@@ -32,15 +32,16 @@ $history = $wpdb->get_results("
 
 <div class="sm-clinic-module" dir="rtl" style="font-family: 'Cairo', sans-serif !important;">
 
-    <!-- Single Main Banner Header (Matching Teacher Term & Annual Plans) -->
+    <!-- Single Main Banner Header with Integrated Search Bar -->
     <div style="background: #ffffff; padding: 20px 24px; border-radius: 20px; border: 1px solid #e2e8f0; margin-bottom: 18px; box-shadow: 0 4px 18px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 280px;">
             <div style="width: 48px; height: 48px; background: #fef2f2; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #881337; border: 1px solid #fecdd3; flex-shrink: 0;">
                 <span class="dashicons dashicons-heart" style="font-size: 24px; width: 24px; height: 24px;"></span>
             </div>
-            <div>
+            <div style="flex: 1;">
                 <h2 style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: #0f172a;">العيادة المدرسية</h2>
-                <p style="margin: 0; font-size: 12.5px; color: #64748b; font-weight: 500;">سجل الحالات والزيارات اليومية للعيادة المدرسية والتقارير الصحية والمراجعات الطبية للطلاب</p>
+                <p style="margin: 0 0 8px 0; font-size: 12.5px; color: #64748b; font-weight: 500;">سجل الحالات والزيارات اليومية للعيادة المدرسية والتقارير الصحية والمراجعات الطبية للطلاب</p>
+                <input type="text" id="eess-clinic-search" onkeyup="eessFilterClinic()" class="sm-input" placeholder="ابحث عن طالب بالاسم، الصف، أو المحول..." style="height: 36px; border-radius: 9999px !important; width: 100%; max-width: 380px; font-size: 12px; padding: 0 14px; border: 1px solid #cbd5e1;">
             </div>
         </div>
 
@@ -71,14 +72,8 @@ $history = $wpdb->get_results("
         </div>
     </div>
 
-    <!-- Clinic Search Engine -->
-    <div style="margin-bottom: 25px;">
-        <input type="text" id="eess-clinic-search" onkeyup="eessFilterClinic()" class="sm-input" placeholder="ابحث عن طالب بالاسم، الصف، أو المحول..." style="height: 42px; border-radius: 8px; width: 100%; font-family: 'Cairo'; padding: 0 15px;">
-    </div>
-
     <!-- PENDING REFERRALS -->
-    <div style="margin-bottom: 40px;">
-        <h4 style="padding-bottom: 5px; margin-bottom: 15px; font-weight: 800; color: #1e293b;">الطلاب المحولون (بانتظار الوصول)</h4>
+    <div style="margin-bottom: 30px;">
         <?php if (empty($pending_referrals)): ?>
             <!-- Professional Centered Empty-State Card with Soft Pastel Medical Icon -->
             <div style="background: #ffffff; border: 1px solid #fecdd3; border-radius: 16px; padding: 35px 24px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
@@ -125,11 +120,10 @@ $history = $wpdb->get_results("
 
     <!-- HISTORY -->
     <div>
-        <h4 style="padding-bottom: 5px; margin-bottom: 15px; font-weight: 800; color: #1e293b;">سجل الزيارات اليومية</h4>
         <?php if (empty($history)): ?>
             <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; text-align: center;">
                 <span class="dashicons dashicons-calendar-alt" style="font-size: 28px; width: 28px; height: 28px; color: #94a3b8; margin-bottom: 8px;"></span>
-                <div style="font-size: 14px; font-weight: 800; color: #475569;">سجل الزيارات اليومية خالي حالياً</div>
+                <div style="font-size: 14px; font-weight: 800; color: #475569;">سجل الزيارات خالي حالياً</div>
             </div>
         <?php else: ?>
             <div class="sm-table-container">

@@ -5213,17 +5213,27 @@ class SM_Public {
 
         // Handle Academic Structure Save
         if (isset($_POST['sm_save_academic_structure']) && wp_verify_nonce($_POST['sm_admin_nonce'], 'sm_admin_action')) {
-            if (current_user_can('إدارة_النظام')) {
-                $academic_data = array(
-                    'term_dates' => $_POST['term_dates'],
-                    'academic_stages' => $_POST['academic_stages'],
-                    'grades_count' => intval($_POST['grades_count']),
-                    'active_grades' => isset($_POST['active_grades']) ? array_map('intval', $_POST['active_grades']) : array(),
-                    'grade_sections' => $_POST['grade_sections'] ?? array(),
-                    'sections_count' => intval($_POST['sections_count']),
-                    'section_letters' => sanitize_text_field($_POST['section_letters'])
-                );
-                SM_Settings::save_academic_structure($academic_data);
+            if (current_user_can('إدارة_النظام') || current_user_can('manage_options')) {
+                $existing = SM_Settings::get_academic_structure();
+                if (isset($_POST['academic_year'])) {
+                    $existing['academic_year'] = sanitize_text_field($_POST['academic_year']);
+                }
+                if (isset($_POST['terms_count'])) {
+                    $existing['terms_count'] = intval($_POST['terms_count']);
+                }
+                if (isset($_POST['term_dates'])) {
+                    $existing['term_dates'] = $_POST['term_dates'];
+                }
+                if (isset($_POST['academic_stages'])) {
+                    $existing['academic_stages'] = $_POST['academic_stages'];
+                }
+                if (isset($_POST['grades_count'])) {
+                    $existing['grades_count'] = intval($_POST['grades_count']);
+                }
+                if (isset($_POST['active_grades'])) {
+                    $existing['active_grades'] = array_map('intval', $_POST['active_grades']);
+                }
+                SM_Settings::save_academic_structure($existing);
                 wp_redirect(add_query_arg('sm_admin_msg', 'settings_saved', $_SERVER['REQUEST_URI']));
                 exit;
             }

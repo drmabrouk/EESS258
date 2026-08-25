@@ -13,7 +13,8 @@ $is_teacher = (in_array('sm_teacher', $user_roles) || $is_admin) && !$is_activit
 global $wpdb;
 
 // Fetch active term plans for current user or reviewed plans for reviewers
-$active_academic_year = '2025/2026';
+$acad_struct = SM_Settings::get_academic_structure();
+$active_academic_year = $acad_struct['academic_year'] ?? '2027/2026';
 $all_subjects = SM_DB::get_subjects();
 $unique_subjects = array_unique(array_map(function($s){ return is_object($s) ? $s->name : $s; }, $all_subjects));
 
@@ -78,6 +79,12 @@ $arabic_term_names = array(
 
         <!-- Primary Header Actions (Wine-Red, Black, White Button Tokens) -->
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <?php if ($is_admin || $is_reviewer): ?>
+            <!-- Academic Config Gear Button -->
+            <button type="button" onclick="document.getElementById('eess-acad-config-modal').style.display='flex'" title="إعدادات العام الدراسي والفصول" class="sm-btn sm-btn-outline" style="height: 38px; width: 38px; padding: 0; border-radius: 50% !important; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                <span class="dashicons dashicons-admin-generic" style="font-size: 18px; width: 18px; height: 18px; margin: 0; color: #475569;"></span>
+            </button>
+            <?php endif; ?>
             <!-- Annual Plan Printing Dropdown -->
             <div style="position: relative; display: inline-block;">
                 <button type="button" onclick="const d = document.getElementById('eess-print-annual-dropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; event.stopPropagation();" class="sm-btn" style="background: #1e293b; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
@@ -153,36 +160,13 @@ $arabic_term_names = array(
         </div>
         <?php endif; ?>
 
-    <!-- TEACHER TAB: SUBMITTED PLANS HISTORY WITH RICH MULTI-LINE CARD ROWS & SEARCH FILTER (Teachers Only) -->
-    <?php if ($is_teacher): ?>
+    <!-- TEACHER TAB: SUBMITTED PLANS HISTORY (Teachers & Coordinators Only) -->
+    <?php
+    $roles = (array) wp_get_current_user()->roles;
+    $is_teacher_or_coordinator = in_array('sm_teacher', $roles) || in_array('sm_coordinator', $roles);
+    if ($is_teacher_or_coordinator):
+    ?>
     <div id="panel-teacher-dashboard" class="term-plan-panel" style="display: block;">
-
-        <!-- Search & Filter Card Matching Lesson Prep Style -->
-        <div style="background: #ffffff; padding: 18px 22px; border-radius: 20px; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 18px;">
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 14px; align-items: end;">
-                <div>
-                    <label style="font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">البحث المباشر في أرشف الخطط</label>
-                    <input type="text" id="eess-teacher-plans-search" onkeyup="eessFilterTeacherPlansTable()" placeholder="ابحث المادة، الصف، الفصل..." style="width: 100%; height: 38px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 9999px !important; font-size: 12.5px; outline: none; background: #f8fafc;">
-                </div>
-                <div>
-                    <label style="font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block;">تصفية بحالة الاعتماد</label>
-                    <select id="eess-teacher-plans-status-filter" onchange="eessFilterTeacherPlansTable()" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 9999px !important; font-size: 12.5px; outline: none; background: #ffffff;">
-                        <option value="">جميع الحالات</option>
-                        <option value="draft">مسودة</option>
-                        <option value="submitted">مرفوعة للمراجعة</option>
-                        <option value="approved">معتمدة رسمياً</option>
-                        <option value="returned">طلب تعديل</option>
-                    </select>
-                </div>
-                <div></div>
-                <?php if ($is_teacher && !$is_reviewer): ?>
-                <button type="button" onclick="eessOpenPlanSetupWizard(1)" class="sm-btn" style="background: #881337; color: #fff; height: 38px; border-radius: 9999px !important; padding: 0 20px; font-weight: 800; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                    <span class="dashicons dashicons-plus-alt" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
-                    <span>إنشاء خطة جديدة</span>
-                </button>
-                <?php endif; ?>
-            </div>
-        </div>
 
         <div style="background: #ffffff; padding: 22px 26px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
@@ -436,6 +420,11 @@ $arabic_term_names = array(
                                             <button type="button" onclick="inspectSubmittedPlan(<?php echo htmlspecialchars(json_encode($sp)); ?>)" title="معاينة محتوى الخطة" class="sm-action-btn sm-action-btn-neutral">
                                                 <span class="dashicons dashicons-visibility"></span>
                                             </button>
+
+                                            <!-- Administrative Direct Print PDF Button -->
+                                            <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $sp->id); ?>" target="_blank" title="طباعة الخطة المعتمدة رسمياً" class="sm-action-btn sm-action-btn-neutral">
+                                                <span class="dashicons dashicons-printer"></span>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -1420,3 +1409,39 @@ function submitPlanReview(status) {
     });
 }
 </script>
+
+<!-- Academic Structure Configuration Modal -->
+<div id="eess-acad-config-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
+        <div style="background: #0f172a; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-admin-generic" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">تعديل العام الدراسي وإعدادات الفصول</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-acad-config-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <form method="post" action="" style="padding: 24px;">
+            <?php wp_nonce_field('sm_admin_action', 'sm_admin_nonce'); ?>
+            <input type="hidden" name="sm_save_academic_structure" value="1">
+
+            <div style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">العام الدراسي الحقيقي</label>
+                <input type="text" name="academic_year" value="<?php echo esc_attr($active_academic_year); ?>" class="sm-input" style="height: 38px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px;" required>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">عدد الفصول الدراسية</label>
+                <select name="terms_count" class="sm-input" style="height: 38px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px;">
+                    <option value="1" <?php selected($acad_struct['terms_count'] ?? 3, 1); ?>>فصل دراسي واحد (1)</option>
+                    <option value="2" <?php selected($acad_struct['terms_count'] ?? 3, 2); ?>>فصلان دراسيان (2)</option>
+                    <option value="3" <?php selected($acad_struct['terms_count'] ?? 3, 3); ?>>ثلاثة فصول دراسية (3)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                <button type="submit" class="sm-btn" style="background: #881337; color: #ffffff !important; height: 38px; padding: 0 20px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer;">حفظ الإعدادات</button>
+                <button type="button" onclick="document.getElementById('eess-acad-config-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 38px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>

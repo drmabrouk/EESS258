@@ -15,7 +15,8 @@ global $wpdb;
 
 if ($is_annual) {
     $teacher_id = isset($_GET['teacher_id']) ? intval($_GET['teacher_id']) : get_current_user_id();
-    $year = isset($_GET['academic_year']) ? sanitize_text_field($_GET['academic_year']) : '2025/2026';
+    $acad_struct = SM_Settings::get_academic_structure();
+    $year = isset($_GET['academic_year']) ? sanitize_text_field($_GET['academic_year']) : ($acad_struct['academic_year'] ?? '2027/2026');
     $subj = isset($_GET['subject']) ? sanitize_text_field($_GET['subject']) : '';
     $grade = isset($_GET['grade']) ? sanitize_text_field($_GET['grade']) : '';
 

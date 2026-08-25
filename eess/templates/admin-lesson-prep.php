@@ -339,10 +339,6 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                 <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">التحضيرات المقدمة</div>
                 <div style="font-size: 18px; font-weight: 800; color: #475569;"><?php echo $stats_submitted; ?></div>
             </div>
-            <div onclick="eessShowComplianceStatDetails('pending')" class="sm-stat-card" style="border-top: 3px solid #eab308; text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">قيد المراجعة</div>
-                <div id="eess-pending-review-stat-counter" style="font-size: 18px; font-weight: 800; color: #eab308;"><?php echo $stats_pending; ?></div>
-            </div>
             <div onclick="eessShowComplianceStatDetails('approved')" class="sm-stat-card" style="border-top: 3px solid #16a34a; text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                 <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">التحضيرات المعتمدة</div>
                 <div style="font-size: 18px; font-weight: 800; color: #16a34a;"><?php echo $stats_approved; ?></div>
@@ -702,38 +698,15 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
         <!-- List Panel (Compacted & Cleaned Up) -->
         <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
 
-            <!-- Search and Filter bar (Unified Wine-Red & Neutral Design System) -->
-            <form method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; background: #ffffff; padding: 18px; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                <input type="hidden" name="page" value="<?php echo isset($_GET['page']) ? esc_attr($_GET['page']) : ''; ?>">
-
-                <div>
-                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">البحث الفوري</label>
-                    <input type="text" name="s_query" value="<?php echo isset($_GET['s_query']) ? esc_attr($_GET['s_query']) : ''; ?>" placeholder="اسم المعلم، المادة، أو عنوان الدرس..." class="sm-input" style="height:38px; font-size:12.5px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 14px;">
-                </div>
-
-                <div>
-                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">تاريخ الدرس</label>
-                    <input type="date" name="filter_date" value="<?php echo isset($_GET['filter_date']) ? esc_attr($_GET['filter_date']) : ''; ?>" class="sm-input" style="height:38px; font-size:12.5px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 12px;">
-                </div>
-
-                <div>
-                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">حالة التحضير</label>
-                    <select name="filter_status" class="sm-input" style="height:38px; font-size:12.5px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 12px;">
-                        <option value="">كافة الحالات</option>
-                        <option value="draft" <?php selected(isset($_GET['filter_status']) && $_GET['filter_status'] == 'draft'); ?>>مسودة</option>
-                        <option value="submitted" <?php selected(isset($_GET['filter_status']) && $_GET['filter_status'] == 'submitted'); ?>>مقدم للاعتماد</option>
-                        <option value="approved" <?php selected(isset($_GET['filter_status']) && $_GET['filter_status'] == 'approved'); ?>>معتمد</option>
-                        <option value="revision_required" <?php selected(isset($_GET['filter_status']) && $_GET['filter_status'] == 'revision_required'); ?>>تعديل مطلوب</option>
-                        <option value="rejected" <?php selected(isset($_GET['filter_status']) && $_GET['filter_status'] == 'rejected'); ?>>مرفوض</option>
-                        <option value="late" <?php selected(isset($_GET['filter_status']) && $_GET['filter_status'] == 'late'); ?>>تسليم متأخر</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; align-items: flex-end; gap: 8px;">
-                    <button type="submit" class="sm-btn" style="height: 38px; font-size:12.5px; padding:0 20px; width:100%; background: #881337; border-radius: 9999px !important; color: white !important; font-weight: 800; border: none; cursor: pointer; white-space: nowrap !important;">تطبيق الفلترة</button>
-                    <a href="<?php echo home_url('/lesson-prep'); ?>" class="sm-btn sm-btn-outline" style="height: 38px; font-size:12px; padding:0 16px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; display:flex; align-items:center; justify-content:center; text-decoration:none; font-weight:700; white-space: nowrap !important;">إعادة ضبط</a>
-                </div>
-            </form>
+            <!-- Table Header Bar: Right Title & Left Compact Search Control -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #ffffff; padding: 14px 18px; border-radius: 14px; border: 1px solid #cbd5e1;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0f172a;">سجلات تحضير الدروس المقدمة</h3>
+                <form method="get" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                    <input type="hidden" name="page" value="<?php echo isset($_GET['page']) ? esc_attr($_GET['page']) : ''; ?>">
+                    <input type="text" name="s_query" value="<?php echo isset($_GET['s_query']) ? esc_attr($_GET['s_query']) : ''; ?>" placeholder="بحث باسم المعلم، المادة، أو الدرس..." class="sm-input" style="height: 36px; font-size: 12px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 14px; width: 240px;">
+                    <button type="submit" class="sm-btn" style="height: 36px; font-size: 12px; padding: 0 16px; background: #881337; border-radius: 9999px !important; color: white !important; font-weight: 800; border: none; cursor: pointer;">بحث</button>
+                </form>
+            </div>
 
             <!-- Table of Submissions -->
             <div class="sm-table-container" style="overflow-x: auto;">
@@ -1612,27 +1585,6 @@ window.eessExecutePrepBulkAction = function() {
     }
 
     executeBulk();
-    return;
-
-    var formData = new FormData();
-    formData.append('action', 'eess_bulk_lesson_action');
-    formData.append('bulk_action', action);
-    formData.append('sm_nonce', '<?php echo wp_create_nonce("eess_lesson_prep_action"); ?>');
-
-    selectedCbs.forEach(function(cb) {
-        formData.append('prep_ids[]', cb.value);
-    });
-
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
-    .then(r => r.json())
-    .then(res => {
-        if (res.success) {
-            alert('✅ ' + res.data.message);
-            location.reload();
-        } else {
-            alert('❌ خطأ: ' + res.data);
-        }
-    });
 };
 </script>
 
