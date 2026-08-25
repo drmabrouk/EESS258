@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحضير درس التربية البدنية والصحية - مدرسة الشعلة الخاصة</title>
+    <!-- تضمين خط كايرو -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #eef2f5;
+            font-family: 'Cairo', sans-serif;
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            font-size: 12px;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        .a4-page {
+            width: 210mm;
+            height: 297mm; 
+            max-height: 297mm;
+            background-color: #ffffff;
+            margin: 5mm auto;
+            padding: 8mm 12mm 15mm 12mm; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ترويسة الصفحة (Header) */
+        .header {
+            display: table;
+            width: 100%;
+            border-bottom: 2px solid #d5dce6; 
+            padding-bottom: 12px; 
+            margin-bottom: 12px; 
+        }
+        .header-col {
+            display: table-cell;
+            vertical-align: middle;
+        }
+        .header-right {
+            text-align: right;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: #5c6b7d;
+            width: 25%; 
+        }
+        .header-center {
+            text-align: center;
+            width: 50%; 
+        }
+        .header-center h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #34495e;
+            font-weight: 700;
+        }
+        .header-center h2 {
+            margin: 8px 0 0; 
+            font-size: 13px;
+            color: #c0392b; 
+            background-color: #fadbd8; 
+            padding: 5px 18px;
+            border-radius: 25px; 
+            display: inline-block;
+            font-weight: 700;
+            border: 1px solid #f5b7b1;
+            white-space: nowrap; 
+        }
+        .header-left {
+            text-align: left;
+            width: 25%; 
+        }
+        .logo-box {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 1px dashed #b5c2d1;
+            border-radius: 8px;
+            text-align: center;
+            line-height: 50px;
+            font-size: 10px;
+            color: #8395a7;
+            background-color: #f4f6f9; 
+        }
+
+        /* الجداول العامة */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+        }
+        th, td {
+            border: 1px solid #d5dce6;
+            padding: 4px 8px; 
+        }
+        th {
+            background-color: #eef2f5; 
+            color: #34495e;
+            font-weight: 700;
+            text-align: right;
+            font-size: 11px;
+        }
+        
+        /* جدول البيانات الأساسية */
+        .info-table th { width: 13%; }
+        .info-table td { width: 37%; font-weight: 600;}
+
+        /* العناوين الفرعية */
+        .section-title {
+            background-color: #f4f6f9;
+            color: #2c3e50;
+            padding: 3px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            display: inline-block;
+            border-right: 4px solid #8395a7; 
+        }
+        
+        /* جداول الأهداف والروابط (تصميم موحد) */
+        .list-table {
+            border: 1px solid #d5dce6;
+            background-color: #fcfdfe;
+            font-size: 11px;
+        }
+        .list-table td {
+            border: none;
+            border-bottom: 1px dashed #d5dce6;
+            padding: 4px 10px;
+        }
+        .list-table tr:last-child td {
+            border-bottom: none;
+        }
+        .list-table strong {
+            color: #5c6b7d;
+        }
+
+        /* تنسيق التنقيط المرن ليمتد لنهاية السطر */
+        .flex-row-dots {
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+        }
+        .flex-row-dots span {
+            white-space: nowrap;
+            margin-left: 8px; /* مسافة بين النص وبداية النقاط */
+        }
+        .flex-dots {
+            flex-grow: 1; /* التمدد التلقائي لملء الفراغ */
+            border-bottom: 2px dotted #95a5a6; /* شكل التنقيط ولونه */
+            position: relative;
+            top: -4px; /* لضبط مستوى النقاط مع خط الكتابة */
+        }
+
+        /* جدول مخطط الدرس */
+        .plan-table th {
+            text-align: center;
+            background-color: #f4f6f9;
+            border-color: #d5dce6;
+            font-size: 12px;
+            border-bottom: 2px solid #b5c2d1;
+        }
+        .plan-table td {
+            vertical-align: middle;
+            line-height: 1.4;
+            font-size: 11px;
+        }
+        .plan-table .part-col {
+            font-weight: 700;
+            text-align: center;
+            width: 14%;
+        }
+        .plan-table .time-col {
+            text-align: center;
+            width: 8%;
+            font-weight: 700;
+        }
+
+        /* ألوان الباستيل للتمييز بين أقسام الدرس */
+        .bg-warmup { background-color: #fdf2e9; border-right: 3px solid #f5cba7 !important; }
+        .bg-edu { background-color: #eafaf1; border-right: 3px solid #a9dfbf !important; }
+        .bg-skill { background-color: #ebf5fb; border-right: 3px solid #a9cce3 !important; }
+        .bg-cool { background-color: #f5eef8; border-right: 3px solid #d7bde2 !important; }
+
+        /* قسم التواقيع */
+        .signatures {
+            display: table;
+            width: 100%;
+            margin-top: auto; 
+            padding-top: 10px;
+            padding-bottom: 15px; 
+        }
+        .sig-col {
+            display: table-cell;
+            text-align: center;
+            width: 33.33%;
+        }
+        .sig-col p {
+            margin: 0 0 20px 0;
+            font-weight: 700;
+            color: #5c6b7d;
+            font-size: 12px;
+        }
+        .sig-line {
+            margin: 0 auto;
+            border-top: 1px solid #b5c2d1;
+            width: 60%;
+        }
+
+        /* تنسيقات الطباعة */
+        @media print {
+            body { background-color: white; }
+            .a4-page {
+                margin: 0;
+                padding: 10mm 12mm 15mm 12mm;
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+                page-break-after: avoid;
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="a4-page">
+        <!-- الترويسة -->
+        <div class="header">
+            <div class="header-col header-right">
+                دولة الإمارات العربية المتحدة<br>
+                وزارة التربية والتعليم
+            </div>
+            <div class="header-col header-center">
+                <h1>مدرسة الشعلة الخاصة</h1>
+                <!-- الجملة على سطر واحد -->
+                <h2>خطة تحضير درس التربية البدنية والصحية</h2>
+            </div>
+            <div class="header-col header-left">
+                <div class="logo-box">شعار</div>
+            </div>
+        </div>
+
+        <!-- البيانات الأساسية -->
+        <table class="info-table">
+            <tr>
+                <th>اسم المعلم:</th>
+                <td></td>
+                <th>الصف:</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>المادة:</th>
+                <td>التربية البدنية والصحية</td>
+                <th>التاريخ:</th>
+                <td>&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp; / 202 م</td>
+            </tr>
+            <tr>
+                <th>عنوان الوحدة:</th>
+                <td></td>
+                <th>الحصة:</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>موضوع الدرس:</th>
+                <td colspan="3"></td>
+            </tr>
+        </table>
+
+        <!-- الأهداف -->
+        <div class="section-title">أهداف الدرس</div>
+        <table class="list-table">
+            <tr>
+                <td>
+                    <div class="flex-row-dots">
+                        <span><strong>الهدف المعرفي:</strong> أن يتعرف الطالب على</span>
+                        <div class="flex-dots"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="flex-row-dots">
+                        <span><strong>الهدف المهاري:</strong> أن يؤدي الطالب مهارة</span>
+                        <div class="flex-dots"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="flex-row-dots">
+                        <span><strong>الهدف الوجداني:</strong> أن يظهر الطالب</span>
+                        <div class="flex-dots"></div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- مخطط الدرس -->
+        <div class="section-title">مخطط وجدول الدرس (المدة: 45 دقيقة)</div>
+        <table class="plan-table">
+            <thead>
+                <tr>
+                    <th>أجزاء الدرس</th>
+                    <th>المحتوى / خطوات التنفيذ</th>
+                    <th>الزمن</th>
+                    <th>التشكيل / طريقة التدريس</th>
+                    <th>الأدوات / التقويم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- الإحماء -->
+                <tr>
+                    <td class="part-col bg-warmup">الجزء التمهيدي<br>(الإحماء)</td>
+                    <td>
+                        - الاصطفاف وأخذ الحضور والغياب.<br>
+                        - الجري الخفيف وتغيير الاتجاهات بناءً على الإشارة.<br>
+                        - تمرينات الإطالة والمرونة وتهيئة العضلات.
+                    </td>
+                    <td class="time-col">10 د</td>
+                    <td style="text-align:center;">قاطرات / دائرة<br><br>الطريقة الجزئية</td>
+                    <td>
+                        <strong>الأدوات:</strong><br>صافرة، أقماع<br><hr style="border:0; border-top:1px dashed #ccc; margin:2px 0;">
+                        <strong>التقويم:</strong><br>الملاحظة
+                    </td>
+                </tr>
+                <!-- النشاط التعليمي -->
+                <tr>
+                    <td class="part-col bg-edu">النشاط التعليمي</td>
+                    <td>
+                        - شرح المهارة الأساسية نظرياً بشكل مبسط.<br>
+                        - عرض نموذج حركي سليم للمهارة.<br>
+                        - أداء المهارة بدون أدوات (تصور حركي).
+                    </td>
+                    <td class="time-col">10 د</td>
+                    <td style="text-align:center;">مربعات / صفوف<br><br>الشرح والعرض</td>
+                    <td>
+                        <strong>الأدوات:</strong><br>وسائل توضيحية<br><hr style="border:0; border-top:1px dashed #ccc; margin:2px 0;">
+                        <strong>التقويم:</strong><br>الأسئلة الشفوية
+                    </td>
+                </tr>
+                <!-- النشاط المهاري -->
+                <tr>
+                    <td class="part-col bg-skill">النشاط المهاري<br>(التطبيق)</td>
+                    <td>
+                        - تقسيم الطلاب لمجموعات لتطبيق المهارة عملياً.<br>
+                        - المرور لتصحيح الأخطاء الفنية.<br>
+                        - إجراء لعبة صغيرة تنافسية تتضمن المهارة.
+                    </td>
+                    <td class="time-col">20 د</td>
+                    <td style="text-align:center;">مجموعات صغيرة<br><br>التعلم التعاوني</td>
+                    <td>
+                        <strong>الأدوات:</strong><br>كرات، شواخص<br><hr style="border:0; border-top:1px dashed #ccc; margin:2px 0;">
+                        <strong>التقويم:</strong><br>تقييم الأداء
+                    </td>
+                </tr>
+                <!-- الختام -->
+                <tr>
+                    <td class="part-col bg-cool">الجزء الختامي<br>(التهدئة)</td>
+                    <td>
+                        - تمرينات استرخاء ومشي خفيف.<br>
+                        - تجميع الطلاب وملخص سريع للمهارة.<br>
+                        - التوجيه بالنظافة والانصراف المنظم.
+                    </td>
+                    <td class="time-col">5 د</td>
+                    <td style="text-align:center;">انتشار حر<br><br>المناقشة</td>
+                    <td>
+                        <strong>الأدوات:</strong><br>لا يوجد<br><hr style="border:0; border-top:1px dashed #ccc; margin:2px 0;">
+                        <strong>التقويم:</strong><br>التغذية الراجعة
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- الروابط والمهارات -->
+        <div class="section-title">الربط والمهارات</div>
+        <table class="list-table">
+            <tr>
+                <td>
+                    <div class="flex-row-dots">
+                        <span><strong>الربط مع الحياة والمواد الأخرى:</strong></span>
+                        <div class="flex-dots"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="flex-row-dots">
+                        <span><strong>الربط بالأجندة الوطنية:</strong></span>
+                        <div class="flex-dots"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="flex-row-dots">
+                        <span><strong>مهارات التفكير العليا ومهارات القرن الواحد والعشرين:</strong></span>
+                        <div class="flex-dots"></div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- التواقيع -->
+        <div class="signatures">
+            <div class="sig-col">
+                <p>توقيع المعلم</p>
+                <div class="sig-line"></div>
+            </div>
+            <div class="sig-col">
+                <p>اعتماد رئيس القسم</p>
+                <div class="sig-line"></div>
+            </div>
+            <div class="sig-col">
+                <p>اعتماد مدير المدرسة</p>
+                <div class="sig-line"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
