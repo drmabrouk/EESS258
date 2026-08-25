@@ -255,33 +255,33 @@ $arabic_term_names = array(
                                         </span>
                                     </td>
 
-                                    <!-- Standardized 36px Circular Action Buttons -->
+                                    <!-- Standardized Circular Action Buttons -->
                                     <td style="padding: 14px 16px; text-align: center;">
-                                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                                        <div class="sm-action-btn-group">
                                             <!-- Print / View File Button -->
                                             <?php if (!empty($tp->plan_file_url)): ?>
-                                                <a href="<?php echo esc_url($tp->plan_file_url); ?>" target="_blank" title="معاينة وطباعة ملف الخطة المرفوعة" style="width: 36px; height: 36px; border-radius: 50% !important; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                    <span class="dashicons dashicons-media-document" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                                <a href="<?php echo esc_url($tp->plan_file_url); ?>" target="_blank" title="معاينة وطباعة ملف الخطة المرفوعة" class="sm-action-btn sm-action-btn-neutral">
+                                                    <span class="dashicons dashicons-media-document"></span>
                                                 </a>
                                             <?php else: ?>
-                                                <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $tp->id); ?>" target="_blank" title="طباعة وثيقة الخطة PDF" style="width: 36px; height: 36px; border-radius: 50% !important; background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                    <span class="dashicons dashicons-printer" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                                <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $tp->id); ?>" target="_blank" title="طباعة وثيقة الخطة PDF" class="sm-action-btn sm-action-btn-success">
+                                                    <span class="dashicons dashicons-printer"></span>
                                                 </a>
                                             <?php endif; ?>
 
                                             <!-- Edit Button -->
-                                            <button type="button" onclick="eessOpenPlanSetupWizard(<?php echo intval($tp->term_number); ?>)" title="تعديل الخطة" style="width: 36px; height: 36px; border-radius: 50% !important; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick="eessOpenPlanSetupWizard(<?php echo intval($tp->term_number); ?>)" title="تعديل الخطة" class="sm-action-btn sm-action-btn-warning">
+                                                <span class="dashicons dashicons-edit"></span>
                                             </button>
 
                                             <!-- Delete Button -->
-                                            <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $tp->id; ?>, '<?php echo esc_js($tp->subject . ' - ' . $arabic_term_names[intval($tp->term_number)]); ?>')" title="حذف الخطة" style="width: 36px; height: 36px; border-radius: 50% !important; background: #fee2e2; color: #dc2626; border: 1px solid #fecdd3; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-trash" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $tp->id; ?>, '<?php echo esc_js($tp->subject . ' - ' . $arabic_term_names[intval($tp->term_number)]); ?>')" title="حذف الخطة" class="sm-action-btn sm-action-btn-danger">
+                                                <span class="dashicons dashicons-trash"></span>
                                             </button>
 
                                             <!-- View Content Button -->
-                                            <button type="button" onclick="inspectSubmittedPlan(<?php echo htmlspecialchars(json_encode($tp)); ?>)" title="معاينة" style="width: 36px; height: 36px; border-radius: 50% !important; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-visibility" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick="inspectSubmittedPlan(<?php echo htmlspecialchars(json_encode($tp)); ?>)" title="معاينة محتوى الخطة" class="sm-action-btn sm-action-btn-neutral">
+                                                <span class="dashicons dashicons-visibility"></span>
                                             </button>
                                         </div>
                                     </td>
