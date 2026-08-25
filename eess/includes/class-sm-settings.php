@@ -795,21 +795,24 @@ class SM_Settings {
             $user_id = get_current_user_id();
         }
 
-        // If user is not logged in, only allow non-logged-in public/nopriv actions
+        // Strip prefix if any
+        $clean_action = str_replace(array('nopriv_'), '', $action);
+
+        // Public/nopriv actions allowed for non-logged-in users
+        $public_actions = array(
+            'sm_get_students_attendance_ajax',
+            'sm_save_attendance_ajax',
+            'sm_save_attendance_batch_ajax',
+            'eess_forgot_verify_identity',
+            'eess_forgot_set_password',
+            'eess_register_submit',
+            'sm_verify_employee_id',
+            'sm_submit_mobile_lesson',
+            'sm_get_pending_announcements'
+        );
+
         if (!$user_id) {
-            $public_actions = array(
-                'sm_get_students_attendance_ajax',
-                'sm_save_attendance_ajax',
-                'sm_save_attendance_batch_ajax',
-                'eess_forgot_otp',
-                'eess_forgot_verify',
-                'eess_forgot_reset',
-                'eess_register_otp',
-                'eess_register_submit',
-                'sm_verify_employee_id',
-                'sm_submit_mobile_lesson'
-            );
-            return in_array($action, $public_actions);
+            return in_array($clean_action, $public_actions);
         }
 
         $user = get_userdata($user_id);
@@ -817,7 +820,23 @@ class SM_Settings {
             return false;
         }
         $roles = (array) $user->roles;
-        if (in_array('administrator', $roles)) {
+        if (in_array('administrator', $roles) || in_array('sm_system_admin', $roles)) {
+            return true;
+        }
+
+        // Actions allowed for all authenticated users
+        $universal_authenticated_actions = array(
+            'sm_get_pending_announcements',
+            'sm_mark_announcement_viewed',
+            'sm_mark_announcement_closed',
+            'eess_submit_support_request',
+            'eess_update_support_status',
+            'eess_delete_support_request',
+            'sm_update_profile_ajax',
+            'sm_get_counts_ajax',
+            'sm_refresh_dashboard'
+        );
+        if (in_array($clean_action, $universal_authenticated_actions)) {
             return true;
         }
 
@@ -834,11 +853,18 @@ class SM_Settings {
             'sm_upload_import_csv' => 'students',
             'sm_process_import_chunk' => 'students',
             'sm_export_students_csv' => 'students',
+            'sm_download_student_import_template' => 'students',
+            'sm_print_student_full_report' => 'students',
+            'sm_update_student_photo' => 'students',
 
-            // Stats / behavior
+            // Behavior / Stats
             'sm_filter_violations' => 'stats',
             'sm_mark_contacted' => 'stats',
             'sm_export_violations_csv' => 'stats',
+            'sm_save_record_ajax' => 'stats',
+            'sm_update_record_status' => 'stats',
+            'sm_delete_record_ajax' => 'stats',
+            'sm_submit_behavior_referral' => 'stats',
 
             // Teachers / Users
             'sm_add_user_ajax' => 'teachers',
@@ -850,18 +876,26 @@ class SM_Settings {
             'eess_reject_user' => 'teachers',
             'eess_save_user_notes' => 'teachers',
             'sm_export_users_csv' => 'teachers',
+            'eess_check_user_uniqueness' => 'teachers',
+            'eess_get_user_unified' => 'teachers',
+            'eess_save_user_unified' => 'teachers',
+            'eess_get_user_assignments' => 'teachers',
 
             // Parents
             'sm_add_parent_ajax' => 'parents',
+            'eess_send_quick_parent_note' => 'parents',
 
             // Grades
             'sm_save_grade_ajax' => 'grades',
+            'eess_import_grades_ajax' => 'grades',
             'sm_get_student_grades_ajax' => 'grades',
             'sm_delete_grade_ajax' => 'grades',
             'sm_add_subject' => 'grades',
             'sm_delete_subject' => 'grades',
             'sm_get_subjects' => 'grades',
             'sm_save_class_grades' => 'grades',
+            'sm_export_grades_csv' => 'grades',
+            'sm_import_grades_csv' => 'grades',
 
             // Attendance
             'sm_get_students_attendance_ajax' => 'attendance',
@@ -870,11 +904,23 @@ class SM_Settings {
             'sm_reset_class_code_ajax' => 'attendance',
             'sm_toggle_attendance_status_ajax' => 'attendance',
 
-            // HR
+            // HR Management
             'eess_hr_add_employee' => 'hr-management',
+            'eess_bulk_import_employees_ajax' => 'hr-management',
+            'sm_verify_employee_id' => 'hr-management',
 
             // Lesson plans
             'sm_download_plans_zip' => 'lesson-plans',
+            'eess_quick_approve_prep' => 'lesson-plans',
+            'eess_bulk_lesson_action' => 'lesson-plans',
+            'sm_submit_mobile_lesson' => 'lesson-plans',
+            'sm_get_educational_suggestions' => 'lesson-plans',
+            'sm_save_educational_input' => 'lesson-plans',
+
+            // Term plans
+            'sm_save_term_plan' => 'term-plans',
+            'sm_review_term_plan' => 'term-plans',
+            'sm_delete_term_plan' => 'term-plans',
 
             // Assignments
             'sm_add_assignment_ajax' => 'assignments',
@@ -884,6 +930,7 @@ class SM_Settings {
             'sm_add_document_ajax' => 'documents',
             'sm_update_document_ajax' => 'documents',
             'sm_delete_document_ajax' => 'documents',
+            'sm_print' => 'documents',
 
             // Clinic
             'sm_add_clinic_referral' => 'clinic',
@@ -900,14 +947,19 @@ class SM_Settings {
             'sm_initialize_system_ajax' => 'global-settings',
             'sm_bulk_delete_ajax' => 'global-settings',
             'sm_refresh_system_cache_ajax' => 'global-settings',
+            'sm_create_system_announcement' => 'global-settings',
+            'sm_disable_system_announcement' => 'global-settings',
+            'sm_delete_system_announcement' => 'global-settings',
+            'sm_reset_user_announcement' => 'global-settings',
+            'sm_delete_user_announcement_log' => 'global-settings',
         );
 
-        if (isset($action_map[$action])) {
-            $section = $action_map[$action];
+        if (isset($action_map[$clean_action])) {
+            $section = $action_map[$clean_action];
             return self::is_section_visible($section, $user_id) && self::user_has_module_capability($section, $user_id);
         }
 
-        return true; // Not mapped, allow by default
+        return true; // Unmapped action, allow by default
     }
 
     public static function get_access_restricted_html() {
