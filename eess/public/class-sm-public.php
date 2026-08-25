@@ -1080,13 +1080,13 @@ class SM_Public {
     }
 
     public function shortcode_login() {
-        if ($this->eess_is_mobile_device()) {
-            return $this->eess_render_mobile_restriction_screen();
-        }
-
         if (is_user_logged_in()) {
             wp_redirect(home_url('/sm-admin'));
             exit;
+        }
+
+        if ($this->eess_is_mobile_device()) {
+            return $this->eess_render_mobile_lesson_prep();
         }
 
         $output = '
@@ -2778,12 +2778,12 @@ class SM_Public {
 
 
     public function shortcode_admin_dashboard() {
-        if ($this->eess_is_mobile_device()) {
-            return $this->eess_render_mobile_restriction_screen();
-        }
-
         if (!is_user_logged_in()) {
             return $this->shortcode_login();
+        }
+
+        if ($this->eess_is_mobile_device()) {
+            return $this->eess_render_mobile_lesson_prep();
         }
 
         $user = wp_get_current_user();
