@@ -1963,6 +1963,74 @@ jQuery(document).ready(function($) {
 })();
 </script>
 
+<!-- Global In-System Confirmation Modal -->
+<div id="sm-global-confirm-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 16px; max-width: 440px; width: 90%; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); font-family: 'Cairo', sans-serif; text-align: center; border: 1px solid #e2e8f0;">
+        <div id="sm-confirm-icon-box" style="width: 56px; height: 56px; border-radius: 50%; background: #fef2f2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+            <span class="dashicons dashicons-warning" style="font-size: 28px; width: 28px; height: 28px;"></span>
+        </div>
+        <h3 id="sm-confirm-title" style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">تأكيد الإجراء</h3>
+        <p id="sm-confirm-message" style="margin: 0 0 24px 0; font-size: 0.9rem; color: #64748b; line-height: 1.6;">هل أنت متأكد من تنفيذ هذا الإجراء؟</p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <button type="button" id="sm-confirm-ok-btn" class="sm-btn" style="background: #000000; color: #ffffff !important; border-radius: 9999px; height: 40px; padding: 0 24px; font-weight: 800; font-size: 13px; border: none; cursor: pointer;">تأكيد</button>
+            <button type="button" id="sm-confirm-cancel-btn" class="sm-btn" style="background: #f1f5f9; color: #475569 !important; border-radius: 9999px; height: 40px; padding: 0 20px; font-weight: 700; font-size: 13px; border: 1px solid #cbd5e1; cursor: pointer;">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script>
+window.smConfirmAction = function(options) {
+    return new Promise(function(resolve) {
+        options = options || {};
+        var modal = document.getElementById('sm-global-confirm-modal');
+        var titleEl = document.getElementById('sm-confirm-title');
+        var msgEl = document.getElementById('sm-confirm-message');
+        var okBtn = document.getElementById('sm-confirm-ok-btn');
+        var cancelBtn = document.getElementById('sm-confirm-cancel-btn');
+        var iconBox = document.getElementById('sm-confirm-icon-box');
+
+        if (!modal) {
+            resolve(confirm(options.message || 'هل أنت متأكد؟'));
+            return;
+        }
+
+        if (titleEl) titleEl.innerText = options.title || 'تأكيد الإجراء';
+        if (msgEl) msgEl.innerText = options.message || 'هل أنت متأكد من تنفيذ هذا الإجراء؟';
+        if (okBtn) {
+            okBtn.innerText = options.confirmText || 'تأكيد';
+            if (options.type === 'danger') {
+                okBtn.style.background = '#dc2626';
+                if (iconBox) { iconBox.style.background = '#fef2f2'; iconBox.style.color = '#dc2626'; }
+            } else if (options.type === 'success') {
+                okBtn.style.background = '#16a34a';
+                if (iconBox) { iconBox.style.background = '#f0fdf4'; iconBox.style.color = '#16a34a'; }
+            } else {
+                okBtn.style.background = '#000000';
+                if (iconBox) { iconBox.style.background = '#f8fafc'; iconBox.style.color = '#334155'; }
+            }
+        }
+
+        modal.style.display = 'flex';
+
+        function cleanup() {
+            modal.style.display = 'none';
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+        }
+
+        okBtn.onclick = function() {
+            cleanup();
+            resolve(true);
+        };
+
+        cancelBtn.onclick = function() {
+            cleanup();
+            resolve(false);
+        };
+    });
+};
+</script>
+
 <?php include_once SM_PLUGIN_DIR . 'templates/partials/teacher-behavior-referral-modal.php'; ?>
 <!-- TECHNICAL SUPPORT & HELP CAPSULE MODAL -->
 <div id="eess-support-capsule-modal" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif; direction: rtl;">

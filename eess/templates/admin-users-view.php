@@ -618,47 +618,73 @@ function permanentlyDeleteUserRequest(userId) {
 
 // Helper registration flow triggers
 function eessApproveUser(userId) {
-    if (!confirm('هل أنت متأكد من رغبتك في اعتماد وتنشيط حساب هذا الموظف؟')) return;
+    var proceed = function() {
+        const data = new FormData();
+        data.append('action', 'eess_approve_user');
+        data.append('user_id', userId);
+        data.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
 
-    const data = new FormData();
-    data.append('action', 'eess_approve_user');
-    data.append('user_id', userId);
-    data.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
+        fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: data })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                smShowNotification('تم اعتماد وتفعيل الحساب بنجاح وإرسال إشعار للمستخدم.');
+                const card = document.getElementById('pending-card-' + userId);
+                if (card) card.remove();
+                setTimeout(() => { location.reload(); }, 1000);
+            } else {
+                smShowNotification('فشل الاعتماد: ' + res.data, true);
+            }
+        });
+    };
 
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: data })
-    .then(res => res.json())
-    .then(res => {
-        if (res.success) {
-            smShowNotification('تم اعتماد وتفعيل الحساب بنجاح وإرسال إشعار للمستخدم.');
-            const card = document.getElementById('pending-card-' + userId);
-            if (card) card.remove();
-            setTimeout(() => { location.reload(); }, 1000);
-        } else {
-            smShowNotification('فشل الاعتماد: ' + res.data, true);
-        }
-    });
+    if (typeof window.smConfirmAction === 'function') {
+        window.smConfirmAction({
+            title: 'اعتماد حساب الموظف',
+            message: 'هل أنت متأكد من رغبتك في اعتماد وتنشيط حساب هذا الموظف؟',
+            type: 'success',
+            confirmText: 'اعتماد وتفعيل'
+        }).then(function(confirmed) {
+            if (confirmed) proceed();
+        });
+    } else {
+        if (confirm('هل أنت متأكد من رغبتك في اعتماد وتنشيط حساب هذا الموظف؟')) proceed();
+    }
 }
 
 function eessRejectUser(userId) {
-    if (!confirm('هل أنت متأكد من رفض طلب هذا المستخدم وحذف حسابه المعلق نهائياً؟')) return;
+    var proceed = function() {
+        const data = new FormData();
+        data.append('action', 'eess_reject_user');
+        data.append('user_id', userId);
+        data.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
 
-    const data = new FormData();
-    data.append('action', 'eess_reject_user');
-    data.append('user_id', userId);
-    data.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
+        fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: data })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                smShowNotification('تم رفض طلب التسجيل وحذف الحساب بنجاح.');
+                const card = document.getElementById('pending-card-' + userId);
+                if (card) card.remove();
+                setTimeout(() => { location.reload(); }, 1000);
+            } else {
+                smShowNotification('فشل الرفض: ' + res.data, true);
+            }
+        });
+    };
 
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: data })
-    .then(res => res.json())
-    .then(res => {
-        if (res.success) {
-            smShowNotification('تم رفض طلب التسجيل وحذف الحساب بنجاح.');
-            const card = document.getElementById('pending-card-' + userId);
-            if (card) card.remove();
-            setTimeout(() => { location.reload(); }, 1000);
-        } else {
-            smShowNotification('فشل الرفض: ' + res.data, true);
-        }
-    });
+    if (typeof window.smConfirmAction === 'function') {
+        window.smConfirmAction({
+            title: 'رفض حساب الموظف',
+            message: 'هل أنت متأكد من رفض طلب هذا المستخدم وحذف حسابه المعلق نهائياً؟',
+            type: 'danger',
+            confirmText: 'رفض وحذف الحساب'
+        }).then(function(confirmed) {
+            if (confirmed) proceed();
+        });
+    } else {
+        if (confirm('هل أنت متأكد من رفض طلب هذا المستخدم وحذف حسابه المعلق نهائياً؟')) proceed();
+    }
 }
 
 // Avatar Previews

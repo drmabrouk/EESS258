@@ -1571,9 +1571,48 @@ window.eessExecutePrepBulkAction = function() {
         return;
     }
 
-    if (action === 'delete' && !confirm('هل أنت متأكد من رغبتك في حذف جميع التحضيرات المحددة نهائياً؟')) {
-        return;
+    var executeBulk = function() {
+        var formData = new FormData();
+        formData.append('action', 'eess_bulk_lesson_action');
+        formData.append('bulk_action', action);
+        formData.append('sm_nonce', '<?php echo wp_create_nonce("eess_lesson_prep_action"); ?>');
+
+        selectedCbs.forEach(function(cb) {
+            formData.append('prep_ids[]', cb.value);
+        });
+
+        fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.success) {
+                if (typeof smShowNotification === 'function') {
+                    smShowNotification('تم تنفيذ الإجراء الجماعي بنجاح');
+                }
+                setTimeout(function() { location.reload(); }, 500);
+            } else {
+                alert('خطأ: ' + (res.data || 'حدث خطأ أثناء تنفيذ الإجراء الجماعي.'));
+            }
+        });
+    };
+
+    if (action === 'delete') {
+        if (typeof window.smConfirmAction === 'function') {
+            window.smConfirmAction({
+                title: 'حذف التحضيرات المحددة',
+                message: 'هل أنت متأكد من رغبتك في حذف جميع التحضيرات المحددة (' + selectedCbs.length + ') نهائياً؟',
+                type: 'danger',
+                confirmText: 'حذف نهائي'
+            }).then(function(confirmed) {
+                if (confirmed) executeBulk();
+            });
+            return;
+        } else if (!confirm('هل أنت متأكد من رغبتك في حذف جميع التحضيرات المحددة نهائياً؟')) {
+            return;
+        }
     }
+
+    executeBulk();
+    return;
 
     var formData = new FormData();
     formData.append('action', 'eess_bulk_lesson_action');

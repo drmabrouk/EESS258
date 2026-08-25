@@ -475,6 +475,96 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Unified Circular Action Buttons System */
+.sm-action-btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
+
+.sm-action-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+    border: 1px solid transparent !important;
+    cursor: pointer !important;
+    transition: all 0.18s ease-in-out !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    text-decoration: none !important;
+    line-height: 1 !important;
+    position: relative;
+}
+
+.sm-action-btn .dashicons,
+.sm-action-btn i {
+    font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+    line-height: 15px !important;
+    margin: 0 !important;
+}
+
+.sm-action-btn:hover {
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.sm-action-btn-neutral {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    border-color: #e2e8f0 !important;
+}
+.sm-action-btn-neutral:hover {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.sm-action-btn-primary {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+.sm-action-btn-primary:hover {
+    background-color: #1e293b !important;
+}
+
+.sm-action-btn-success {
+    background-color: #eaf7ee !important;
+    color: #166534 !important;
+    border-color: #bbf7d0 !important;
+}
+.sm-action-btn-success:hover {
+    background-color: #16a34a !important;
+    color: #ffffff !important;
+}
+
+.sm-action-btn-danger {
+    background-color: #fdecec !important;
+    color: #991b1b !important;
+    border-color: #fecdd3 !important;
+}
+.sm-action-btn-danger:hover {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+.sm-action-btn-warning {
+    background-color: #fff8e1 !important;
+    color: #854d0e !important;
+    border-color: #fef08a !important;
+}
+.sm-action-btn-warning:hover {
+    background-color: #d97706 !important;
+    color: #ffffff !important;
+}
+
 .eess-action-btn.disabled {
     opacity: 0.4 !important;
     cursor: not-allowed !important;

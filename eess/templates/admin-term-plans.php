@@ -411,30 +411,30 @@ $arabic_term_names = array(
 
                                     <!-- Quick Action Circular Buttons (Approve, Reject, Modification Request) -->
                                     <td style="padding: 12px 16px; text-align: center;">
-                                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                                        <div class="sm-action-btn-group">
                                             <!-- Approve Button (Positive Green) -->
-                                            <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" style="width: 32px; height: 32px; border-radius: 50% !important; background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" class="sm-action-btn sm-action-btn-success">
+                                                <span class="dashicons dashicons-yes-alt"></span>
                                             </button>
 
-                                            <!-- Modification Request Button (Warning Orange/Red) -->
-                                            <button type="button" onclick="eessOpenModificationNotesModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name); ?>')" title="طلب تعديلات وملاحظات" style="width: 32px; height: 32px; border-radius: 50% !important; background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-edit" style="font-size: 15px; width: 15px; height: 15px; margin: 0;"></span>
+                                            <!-- Modification Request Button (Warning Orange) -->
+                                            <button type="button" onclick="eessOpenModificationNotesModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name); ?>')" title="طلب تعديلات وملاحظات" class="sm-action-btn sm-action-btn-warning">
+                                                <span class="dashicons dashicons-edit"></span>
                                             </button>
 
                                             <!-- Reject Button (Danger Red) -->
-                                            <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'rejected')" title="رفض الخطة" style="width: 32px; height: 32px; border-radius: 50% !important; background: #fee2e2; color: #dc2626; border: 1px solid #fecdd3; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-no-alt" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'rejected')" title="رفض الخطة" class="sm-action-btn sm-action-btn-danger">
+                                                <span class="dashicons dashicons-no-alt"></span>
                                             </button>
 
                                             <!-- Delete Button (In-System Modal Confirmation) -->
-                                            <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name . ' - ' . $sp->subject); ?>')" title="حذف الخطة نهائياً" style="width: 32px; height: 32px; border-radius: 50% !important; background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-trash" style="font-size: 15px; width: 15px; height: 15px; margin: 0;"></span>
+                                            <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name . ' - ' . $sp->subject); ?>')" title="حذف الخطة نهائياً" class="sm-action-btn sm-action-btn-danger">
+                                                <span class="dashicons dashicons-trash"></span>
                                             </button>
 
                                             <!-- Preview Plan Details Button -->
-                                            <button type="button" onclick="inspectSubmittedPlan(<?php echo htmlspecialchars(json_encode($sp)); ?>)" title="معاينة محتوى الخطة" style="width: 32px; height: 32px; border-radius: 50% !important; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-visibility" style="font-size: 15px; width: 15px; height: 15px; margin: 0;"></span>
+                                            <button type="button" onclick="inspectSubmittedPlan(<?php echo htmlspecialchars(json_encode($sp)); ?>)" title="معاينة محتوى الخطة" class="sm-action-btn sm-action-btn-neutral">
+                                                <span class="dashicons dashicons-visibility"></span>
                                             </button>
                                         </div>
                                     </td>
@@ -867,28 +867,42 @@ function eessExecutePlanDeletion() {
 function eessDirectReviewPlan(planId, reviewStatus) {
     if (!planId) return;
     const confirmMsg = reviewStatus === 'approved' ? 'هل أنت متأكد من اعتماد هذه الخطة رسمياً؟' : 'هل أنت متأكد من تغيير حالة هذه الخطة؟';
-    if (!confirm(confirmMsg)) return;
 
-    const formData = new FormData();
-    formData.append('action', 'sm_review_term_plan');
-    formData.append('plan_id', planId);
-    formData.append('review_status', reviewStatus);
-    formData.append('sm_nonce', '<?php echo wp_create_nonce("sm_term_plan_action"); ?>');
+    var proceed = function() {
+        const formData = new FormData();
+        formData.append('action', 'sm_review_term_plan');
+        formData.append('plan_id', planId);
+        formData.append('review_status', reviewStatus);
+        formData.append('sm_nonce', '<?php echo wp_create_nonce("sm_term_plan_action"); ?>');
 
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
-    .then(r => r.json())
-    .then(res => {
-        if (res.success) {
-            if (typeof smShowNotification === 'function') {
-                smShowNotification(reviewStatus === 'approved' ? 'تم اعتماد الخطة الفصلية بنجاح' : 'تم تحديث حالة الخطة بنجاح');
+        fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                if (typeof smShowNotification === 'function') {
+                    smShowNotification(reviewStatus === 'approved' ? 'تم اعتماد الخطة الفصلية بنجاح' : 'تم تحديث حالة الخطة بنجاح');
+                }
+                setTimeout(() => location.reload(), 500);
+            } else {
+                if (typeof smShowNotification === 'function') {
+                    smShowNotification('خطأ: ' + (res.data || 'تعذر معالجة الطلب'), true);
+                }
             }
-            setTimeout(() => location.reload(), 500);
-        } else {
-            if (typeof smShowNotification === 'function') {
-                smShowNotification('خطأ: ' + (res.data || 'تعذر معالجة الطلب'), true);
-            }
-        }
-    });
+        });
+    };
+
+    if (typeof window.smConfirmAction === 'function') {
+        window.smConfirmAction({
+            title: reviewStatus === 'approved' ? 'اعتماد الخطة الفصلية' : 'مراجعة الخطة الفصلية',
+            message: confirmMsg,
+            type: reviewStatus === 'approved' ? 'success' : 'danger',
+            confirmText: 'تأكيد الإجراء'
+        }).then(function(confirmed) {
+            if (confirmed) proceed();
+        });
+    } else {
+        if (confirm(confirmMsg)) proceed();
+    }
 }
 
 function eessCheckAnnualPlanPrintComplete(completedCount) {
