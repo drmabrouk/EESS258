@@ -388,10 +388,6 @@ class SM_Activator {
                 'title'   => 'تسجيل حضور الفصول',
                 'content' => '[sm_class_attendance]',
             ),
-            'lesson-prep' => array(
-                'title'   => 'تحضير الدروس',
-                'content' => '[sm_lesson_prep]',
-            ),
         );
 
         foreach ($pages as $slug => $page_data) {
