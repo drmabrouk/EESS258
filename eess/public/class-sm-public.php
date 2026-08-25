@@ -348,7 +348,6 @@ class SM_Public {
         add_shortcode('sm_login', array($this, 'shortcode_login'));
         add_shortcode('sm_admin', array($this, 'shortcode_admin_dashboard'));
         add_shortcode('sm_class_attendance', array($this, 'shortcode_class_attendance'));
-        add_shortcode('sm_lesson_prep', array($this, 'shortcode_lesson_prep'));
     }
 
     public function eess_render_mobile_lesson_prep() {
@@ -626,54 +625,92 @@ class SM_Public {
                 </button>
             </div>
 
-            <!-- TEACHER MOBILE DASHBOARD: TWO PRIMARY ACTION CARDS & 2 RECENT SUBMISSIONS -->
-            <?php if (is_user_logged_in() && !empty($teacher_own_preps)): ?>
+            <!-- TEACHER MOBILE DASHBOARD: TWO PRIMARY ACTION CARDS (Weekly Lesson Prep & Term Plan) -->
+            <?php if (is_user_logged_in() && in_array('sm_teacher', (array)$user->roles)): ?>
             <div id="m-teacher-dashboard-overview" style="margin-bottom: 16px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-                    <!-- Action Card 1: Prepare Lesson -->
-                    <div onclick="document.getElementById('m-step-form-card').scrollIntoView({behavior: 'smooth'});" style="background: #ffffff; border: 1.5px solid #881337; border-radius: 14px; padding: 14px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(136,19,55,0.06);">
-                        <div style="width: 40px; height: 40px; background: #fef2f2; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: #881337; margin-bottom: 6px;">
-                            <span class="dashicons dashicons-edit" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+                    <!-- CARD 1: WEEKLY LESSON PREPARATION -->
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                            <div style="width: 36px; height: 36px; background: #fef2f2; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #881337;">
+                                <span class="dashicons dashicons-welcome-write-blog" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #0f172a;">تحضير الدروس الأسبوعي</h4>
+                                <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">إعداد وتوثيق الدروس اليومية أو رفع ملف جاهز</p>
+                            </div>
                         </div>
-                        <div style="font-weight: 800; font-size: 13px; color: #881337;">تحضير درس جديد</div>
-                        <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">إدخال وتوثيق خطة الدرس</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <button type="button" onclick="document.getElementById('m-step-form-card').style.display='block'; document.getElementById('m-step-upload-prep-card').style.display='none'; document.getElementById('m-step-form-card').scrollIntoView({behavior:'smooth'});" style="background: #881337; color: white; border: none; border-radius: 10px; height: 38px; font-weight: 800; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                <span class="dashicons dashicons-edit" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                <span>إعداد تحضير جديد</span>
+                            </button>
+                            <button type="button" onclick="document.getElementById('m-step-upload-prep-card').style.display='block'; document.getElementById('m-step-form-card').style.display='none'; document.getElementById('m-step-upload-prep-card').scrollIntoView({behavior:'smooth'});" style="background: #0f172a; color: white; border: none; border-radius: 10px; height: 38px; font-weight: 800; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                <span class="dashicons dashicons-upload" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                <span>رفع ملف تحضير</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Action Card 2: Submitted Lessons -->
-                    <div onclick="document.getElementById('m-teacher-history-card').scrollIntoView({behavior: 'smooth'});" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 14px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                        <div style="width: 40px; height: 40px; background: #f1f5f9; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: #334155; margin-bottom: 6px;">
-                            <span class="dashicons dashicons-portfolio" style="font-size: 20px; width: 20px; height: 20px;"></span>
+                    <!-- CARD 2: TERM PLAN -->
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                            <div style="width: 36px; height: 36px; background: #e0f2fe; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #0284c7;">
+                                <span class="dashicons dashicons-calendar-alt" style="font-size: 18px; width: 18px; height: 18px;"></span>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطة الفصلية</h4>
+                                <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">رفع خطة جاهزة أو مراجعة الخطط السابقة</p>
+                            </div>
                         </div>
-                        <div style="font-weight: 800; font-size: 13px; color: #0f172a;">التحضيرات المقدمة</div>
-                        <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;"><?php echo count($teacher_own_preps); ?> تحضيرات سابقة</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <button type="button" onclick="document.getElementById('m-step-upload-plan-card').style.display='block'; document.getElementById('m-step-upload-plan-card').scrollIntoView({behavior:'smooth'});" style="background: #0284c7; color: white; border: none; border-radius: 10px; height: 38px; font-weight: 800; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                <span class="dashicons dashicons-upload" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                <span>رفع خطة جاهزة</span>
+                            </button>
+                            <button type="button" onclick="document.getElementById('m-teacher-history-card').scrollIntoView({behavior:'smooth'});" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 10px; height: 38px; font-weight: 800; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                <span class="dashicons dashicons-visibility" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                <span>عرض الخطط السابقة</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 2 Most Recent Submissions Preview -->
-                <div style="background: #ffffff; border-radius: 14px; border: 1px solid #cbd5e1; padding: 14px; margin-bottom: 16px;">
-                    <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <span>📋 أحدث تحضيرين تم تقديمهما:</span>
-                        <span style="font-size: 10.5px; color: #64748b; font-weight: normal;">آخر تحديث آلي</span>
-                    </div>
-                    <?php
-                    $recent_two = array_slice($teacher_own_preps, 0, 2);
-                    foreach ($recent_two as $r_prep):
-                        $s_bg = '#f1f5f9'; $s_col = '#64748b'; $s_lbl = 'مسودة';
-                        if ($r_prep->status === 'submitted') { $s_bg = '#e0f2fe'; $s_col = '#0369a1'; $s_lbl = 'مقدم'; }
-                        elseif ($r_prep->status === 'approved') { $s_bg = '#dcfce7'; $s_col = '#15803d'; $s_lbl = 'معتمد'; }
-                        elseif ($r_prep->status === 'revision_required' || $r_prep->status === 'returned') { $s_bg = '#fee2e2'; $s_col = '#b91c1c'; $s_lbl = 'مطلوب تعديل'; }
-                    ?>
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 800; font-size: 12.5px; color: #0f172a;"><?php echo esc_html($r_prep->title); ?></div>
-                            <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;"><?php echo esc_html($r_prep->subject . ' - ' . $r_prep->lesson_date); ?></div>
+                <!-- UPLOAD LESSON PREPARATION CARD CONTAINER -->
+                <div id="m-step-upload-prep-card" style="display: none; background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid #cbd5e1; margin-bottom: 16px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #0f172a;">رفع ملف تحضير درس جاهز</h4>
+                    <form method="post" enctype="multipart/form-data" action="">
+                        <input type="hidden" name="action" value="sm_submit_mobile_lesson">
+                        <?php wp_nonce_field('sm_mobile_prep_nonce', 'sm_nonce'); ?>
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">عنوان الدرس <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="lesson_title" required class="sm-input" style="width: 100%; height: 38px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <span style="font-size: 10px; padding: 2px 8px; border-radius: 50px; background: <?php echo $s_bg; ?>; color: <?php echo $s_col; ?>; font-weight: 800;"><?php echo $s_lbl; ?></span>
-                            <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=lesson_prep&prep_id=' . $r_prep->id); ?>" target="_blank" style="text-decoration: none; color: #0284c7; font-size: 12px;" title="مشاركة / فتح">📄</a>
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف التحضير (PDF / Word) <span style="color:#ef4444;">*</span></label>
+                            <input type="file" name="lesson_file" accept=".pdf,.doc,.docx" required style="width: 100%; font-size: 12px;">
                         </div>
-                    </div>
-                    <?php endforeach; ?>
+                        <button type="submit" class="sm-btn" style="width: 100%; height: 38px; background: #0f172a; color: white !important; border-radius: 8px; font-weight: 800; font-size: 12px; border: none; cursor: pointer;">رفع وإرسال التحضير</button>
+                    </form>
+                </div>
+
+                <!-- UPLOAD TERM PLAN CARD CONTAINER -->
+                <div id="m-step-upload-plan-card" style="display: none; background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid #cbd5e1; margin-bottom: 16px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #0f172a;">رفع ملف الخطة الفصلية الجاهزة</h4>
+                    <form method="post" enctype="multipart/form-data" action="">
+                        <input type="hidden" name="action" value="sm_save_term_plan">
+                        <input type="hidden" name="planning_method" value="upload">
+                        <?php wp_nonce_field('sm_term_plan_action', 'sm_nonce'); ?>
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">عنوان الخطة / المادة <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="plan_title" required class="sm-input" style="width: 100%; height: 38px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف الخطة (PDF / Word) <span style="color:#ef4444;">*</span></label>
+                            <input type="file" name="plan_document_file" accept=".pdf,.doc,.docx" required style="width: 100%; font-size: 12px;">
+                        </div>
+                        <button type="submit" class="sm-btn" style="width: 100%; height: 38px; background: #0284c7; color: white !important; border-radius: 8px; font-weight: 800; font-size: 12px; border: none; cursor: pointer;">رفع وإرسال الخطة الفصلية</button>
+                    </form>
                 </div>
             </div>
             <?php endif; ?>
