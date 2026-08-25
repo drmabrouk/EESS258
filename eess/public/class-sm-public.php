@@ -6631,6 +6631,95 @@ class SM_Public {
         wp_send_json_success($scope);
     }
 
+    public function ajax_sm_copy_record() {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('عفواً، يجب تسجيل الدخول للقيام بهذه العملية.');
+        }
+
+        $user = wp_get_current_user();
+        $user_roles = (array) $user->roles;
+        $is_sys_admin = in_array('administrator', $user_roles) || in_array('sm_system_admin', $user_roles) || current_user_can('manage_options');
+
+        if (!$is_sys_admin) {
+            wp_send_json_error('عفواً، هذه الميزة مقتصرة فقط على مدير النظام الرئيسي (System Administrator).');
+        }
+
+        check_ajax_referer('eess_admin_action', 'nonce');
+
+        $record_type = isset($_POST['record_type']) ? sanitize_key($_POST['record_type']) : '';
+        $record_id   = isset($_POST['record_id']) ? intval($_POST['record_id']) : 0;
+        $target_uid  = isset($_POST['target_user_id']) ? intval($_POST['target_user_id']) : 0;
+
+        if (!$record_id || !$target_uid || !in_array($record_type, array('lesson_prep', 'term_plan'))) {
+            wp_send_json_error('بيانات النسخ غير مكتملة أو نوع السجل غير صحيح.');
+        }
+
+        $target_user = get_userdata($target_uid);
+        if (!$target_user) {
+            wp_send_json_error('المستخدم المستهدف غير موجود بالنظام.');
+        }
+
+        global $wpdb;
+
+        if ($record_type === 'lesson_prep') {
+            $orig = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sm_lesson_preps WHERE id = %d", $record_id));
+            if (!$orig) {
+                wp_send_json_error('تحضير الدرس الأصلي غير موجود.');
+            }
+
+            $wpdb->insert("{$wpdb->prefix}sm_lesson_preps", array(
+                'teacher_id'      => $target_uid,
+                'supervisor_id'   => $orig->supervisor_id,
+                'title'           => $orig->title . ' (نسخة)',
+                'subject'         => $orig->subject,
+                'grade_level'     => $orig->grade_level,
+                'class_section'   => $orig->class_section,
+                'lesson_date'     => $orig->lesson_date,
+                'submission_time' => current_time('mysql'),
+                'status'          => 'submitted',
+                'delay_seconds'   => 0,
+                'lesson_data'     => $orig->lesson_data,
+                'version'         => 1,
+                'parent_id'       => 0,
+                'created_at'      => current_time('mysql'),
+                'updated_at'      => current_time('mysql')
+            ));
+
+            $new_id = $wpdb->insert_id;
+            SM_Logger::log('نسخ تحضير درس', "قام مدير النظام بنسخ تحضير الدرس ID: $record_id للمستخدم: {$target_user->display_name} بالمعرف الجديد ID: $new_id");
+            wp_send_json_success(array('message' => "تم نسخ تحضير الدرس بنجاح ونقله لحساب: {$target_user->display_name}"));
+        } elseif ($record_type === 'term_plan') {
+            $orig = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sm_term_plans WHERE id = %d", $record_id));
+            if (!$orig) {
+                wp_send_json_error('الخطة الفصلية الأصلية غير موجودة.');
+            }
+
+            $wpdb->insert("{$wpdb->prefix}sm_term_plans", array(
+                'teacher_id'       => $target_uid,
+                'academic_year'    => $orig->academic_year,
+                'term_number'      => $orig->term_number,
+                'subject'          => $orig->subject,
+                'grade'            => $orig->grade,
+                'planning_method'  => $orig->planning_method,
+                'plan_file_url'    => $orig->plan_file_url,
+                'weeks_data'       => $orig->weeks_data,
+                'status'           => 'submitted',
+                'completion_pct'   => $orig->completion_pct,
+                'review_notes'     => '',
+                'reviewed_by'      => 0,
+                'reviewed_at'      => null,
+                'num_terms'        => $orig->num_terms,
+                'term_dates_json'  => $orig->term_dates_json,
+                'created_at'       => current_time('mysql'),
+                'updated_at'       => current_time('mysql')
+            ));
+
+            $new_id = $wpdb->insert_id;
+            SM_Logger::log('نسخ خطة فصلية', "قام مدير النظام بنسخ الخطة الفصلية ID: $record_id للمستخدم: {$target_user->display_name} بالمعرف الجديد ID: $new_id");
+            wp_send_json_success(array('message' => "تم نسخ الخطة الفصلية بنجاح ونقلها لحساب: {$target_user->display_name}"));
+        }
+    }
+
     public function ajax_sm_print() {
         if (!is_user_logged_in()) {
             wp_die('عفواً، يجب تسجيل الدخول للتمكن من طباعة هذا المستند.');

@@ -878,34 +878,41 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                 </span>
                             </td>
                             <td>
-                                <div style="display:flex; gap:6px; align-items:center;">
-                                    <!-- View Button (Pastel Slate) -->
-                                    <button onclick="smOpenPrepViewer(<?php echo $sub->id; ?>)" class="sm-btn" title="عرض تفاصيل التحضير الكاملة" style="width: 32px; height: 32px; padding: 0; background: #f1f5f9; color: #475569 !important; border-radius: 8px; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                                        <span class="dashicons dashicons-visibility" style="font-size: 16px; width: 16px; height: 16px; margin: 0; line-height: 1;"></span>
+                                <div class="sm-action-btn-group">
+                                    <!-- View Button -->
+                                    <button onclick="smOpenPrepViewer(<?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-neutral" title="عرض تفاصيل التحضير الكاملة">
+                                        <span class="dashicons dashicons-visibility"></span>
                                     </button>
 
-                                    <!-- Print PDF Button (Pastel Sky Blue) -->
-                                    <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=lesson_prep&prep_id=' . $sub->id); ?>" target="_blank" class="sm-btn" title="طباعة أو تصدير وثيقة PDF المعتمدة" style="width: 32px; height: 32px; padding: 0; background: #e0f2fe; color: #0284c7 !important; border-radius: 8px; border: 1px solid #bae6fd; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; transition: all 0.2s;">
-                                        <span class="dashicons dashicons-printer" style="font-size: 16px; width: 16px; height: 16px; margin: 0; line-height: 1;"></span>
+                                    <!-- Print PDF Button -->
+                                    <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=lesson_prep&prep_id=' . $sub->id); ?>" target="_blank" class="sm-action-btn sm-action-btn-neutral" title="طباعة أو تصدير وثيقة PDF المعتمدة">
+                                        <span class="dashicons dashicons-printer"></span>
                                     </a>
 
                                     <?php if ($can_review && ($sub->status === 'submitted' || $sub->status === 'late' || $sub->status === 'resubmitted')): ?>
-                                        <!-- Approve Button (Pastel Emerald Green) -->
-                                        <button id="btn-approve-<?php echo $sub->id; ?>" onclick="smQuickApprovePrep(<?php echo $sub->id; ?>)" class="sm-btn" title="اعتماد خطة الدرس فوراً" style="width: 32px; height: 32px; padding: 0; background: #dcfce7; color: #15803d !important; border-radius: 8px; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                                            <span class="dashicons dashicons-yes-alt" style="font-size: 16px; width: 16px; height: 16px; margin: 0; line-height: 1;"></span>
+                                        <!-- Approve Button -->
+                                        <button id="btn-approve-<?php echo $sub->id; ?>" onclick="smQuickApprovePrep(<?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-success" title="اعتماد خطة الدرس فوراً">
+                                            <span class="dashicons dashicons-yes-alt"></span>
                                         </button>
                                     <?php endif; ?>
 
                                     <?php if ($is_teacher && ($sub->status === 'draft' || $sub->status === 'revision_required')): ?>
-                                        <!-- Edit Button (Pastel Amber) -->
-                                        <a href="<?php echo add_query_arg('edit_prep_id', $sub->id, home_url('/lesson-prep')); ?>" class="sm-btn" title="تعديل وثيقة التحضير" style="width: 32px; height: 32px; padding: 0; background: #fef3c7; color: #b45309 !important; border-radius: 8px; border: 1px solid #fde68a; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; transition: all 0.2s;">
-                                            <span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; margin: 0; line-height: 1;"></span>
+                                        <!-- Edit Button -->
+                                        <a href="<?php echo add_query_arg('edit_prep_id', $sub->id, home_url('/lesson-prep')); ?>" class="sm-action-btn sm-action-btn-warning" title="تعديل وثيقة التحضير">
+                                            <span class="dashicons dashicons-edit"></span>
                                         </a>
                                     <?php endif; ?>
 
-                                    <!-- Delete Button (Pastel Red - Distinct Destructive Treatment) -->
-                                    <button onclick="smOpenDeletePrepModal(<?php echo $sub->id; ?>, '<?php echo esc_js($sub->title); ?>')" class="sm-btn" title="حذف التحضير نهائياً" style="width: 32px; height: 32px; padding: 0; background: #fee2e2; color: #dc2626 !important; border-radius: 8px; border: 1px solid #fca5a5; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                                        <span class="dashicons dashicons-trash" style="font-size: 16px; width: 16px; height: 16px; margin: 0; line-height: 1; color: #dc2626;"></span>
+                                    <?php if ($is_admin): ?>
+                                        <!-- Copy Record Button (System Administrator Only) -->
+                                        <button type="button" onclick="eessOpenCopyRecordModal('lesson_prep', <?php echo $sub->id; ?>, '<?php echo esc_js($sub->title); ?>')" class="sm-action-btn sm-action-btn-primary" title="نسخ تحضير الدرس ونقله لمعلم آخر">
+                                            <span class="dashicons dashicons-admin-page"></span>
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <!-- Delete Button -->
+                                    <button onclick="smOpenDeletePrepModal(<?php echo $sub->id; ?>, '<?php echo esc_js($sub->title); ?>')" class="sm-action-btn sm-action-btn-danger" title="حذف التحضير نهائياً">
+                                        <span class="dashicons dashicons-trash"></span>
                                     </button>
                                 </div>
                             </td>

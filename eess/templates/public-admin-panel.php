@@ -2034,6 +2034,124 @@ window.smConfirmAction = function(options) {
 };
 </script>
 
+<!-- In-System Copy Record Modal (System Administrator Only) -->
+<div id="eess-copy-record-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
+        <div style="background: #0f172a; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-admin-page" style="font-size: 20px; width: 20px; height: 20px; color: #38bdf8;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">نسخ السجل ونقله لمستخدم آخر</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-copy-record-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <form id="eess-copy-record-form" onsubmit="eessExecuteCopyRecordSubmit(event)" style="padding: 24px;">
+            <input type="hidden" id="copy_record_type" value="">
+            <input type="hidden" id="copy_record_id" value="0">
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #64748b;">السجل المحدد للنسخ:</div>
+                <div id="copy_record_title_preview" style="font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 2px;">-</div>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="font-size: 12.5px; font-weight: 800; color: #334155; margin-bottom: 6px; display: block;">اختر المستخدم / المعلم المستهدف <span style="color:#ef4444;">*</span></label>
+                <?php
+                $all_system_users = get_users(array('orderby' => 'display_name', 'order' => 'ASC', 'number' => 200));
+                ?>
+                <select id="copy_target_user_id" onchange="eessOnCopyTargetUserChanged(this)" class="sm-input" style="height: 42px; width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; font-weight: 700; font-size: 13px;" required>
+                    <option value="">-- اختر المعلم المستهدف --</option>
+                    <?php foreach ($all_system_users as $su): ?>
+                        <option value="<?php echo $su->ID; ?>" data-email="<?php echo esc_attr($su->user_email); ?>" data-role="<?php echo esc_attr(implode(', ', $su->roles)); ?>">
+                            <?php echo esc_html($su->display_name . ' (' . $su->user_login . ')'); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div id="copy_target_user_details" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #166534; margin-bottom: 4px;">تأكيد حساب المستهدف:</div>
+                <div style="font-size: 12.5px; color: #15803d; font-weight: 700;">
+                    البريد: <span id="copy_target_email_text">-</span> | الرتبة: <span id="copy_target_role_text">-</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="submit" id="copy_submit_btn" class="sm-btn" style="background: #000000; color: #ffffff !important; height: 40px; padding: 0 22px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer;">تأكيد وإنشاء النسخة</button>
+                <button type="button" onclick="document.getElementById('eess-copy-record-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 40px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+window.eessOpenCopyRecordModal = function(recordType, recordId, recordTitle) {
+    document.getElementById('copy_record_type').value = recordType;
+    document.getElementById('copy_record_id').value = recordId;
+    document.getElementById('copy_record_title_preview').innerText = recordTitle || 'سجل غير مسمى';
+    document.getElementById('copy_target_user_id').selectedIndex = 0;
+    document.getElementById('copy_target_user_details').style.display = 'none';
+    document.getElementById('eess-copy-record-modal').style.display = 'flex';
+};
+
+window.eessOnCopyTargetUserChanged = function(sel) {
+    var opt = sel.options[sel.selectedIndex];
+    var details = document.getElementById('copy_target_user_details');
+    if (opt && opt.value) {
+        document.getElementById('copy_target_email_text').innerText = opt.getAttribute('data-email') || '-';
+        document.getElementById('copy_target_role_text').innerText = opt.getAttribute('data-role') || '-';
+        details.style.display = 'block';
+    } else {
+        details.style.display = 'none';
+    }
+};
+
+window.eessExecuteCopyRecordSubmit = function(e) {
+    e.preventDefault();
+    var recordType = document.getElementById('copy_record_type').value;
+    var recordId = document.getElementById('copy_record_id').value;
+    var targetUid = document.getElementById('copy_target_user_id').value;
+
+    if (!recordId || !targetUid) {
+        alert('يرجى اختيار المستخدم المستهدف.');
+        return;
+    }
+
+    var btn = document.getElementById('copy_submit_btn');
+    btn.disabled = true;
+    btn.innerText = 'جاري النسخ...';
+
+    var formData = new FormData();
+    formData.append('action', 'sm_copy_record');
+    formData.append('record_type', recordType);
+    formData.append('record_id', recordId);
+    formData.append('target_user_id', targetUid);
+    formData.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
+
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+        btn.disabled = false;
+        btn.innerText = 'تأكيد وإنشاء النسخة';
+        if (res.success) {
+            if (typeof smShowNotification === 'function') {
+                smShowNotification(res.data.message || 'تم نسخ السجل بنجاح');
+            } else {
+                alert(res.data.message || 'تم نسخ السجل بنجاح');
+            }
+            document.getElementById('eess-copy-record-modal').style.display = 'none';
+            setTimeout(function() { location.reload(); }, 600);
+        } else {
+            alert('خطأ: ' + (res.data || 'تعذر نسخ السجل.'));
+        }
+    })
+    .catch(function(err) {
+        btn.disabled = false;
+        btn.innerText = 'تأكيد وإنشاء النسخة';
+        alert('حدث خطأ في الاتصال بالسيرفر.');
+    });
+};
+</script>
+
 <?php include_once SM_PLUGIN_DIR . 'templates/partials/teacher-behavior-referral-modal.php'; ?>
 <!-- TECHNICAL SUPPORT & HELP CAPSULE MODAL -->
 <div id="eess-support-capsule-modal" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif; direction: rtl;">

@@ -425,6 +425,13 @@ $arabic_term_names = array(
                                             <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $sp->id); ?>" target="_blank" title="طباعة الخطة المعتمدة رسمياً" class="sm-action-btn sm-action-btn-neutral">
                                                 <span class="dashicons dashicons-printer"></span>
                                             </a>
+
+                                            <?php if ($is_admin): ?>
+                                            <!-- Copy Record Button (System Administrator Only) -->
+                                            <button type="button" onclick="eessOpenCopyRecordModal('term_plan', <?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name . ' - ' . $sp->subject); ?>')" title="نسخ الخطة ونقلها لمستخدم آخر" class="sm-action-btn sm-action-btn-primary">
+                                                <span class="dashicons dashicons-admin-page"></span>
+                                            </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -524,37 +531,27 @@ $arabic_term_names = array(
                     <input type="file" name="plan_document_file" id="wiz_plan_document_file" accept=".pdf,.doc,.docx" class="sm-input" style="height: 42px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 12px; padding: 6px 12px; width: 100%; box-sizing: border-box;">
                 </div>
 
-                <!-- Academic Info Summary Badge -->
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 18px; margin-bottom: 20px;">
-                    <div style="font-weight: 800; font-size: 13px; color: #166534; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-                        <span class="dashicons dashicons-id-alt" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                        <span>البيانات المسترجعة تلقائياً من حسابك الأكاديمي:</span>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; font-size: 12px; color: #15803d; font-weight: 700;">
-                        <div>📚 <strong>المادة الدراسية:</strong> <?php echo esc_html($assigned_teacher_subject); ?></div>
-                        <div>🏫 <strong>المدرسة:</strong> <?php echo esc_html($assigned_teacher_school); ?></div>
-                        <div>📅 <strong>العام الأكاديمي:</strong> <?php echo esc_html($active_academic_year); ?></div>
-                    </div>
-                </div>
+                <!-- System-Based Creation Initial Fields (Hidden when Upload method is selected) -->
+                <div id="eess-create-method-block">
+                    <!-- Multi-Grade Capsule Selection (KG to Grade 12) -->
+                    <div style="margin-bottom: 16px;">
+                        <label class="sm-label" style="font-weight: 800; font-size: 12.5px; color: #334155; margin-bottom: 8px; display: block;">الصفوف الدراسية المشمولة بالخطة (اختر المناهج/الصفوف المستهدفة) <span style="color:#ef4444;">*</span></label>
 
-                <!-- Multi-Grade Capsule Selection (KG to Grade 12) -->
-                <div style="margin-bottom: 16px;">
-                    <label class="sm-label" style="font-weight: 800; font-size: 12.5px; color: #334155; margin-bottom: 8px; display: block;">الصفوف الدراسية المشمولة بالخطة (اختر المناهج/الصفوف المستهدفة) <span style="color:#ef4444;">*</span></label>
-
-                    <?php
-                    $all_grade_options = array(
-                        'مرحلة الروضة', 'الصف الأول', 'الصف الثاني', 'الصف الثالث',
-                        'الصف الرابع', 'الصف الخامس', 'الصف السادس', 'الصف السابع',
-                        'الصف الثامن', 'الصف التاسع', 'الصف العاشر', 'الصف الحادي عشر', 'الصف الثاني عشر'
-                    );
-                    ?>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; background: #ffffff; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; max-height: 130px; overflow-y: auto;">
-                        <?php foreach ($all_grade_options as $g_opt): ?>
-                            <label class="eess-grade-capsule-label" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 11.5px; font-weight: 700; color: #334155; cursor: pointer; user-select: none;">
-                                <input type="checkbox" name="assigned_plan_grades[]" value="<?php echo esc_attr($g_opt); ?>" onchange="eessTogglePlanGradeCapsule(this)" style="display: none;">
-                                <span><?php echo esc_html($g_opt); ?></span>
-                            </label>
-                        <?php endforeach; ?>
+                        <?php
+                        $all_grade_options = array(
+                            'مرحلة الروضة', 'الصف الأول', 'الصف الثاني', 'الصف الثالث',
+                            'الصف الرابع', 'الصف الخامس', 'الصف السادس', 'الصف السابع',
+                            'الصف الثامن', 'الصف التاسع', 'الصف العاشر', 'الصف الحادي عشر', 'الصف الثاني عشر'
+                        );
+                        ?>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; background: #ffffff; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; max-height: 130px; overflow-y: auto;">
+                            <?php foreach ($all_grade_options as $g_opt): ?>
+                                <label class="eess-grade-capsule-label" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 11.5px; font-weight: 700; color: #334155; cursor: pointer; user-select: none;">
+                                    <input type="checkbox" name="target_grades[]" value="<?php echo esc_attr($g_opt); ?>" onchange="eessTogglePlanGradeCapsule(this)" style="display: none;">
+                                    <span><?php echo esc_html($g_opt); ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -565,12 +562,14 @@ $arabic_term_names = array(
                 var cardUpload = document.getElementById('eess-method-card-upload');
                 var cardCreate = document.getElementById('eess-method-card-create');
                 var uploadBlock = document.getElementById('eess-upload-method-block');
+                var createBlock = document.getElementById('eess-create-method-block');
                 var stepperTrack = document.getElementById('eess-wizard-stepper-track');
 
                 if (method === 'upload') {
                     if (cardUpload) { cardUpload.style.background = '#f0f9ff'; cardUpload.style.borderColor = '#0284c7'; }
                     if (cardCreate) { cardCreate.style.background = '#ffffff'; cardCreate.style.borderColor = '#cbd5e1'; }
                     if (uploadBlock) uploadBlock.style.display = 'block';
+                    if (createBlock) createBlock.style.display = 'none';
                     if (stepperTrack) stepperTrack.style.display = 'none';
 
                     // Directly enable submit button on Step 1 for upload method
@@ -582,6 +581,7 @@ $arabic_term_names = array(
                     if (cardCreate) { cardCreate.style.background = '#fef2f2'; cardCreate.style.borderColor = '#881337'; }
                     if (cardUpload) { cardUpload.style.background = '#ffffff'; cardUpload.style.borderColor = '#cbd5e1'; }
                     if (uploadBlock) uploadBlock.style.display = 'none';
+                    if (createBlock) createBlock.style.display = 'block';
                     if (stepperTrack) stepperTrack.style.display = 'block';
 
                     var submitBtn = document.getElementById('wiz-submit-btn');
