@@ -115,6 +115,7 @@ class SM_Settings {
 
     public static function get_academic_structure() {
         $default = array(
+            'academic_year' => '2027/2026',
             'terms_count' => 3,
             'term_dates' => array(
                 'term1' => array('start' => '', 'end' => ''),
