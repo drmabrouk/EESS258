@@ -220,43 +220,40 @@
                     <!-- 2. Print Button (Active Blue) -->
                     <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=single_violation&record_id=' . $row->id); ?>"
                        target="_blank"
-                       class="eess-action-btn"
-                       style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 50%; background: #f0f9ff !important; color: #0284c7 !important; border: 1px solid #bae6fd !important; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.2s;"
+                       class="sm-action-btn sm-action-btn-neutral"
                        title="طباعة التقرير" aria-label="طباعة التقرير">
-                        <svg width="16" height="16" fill="none" stroke="#0284c7" viewBox="0 0 24 24" style="width: 16px; height: 16px; display: block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span class="dashicons dashicons-printer"></span>
                     </a>
 
                     <!-- 3. Edit Button (Active Amber or Disabled Muted Gray) -->
                     <?php if (current_user_can('إدارة_المخالفات') || current_user_can('manage_options')): ?>
                         <button type="button" onclick="editSmRecord(<?php echo htmlspecialchars(json_encode($row)); ?>)"
-                                class="eess-action-btn"
-                                style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 50%; background: #fffbeb !important; color: #d97706 !important; border: 1px solid #fde68a !important; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;"
+                                class="sm-action-btn sm-action-btn-warning"
                                 title="تعديل السجل" aria-label="تعديل السجل">
-                            <svg width="16" height="16" fill="none" stroke="#d97706" viewBox="0 0 24 24" style="width: 16px; height: 16px; display: block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span class="dashicons dashicons-edit"></span>
                         </button>
                     <?php else: ?>
                         <button type="button" disabled
-                                class="eess-action-btn"
-                                style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 50%; background: #f8fafc !important; color: #94a3b8 !important; border: 1px solid #e2e8f0 !important; display: inline-flex; align-items: center; justify-content: center; opacity: 0.4; pointer-events: none; cursor: not-allowed;"
+                                class="sm-action-btn sm-action-btn-neutral"
+                                style="opacity: 0.4; pointer-events: none; cursor: not-allowed;"
                                 title="تعديل غير متاح" aria-label="تعديل غير متاح">
-                            <svg width="16" height="16" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" style="width: 16px; height: 16px; display: block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span class="dashicons dashicons-edit"></span>
                         </button>
                     <?php endif; ?>
 
                     <!-- 4. Delete Button (Active Red or Disabled Muted Gray) -->
                     <?php if (current_user_can('إدارة_المخالفات') || current_user_can('manage_options')): ?>
                         <button type="button" onclick="confirmDeleteRecord(<?php echo $row->id; ?>)"
-                                class="eess-action-btn"
-                                style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 50%; background: #fef2f2 !important; color: #dc2626 !important; border: 1px solid #fecaca !important; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;"
+                                class="sm-action-btn sm-action-btn-danger"
                                 title="حذف المخالفة" aria-label="حذف المخالفة">
-                            <svg width="16" height="16" fill="none" stroke="#dc2626" viewBox="0 0 24 24" style="width: 16px; height: 16px; display: block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span class="dashicons dashicons-trash"></span>
                         </button>
                     <?php else: ?>
                         <button type="button" disabled
-                                class="eess-action-btn"
-                                style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 50%; background: #f8fafc !important; color: #94a3b8 !important; border: 1px solid #e2e8f0 !important; display: inline-flex; align-items: center; justify-content: center; opacity: 0.4; pointer-events: none; cursor: not-allowed;"
+                                class="sm-action-btn sm-action-btn-neutral"
+                                style="opacity: 0.4; pointer-events: none; cursor: not-allowed;"
                                 title="حذف غير متاح" aria-label="حذف غير متاح">
-                            <svg width="16" height="16" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" style="width: 16px; height: 16px; display: block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span class="dashicons dashicons-trash"></span>
                         </button>
                     <?php endif; ?>
 

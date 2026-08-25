@@ -145,6 +145,7 @@ class School_Management {
         $this->loader->add_action('wp_ajax_sm_delete_term_plan', $plugin_public, 'ajax_delete_term_plan');
 
         // Print / PDF action
+        $this->loader->add_action('wp_ajax_sm_copy_record', $plugin_public, 'ajax_sm_copy_record');
         $this->loader->add_action('wp_ajax_sm_print', $plugin_public, 'ajax_sm_print');
 
         // Admin approval actions

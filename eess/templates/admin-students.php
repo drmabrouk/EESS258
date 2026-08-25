@@ -451,24 +451,24 @@ $to_num = min($offset + $limit, $total_students_count);
                                         </a>
 
                                         <!-- Behavioral Profile Drawer -->
-                                        <button type="button" onclick="viewSmStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)" title="الملف السلوكي والتحليلي" style="width: 36px; height: 36px; border-radius: 50% !important; flex-shrink: 0; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                            <span class="dashicons dashicons-clipboard" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                        <button type="button" onclick="viewSmStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)" title="الملف السلوكي والتحليلي" class="sm-action-btn sm-action-btn-warning">
+                                            <span class="dashicons dashicons-clipboard"></span>
                                         </button>
 
                                         <?php if ($is_admin): ?>
                                             <!-- Credentials Button -->
-                                            <button type="button" onclick="showStudentCreds('<?php echo esc_js($student->student_code); ?>', '<?php echo esc_js(get_user_meta($student->parent_user_id, 'sm_temp_pass', true)); ?>', '<?php echo esc_js($student->name); ?>', <?php echo $student->id; ?>)" title="حساب الدخول الأكاديمي" style="width: 36px; height: 36px; border-radius: 50% !important; flex-shrink: 0; background: #f1f5f9; color: #334155; border: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-key" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick="showStudentCreds('<?php echo esc_js($student->student_code); ?>', '<?php echo esc_js(get_user_meta($student->parent_user_id, 'sm_temp_pass', true)); ?>', '<?php echo esc_js($student->name); ?>', <?php echo $student->id; ?>)" title="حساب الدخول الأكاديمي" class="sm-action-btn sm-action-btn-neutral">
+                                                <span class="dashicons dashicons-key"></span>
                                             </button>
 
                                             <!-- Edit Student Button -->
-                                            <button type="button" onclick='openUnifiedProfileModal(<?php echo json_encode($student); ?>)' title="تعديل الطالب" style="width: 36px; height: 36px; border-radius: 50% !important; flex-shrink: 0; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick='openUnifiedProfileModal(<?php echo json_encode($student); ?>)' title="تعديل الطالب" class="sm-action-btn sm-action-btn-warning">
+                                                <span class="dashicons dashicons-edit"></span>
                                             </button>
 
                                             <!-- Delete Student Button -->
-                                            <button type="button" onclick="confirmDeleteStudent(<?php echo $student->id; ?>, '<?php echo esc_js($student->name); ?>')" title="حذف الطالب نهائياً" style="width: 36px; height: 36px; border-radius: 50% !important; flex-shrink: 0; background: #fee2e2; color: #dc2626; border: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-trash" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="button" onclick="confirmDeleteStudent(<?php echo $student->id; ?>, '<?php echo esc_js($student->name); ?>')" title="حذف الطالب نهائياً" class="sm-action-btn sm-action-btn-danger">
+                                                <span class="dashicons dashicons-trash"></span>
                                             </button>
                                         <?php endif; ?>
                                     </div>
