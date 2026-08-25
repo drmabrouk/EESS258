@@ -6631,6 +6631,110 @@ class SM_Public {
         wp_send_json_success($scope);
     }
 
+    public function ajax_sm_assign_term_plan() {
+        if (!is_user_logged_in()) wp_send_json_error('يجب تسجيل الدخول.');
+        $user = wp_get_current_user();
+        $roles = (array)$user->roles;
+        if (!in_array('administrator', $roles) && !in_array('sm_system_admin', $roles) && !current_user_can('manage_options')) {
+            wp_send_json_error('عفواً، هذه الميزة مقتصرة فقط على مدير النظام الرئيسي.');
+        }
+        check_ajax_referer('eess_admin_action', 'nonce');
+
+        $target_uid = intval($_POST['target_user_id'] ?? 0);
+        $term_num   = intval($_POST['term_number'] ?? 1);
+        $subject    = sanitize_text_field($_POST['subject'] ?? 'عام');
+        $grade      = sanitize_text_field($_POST['grade'] ?? 'غير محدد');
+
+        if (!$target_uid) wp_send_json_error('يرجى اختيار المعلم المستهدف.');
+
+        $file_url = '';
+        if (!empty($_FILES['plan_file']['name'])) {
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            $uploaded = wp_handle_upload($_FILES['plan_file'], array('test_form' => false));
+            if (isset($uploaded['url'])) {
+                $file_url = $uploaded['url'];
+            }
+        }
+
+        global $wpdb;
+        $acad_struct = SM_Settings::get_academic_structure();
+        $academic_year = $acad_struct['academic_year'] ?? '2027/2026';
+
+        $wpdb->insert("{$wpdb->prefix}sm_term_plans", array(
+            'teacher_id'      => $target_uid,
+            'academic_year'   => $academic_year,
+            'term_number'     => $term_num,
+            'subject'         => $subject,
+            'grade'           => $grade,
+            'planning_method' => 'upload',
+            'plan_file_url'   => $file_url,
+            'weeks_data'      => '',
+            'status'          => 'submitted',
+            'completion_pct'  => 100,
+            'num_terms'       => $acad_struct['terms_count'] ?? 3,
+            'created_at'      => current_time('mysql'),
+            'updated_at'      => current_time('mysql')
+        ));
+
+        $target_user = get_userdata($target_uid);
+        SM_Logger::log('تعيين خطة فصلية', "قام مدير النظام بتعيين خطة فصلية للمعلم: " . ($target_user ? $target_user->display_name : $target_uid));
+        wp_send_json_success(array('message' => 'تمت إسناد الخطة الفصلية للمعلم بنجاح.'));
+    }
+
+    public function ajax_sm_assign_lesson_prep() {
+        if (!is_user_logged_in()) wp_send_json_error('يجب تسجيل الدخول.');
+        $user = wp_get_current_user();
+        $roles = (array)$user->roles;
+        if (!in_array('administrator', $roles) && !in_array('sm_system_admin', $roles) && !current_user_can('manage_options')) {
+            wp_send_json_error('عفواً، هذه الميزة مقتصرة فقط على مدير النظام الرئيسي.');
+        }
+        check_ajax_referer('eess_admin_action', 'nonce');
+
+        $target_uid  = intval($_POST['target_user_id'] ?? 0);
+        $title       = sanitize_text_field($_POST['title'] ?? '');
+        $subject     = sanitize_text_field($_POST['subject'] ?? '');
+        $grade_level = sanitize_text_field($_POST['grade_level'] ?? '');
+        $lesson_date = sanitize_text_field($_POST['lesson_date'] ?? current_time('Y-m-d'));
+
+        if (!$target_uid || empty($title)) wp_send_json_error('يرجى اختيار المعلم وتحديد عنوان الدرس.');
+
+        $file_url = '';
+        if (!empty($_FILES['prep_file']['name'])) {
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            $uploaded = wp_handle_upload($_FILES['prep_file'], array('test_form' => false));
+            if (isset($uploaded['url'])) {
+                $file_url = $uploaded['url'];
+            }
+        }
+
+        $lesson_data = json_encode(array(
+            'objectives' => 'تحضير مسند إدارياً',
+            'file_url'   => $file_url
+        ), JSON_UNESCAPED_UNICODE);
+
+        global $wpdb;
+        $wpdb->insert("{$wpdb->prefix}sm_lesson_preps", array(
+            'teacher_id'      => $target_uid,
+            'supervisor_id'   => $user->ID,
+            'title'           => $title,
+            'subject'         => $subject,
+            'grade_level'     => $grade_level,
+            'class_section'   => 'شعبة 1',
+            'lesson_date'     => $lesson_date,
+            'submission_time' => current_time('mysql'),
+            'status'          => 'submitted',
+            'delay_seconds'   => 0,
+            'lesson_data'     => $lesson_data,
+            'version'         => 1,
+            'created_at'      => current_time('mysql'),
+            'updated_at'      => current_time('mysql')
+        ));
+
+        $target_user = get_userdata($target_uid);
+        SM_Logger::log('تعيين تحضير درس', "قام مدير النظام بتعيين تحضير درس للمعلم: " . ($target_user ? $target_user->display_name : $target_uid));
+        wp_send_json_success(array('message' => 'تمت إسناد تحضير الدرس للمعلم بنجاح.'));
+    }
+
     public function ajax_sm_copy_record() {
         if (!is_user_logged_in()) {
             wp_send_json_error('عفواً، يجب تسجيل الدخول للقيام بهذه العملية.');

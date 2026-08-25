@@ -306,6 +306,14 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                 </div>
             </div>
 
+            <?php if ($is_admin): ?>
+            <!-- Assign Ready-Made Lesson Prep to Teacher Button (System Admin Only) -->
+            <button type="button" onclick="document.getElementById('eess-assign-prep-modal').style.display='flex'" class="sm-btn" style="background: #0f172a; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <span class="dashicons dashicons-user-freelance" style="font-size: 16px; width: 16px; height: 16px; color: #38bdf8;"></span>
+                <span>إسناد تحضير لمعلم</span>
+            </button>
+            <?php endif; ?>
+
             <!-- Settings Gear Icon Button -->
             <button type="button" onclick="document.getElementById('prep-settings-modal').style.display='flex'" class="sm-btn sm-btn-outline" style="height: 38px; display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px !important; cursor: pointer; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; font-weight: 800; font-size: 12.5px; padding: 0 16px;">
                 <span class="dashicons dashicons-admin-generic" style="font-size: 16px; width: 16px; height: 16px; margin: 0; color: #475569;"></span>
@@ -910,7 +918,7 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                         </button>
                                     <?php endif; ?>
 
-                                    <!-- Delete Button -->
+                                    <!-- Delete Button (Far-Left in RTL) -->
                                     <button onclick="smOpenDeletePrepModal(<?php echo $sub->id; ?>, '<?php echo esc_js($sub->title); ?>')" class="sm-action-btn sm-action-btn-danger" title="حذف التحضير نهائياً">
                                         <span class="dashicons dashicons-trash"></span>
                                     </button>
@@ -1087,6 +1095,109 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
         </div>
     </div>
 </div>
+
+<!-- Assign Lesson Prep Modal (System Administrator Only) -->
+<div id="eess-assign-prep-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 540px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
+        <div style="background: #0f172a; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-user-freelance" style="font-size: 20px; width: 20px; height: 20px; color: #38bdf8;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">إسناد ورفع تحضير درس لمعلم</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-assign-prep-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <form id="eess-assign-prep-form" onsubmit="eessSubmitAssignPrepForm(event)" style="padding: 24px;">
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">اختر المعلم المستهدف <span style="color:#ef4444;">*</span></label>
+                <?php $teachers_list = get_users(array('role' => 'sm_teacher', 'orderby' => 'display_name', 'order' => 'ASC')); ?>
+                <select id="assign_prep_teacher_id" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12.5px; font-weight: 700;" required>
+                    <option value="">-- اختر المعلم --</option>
+                    <?php foreach ($teachers_list as $t): ?>
+                        <option value="<?php echo $t->ID; ?>"><?php echo esc_html($t->display_name . ' (' . $t->user_login . ')'); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">عنوان الدرس <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="assign_prep_title" placeholder="مثال: تحضير درس اللياقة البدنية والسرعة" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12px;" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">المادة الدراسية</label>
+                    <input type="text" id="assign_prep_subject" placeholder="مثال: التربية البدنية" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12px;" required>
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الصف الدراسي</label>
+                    <input type="text" id="assign_prep_grade" placeholder="مثال: الصف العاشر" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12px;" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">تاريخ الدرس</label>
+                <input type="date" id="assign_prep_date" value="<?php echo current_time('Y-m-d'); ?>" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12px;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">ملف التحضير (PDF / Word)</label>
+                <input type="file" id="assign_prep_file" accept=".pdf,.doc,.docx" style="width: 100%; font-size: 12px;">
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="submit" id="assign_prep_submit_btn" class="sm-btn" style="background: #000000; color: #ffffff !important; height: 38px; padding: 0 22px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer;">إسناد ورفع التحضير</button>
+                <button type="button" onclick="document.getElementById('eess-assign-prep-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 38px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function eessSubmitAssignPrepForm(e) {
+    e.preventDefault();
+    var tUid = document.getElementById('assign_prep_teacher_id').value;
+    var title = document.getElementById('assign_prep_title').value;
+    var subj = document.getElementById('assign_prep_subject').value;
+    var grade = document.getElementById('assign_prep_grade').value;
+    var lDate = document.getElementById('assign_prep_date').value;
+    var fileInput = document.getElementById('assign_prep_file');
+
+    if (!tUid || !title) {
+        alert('يرجى اختيار المعلم وتحديد عنوان الدرس.');
+        return;
+    }
+
+    var btn = document.getElementById('assign_prep_submit_btn');
+    btn.disabled = true;
+    btn.innerText = 'جاري الإسناد...';
+
+    var formData = new FormData();
+    formData.append('action', 'sm_assign_lesson_prep');
+    formData.append('target_user_id', tUid);
+    formData.append('title', title);
+    formData.append('subject', subj);
+    formData.append('grade_level', grade);
+    formData.append('lesson_date', lDate);
+    if (fileInput.files[0]) {
+        formData.append('prep_file', fileInput.files[0]);
+    }
+    formData.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
+
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerText = 'إسناد ورفع التحضير';
+        if (res.success) {
+            if (typeof smShowNotification === 'function') smShowNotification(res.data.message || 'تم الإسناد بنجاح');
+            document.getElementById('eess-assign-prep-modal').style.display = 'none';
+            setTimeout(() => location.reload(), 600);
+        } else {
+            alert('خطأ: ' + (res.data || 'فشل إسناد التحضير.'));
+        }
+    });
+}
+</script>
 
 <!-- In-System Custom Confirmation Modal for Deleting Lesson Prep -->
 <div id="eess-delete-prep-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;">

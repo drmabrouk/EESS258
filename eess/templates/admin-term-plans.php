@@ -79,6 +79,14 @@ $arabic_term_names = array(
 
         <!-- Primary Header Actions (Wine-Red, Black, White Button Tokens) -->
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <?php if ($is_admin): ?>
+            <!-- Assign Ready-Made Plan to Teacher Button (System Admin Only) -->
+            <button type="button" onclick="document.getElementById('eess-assign-plan-modal').style.display='flex'" class="sm-btn" style="background: #0f172a; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <span class="dashicons dashicons-user-freelance" style="font-size: 16px; width: 16px; height: 16px; color: #38bdf8;"></span>
+                <span>إسناد خطة لمعلم</span>
+            </button>
+            <?php endif; ?>
+
             <?php if ($is_admin || $is_reviewer): ?>
             <!-- Academic Config Gear Button -->
             <button type="button" onclick="document.getElementById('eess-acad-config-modal').style.display='flex'" title="إعدادات العام الدراسي والفصول" class="sm-btn sm-btn-outline" style="height: 38px; width: 38px; padding: 0; border-radius: 50% !important; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -274,14 +282,9 @@ $arabic_term_names = array(
                                                 <span class="dashicons dashicons-edit"></span>
                                             </button>
 
-                                            <!-- Delete Button -->
+                                            <!-- Delete Button (Far-Left in RTL) -->
                                             <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $tp->id; ?>, '<?php echo esc_js($tp->subject . ' - ' . $arabic_term_names[intval($tp->term_number)]); ?>')" title="حذف الخطة" class="sm-action-btn sm-action-btn-danger">
                                                 <span class="dashicons dashicons-trash"></span>
-                                            </button>
-
-                                            <!-- View Content Button -->
-                                            <button type="button" onclick="inspectSubmittedPlan(<?php echo htmlspecialchars(json_encode($tp)); ?>)" title="معاينة محتوى الخطة" class="sm-action-btn sm-action-btn-neutral">
-                                                <span class="dashicons dashicons-visibility"></span>
                                             </button>
                                         </div>
                                     </td>
@@ -396,6 +399,18 @@ $arabic_term_names = array(
                                     <!-- Quick Action Circular Buttons (Approve, Reject, Modification Request) -->
                                     <td style="padding: 12px 16px; text-align: center;">
                                         <div class="sm-action-btn-group">
+                                            <!-- View / Document Button -->
+                                            <?php if (!empty($sp->plan_file_url)): ?>
+                                                <a href="<?php echo esc_url($sp->plan_file_url); ?>" target="_blank" title="معاينة ملف الخطة المرفوعة" class="sm-action-btn sm-action-btn-neutral">
+                                                    <span class="dashicons dashicons-media-document"></span>
+                                                </a>
+                                            <?php endif; ?>
+
+                                            <!-- Administrative Direct Print PDF Button -->
+                                            <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $sp->id); ?>" target="_blank" title="طباعة الخطة المعتمدة رسمياً" class="sm-action-btn sm-action-btn-neutral">
+                                                <span class="dashicons dashicons-printer"></span>
+                                            </a>
+
                                             <!-- Approve Button (Positive Green) -->
                                             <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" class="sm-action-btn sm-action-btn-success">
                                                 <span class="dashicons dashicons-yes-alt"></span>
@@ -411,27 +426,17 @@ $arabic_term_names = array(
                                                 <span class="dashicons dashicons-no-alt"></span>
                                             </button>
 
-                                            <!-- Delete Button (In-System Modal Confirmation) -->
-                                            <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name . ' - ' . $sp->subject); ?>')" title="حذف الخطة نهائياً" class="sm-action-btn sm-action-btn-danger">
-                                                <span class="dashicons dashicons-trash"></span>
-                                            </button>
-
-                                            <!-- Preview Plan Details Button -->
-                                            <button type="button" onclick="inspectSubmittedPlan(<?php echo htmlspecialchars(json_encode($sp)); ?>)" title="معاينة محتوى الخطة" class="sm-action-btn sm-action-btn-neutral">
-                                                <span class="dashicons dashicons-visibility"></span>
-                                            </button>
-
-                                            <!-- Administrative Direct Print PDF Button -->
-                                            <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $sp->id); ?>" target="_blank" title="طباعة الخطة المعتمدة رسمياً" class="sm-action-btn sm-action-btn-neutral">
-                                                <span class="dashicons dashicons-printer"></span>
-                                            </a>
-
                                             <?php if ($is_admin): ?>
                                             <!-- Copy Record Button (System Administrator Only) -->
                                             <button type="button" onclick="eessOpenCopyRecordModal('term_plan', <?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name . ' - ' . $sp->subject); ?>')" title="نسخ الخطة ونقلها لمستخدم آخر" class="sm-action-btn sm-action-btn-primary">
                                                 <span class="dashicons dashicons-admin-page"></span>
                                             </button>
                                             <?php endif; ?>
+
+                                            <!-- Delete Button (Far-Left in RTL) -->
+                                            <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name . ' - ' . $sp->subject); ?>')" title="حذف الخطة نهائياً" class="sm-action-btn sm-action-btn-danger">
+                                                <span class="dashicons dashicons-trash"></span>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -703,6 +708,104 @@ $arabic_term_names = array(
     </div>
 </div>
 
+<!-- Assign Term Plan Modal (System Administrator Only) -->
+<div id="eess-assign-plan-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 540px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
+        <div style="background: #0f172a; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-user-freelance" style="font-size: 20px; width: 20px; height: 20px; color: #38bdf8;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">إسناد ورفع خطة فصلية لمعلم</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-assign-plan-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <form id="eess-assign-plan-form" onsubmit="eessSubmitAssignPlanForm(event)" style="padding: 24px;">
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">اختر المعلم المستهدف <span style="color:#ef4444;">*</span></label>
+                <?php $teachers_list = get_users(array('role' => 'sm_teacher', 'orderby' => 'display_name', 'order' => 'ASC')); ?>
+                <select id="assign_plan_teacher_id" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12.5px; font-weight: 700;" required>
+                    <option value="">-- اختر المعلم --</option>
+                    <?php foreach ($teachers_list as $t): ?>
+                        <option value="<?php echo $t->ID; ?>"><?php echo esc_html($t->display_name . ' (' . $t->user_login . ')'); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الفصل الدراسي</label>
+                    <select id="assign_plan_term_number" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12px;">
+                        <option value="1">الفصل الأول</option>
+                        <option value="2">الفصل الثاني</option>
+                        <option value="3">الفصل الثالث</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">المادة الدراسية</label>
+                    <input type="text" id="assign_plan_subject" placeholder="مثال: التربية البدنية" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12px;" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الصف الدراسي / المنهج</label>
+                <input type="text" id="assign_plan_grade" placeholder="مثال: الصف العاشر" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12px;" required>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">ملف الخطة الجاهز (PDF / Word) <span style="color:#ef4444;">*</span></label>
+                <input type="file" id="assign_plan_file" accept=".pdf,.doc,.docx" required style="width: 100%; font-size: 12px;">
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="submit" id="assign_plan_submit_btn" class="sm-btn" style="background: #000000; color: #ffffff !important; height: 38px; padding: 0 22px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer;">إسناد ورفع الخطة</button>
+                <button type="button" onclick="document.getElementById('eess-assign-plan-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 38px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function eessSubmitAssignPlanForm(e) {
+    e.preventDefault();
+    var tUid = document.getElementById('assign_plan_teacher_id').value;
+    var term = document.getElementById('assign_plan_term_number').value;
+    var subj = document.getElementById('assign_plan_subject').value;
+    var grade = document.getElementById('assign_plan_grade').value;
+    var fileInput = document.getElementById('assign_plan_file');
+
+    if (!tUid || !fileInput.files[0]) {
+        alert('يرجى اختيار المعلم وتحديد ملف الخطة.');
+        return;
+    }
+
+    var btn = document.getElementById('assign_plan_submit_btn');
+    btn.disabled = true;
+    btn.innerText = 'جاري الإسناد...';
+
+    var formData = new FormData();
+    formData.append('action', 'sm_assign_term_plan');
+    formData.append('target_user_id', tUid);
+    formData.append('term_number', term);
+    formData.append('subject', subj);
+    formData.append('grade', grade);
+    formData.append('plan_file', fileInput.files[0]);
+    formData.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
+
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerText = 'إسناد ورفع الخطة';
+        if (res.success) {
+            if (typeof smShowNotification === 'function') smShowNotification(res.data.message || 'تمت الإسناد بنجاح');
+            document.getElementById('eess-assign-plan-modal').style.display = 'none';
+            setTimeout(() => location.reload(), 600);
+        } else {
+            alert('خطأ: ' + (res.data || 'فشل إسناد الخطة.'));
+        }
+    });
+}
+</script>
+
 <!-- In-System Plan Deletion Confirmation Modal -->
 <div id="eess-delete-plan-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif; direction: rtl;">
     <div style="background: #ffffff; border-radius: 20px; max-width: 480px; width: 100%; border: 1px solid #fecdd3; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); overflow: hidden; display: flex; flex-direction: column;">
@@ -733,40 +836,6 @@ $arabic_term_names = array(
     </div>
 </div>
 
-<!-- Inspection & Approval Modal -->
-<div id="tp_inspect_modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif; direction: rtl;">
-    <div style="background: #ffffff; border-radius: 20px; max-width: 720px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); overflow: hidden; display: flex; flex-direction: column;">
-        <div style="background: #1e293b; color: #ffffff; padding: 16px 22px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
-            <h3 style="margin: 0; font-size: 15.5px; font-weight: 800; color: #ffffff;" id="tp_inspect_title">معاينة ومراجعة الخطة الفصلية</h3>
-            <button type="button" onclick="document.getElementById('tp_inspect_modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
-        </div>
-
-        <div style="padding: 22px;">
-            <div id="tp_inspect_body" style="max-height: 48vh; overflow-y: auto; margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px;">
-                <!-- Weeks details populated via JS -->
-            </div>
-
-            <?php if ($is_reviewer): ?>
-                <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 18px;">
-                    <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">ملاحظات المراجعة / التوجيه الإداري:</label>
-                    <textarea id="tp_review_notes_input" class="sm-textarea" rows="2" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 8px; font-size: 12.5px;" placeholder="أدخل الملاحظات المطلوبة للتعديل..."></textarea>
-                </div>
-
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button type="button" onclick="submitPlanReview('approved')" class="sm-btn" style="background: #16a34a; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 20px; font-weight: 800; border: none; cursor: pointer;">
-                        ✓ اعتماد الخطة رسمياً
-                    </button>
-                    <button type="button" onclick="submitPlanReview('returned')" class="sm-btn" style="background: #ea580c; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; border: none; cursor: pointer;">
-                        إعادة للتعديل مع الملاحظات
-                    </button>
-                    <button type="button" onclick="submitPlanReview('rejected')" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; border: none; cursor: pointer;">
-                        رفض الخطة
-                    </button>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
 
 <script>
 let currentPlanData = null;
@@ -1361,53 +1430,6 @@ function eessSaveWizardPlanSubmit(e) {
     });
 }
 
-function inspectSubmittedPlan(plan) {
-    currentInspectedPlanId = plan.id;
-    document.getElementById('tp_inspect_title').innerText = 'معاينة خطة: ' + plan.teacher_name + ' - ' + plan.subject + ' (' + plan.grade + ')';
-
-    const body = document.getElementById('tp_inspect_body');
-    body.innerHTML = '';
-
-    let weeks = {};
-    try {
-        weeks = JSON.parse(plan.weeks_data || '{}');
-    } catch(e) {}
-
-    Object.keys(weeks).forEach(wNum => {
-        const item = weeks[wNum];
-        const card = document.createElement('div');
-        card.style.cssText = 'background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 10px;';
-        card.innerHTML = `
-            <div style="font-weight: 800; font-size: 13px; color: #2563eb; margin-bottom: 4px;">الأسبوع ${wNum}: ${item.title || 'بدون عنوان'}</div>
-            <p style="margin: 0; font-size: 12px; color: #334155; line-height: 1.5;">${item.summary || 'لا يوجد ملخص مسجل'}</p>
-        `;
-        body.appendChild(card);
-    });
-
-    document.getElementById('tp_inspect_modal').style.display = 'flex';
-}
-
-function submitPlanReview(status) {
-    if (!currentInspectedPlanId) return;
-
-    const notes = document.getElementById('tp_review_notes_input').value;
-    const formData = new FormData();
-    formData.append('action', 'sm_review_term_plan');
-    formData.append('plan_id', currentInspectedPlanId);
-    formData.append('review_status', status);
-    formData.append('review_notes', notes);
-    formData.append('sm_nonce', '<?php echo wp_create_nonce("sm_term_plan_action"); ?>');
-
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
-    .then(r => r.json())
-    .then(res => {
-        if (res.success) {
-            if (typeof smShowNotification === 'function') smShowNotification('تم مراجعة الخطة بنجاح');
-            document.getElementById('tp_inspect_modal').style.display = 'none';
-            setTimeout(() => location.reload(), 600);
-        }
-    });
-}
 </script>
 
 <!-- Academic Structure Configuration Modal -->
