@@ -423,7 +423,7 @@ class SM_Public {
             <div style="position: sticky; top: 0; z-index: 9999; background: #0f172a; color: #ffffff; padding: 12px 16px; border-radius: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 14px rgba(15,23,42,0.18);">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="dashicons dashicons-welcome-learn-more" style="color: #38bdf8; font-size: 18px; width: 18px; height: 18px;"></span>
-                    <span style="font-size: 13.5px; font-weight: 800; color: #ffffff; letter-spacing: 0.3px;">School Management System</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #ffffff;">نظام الإدارة المدرسية</span>
                 </div>
                 <a href="<?php echo wp_logout_url(home_url('/sm-login')); ?>" class="sm-btn" style="height: 30px; padding: 0 12px; font-size: 11px; background: #dc2626; color: #ffffff !important; border-radius: 9999px !important; text-decoration: none; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
                     <span class="dashicons dashicons-logout" style="font-size: 13px; width: 13px; height: 13px;"></span>
@@ -435,7 +435,7 @@ class SM_Public {
             <div style="position: sticky; top: 0; z-index: 9999; background: #0f172a; color: #ffffff; padding: 12px 16px; border-radius: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 14px rgba(15,23,42,0.18);">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="dashicons dashicons-welcome-learn-more" style="color: #38bdf8; font-size: 18px; width: 18px; height: 18px;"></span>
-                    <span style="font-size: 13.5px; font-weight: 800; color: #ffffff; letter-spacing: 0.3px;">School Management System</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #ffffff;">نظام الإدارة المدرسية</span>
                 </div>
             </div>
             <?php endif; ?>
@@ -792,7 +792,10 @@ class SM_Public {
                             </div>
                             <div style="font-size: 11px; color: #64748b; display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
                                 <span><span class="dashicons dashicons-book" style="font-size: 13px; width: 13px; height: 13px; color: #881337; vertical-align: middle;"></span> <?php echo esc_html($top->subject); ?> (<?php echo esc_html($top->grade_level); ?>)</span>
-                                <span style="font-family: monospace; font-size: 10.5px;"><?php echo esc_html($top->lesson_date); ?></span>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <a href="<?php echo esc_url(add_query_arg(array('sm_action' => 'print', 'print_type' => 'lesson_prep', 'prep_id' => $top->id), home_url('/'))); ?>" target="_blank" onclick="event.stopPropagation();" style="color: #0284c7; text-decoration: none; font-weight: 800; font-size: 11px; background: #e0f2fe; padding: 2px 8px; border-radius: 9999px;">📄 PDF / مشاركة</a>
+                                    <span style="font-family: monospace; font-size: 10.5px;"><?php echo esc_html($top->lesson_date); ?></span>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -890,6 +893,12 @@ class SM_Public {
                         <div style="margin-bottom: 14px;">
                             <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">الربط بالمواد والتخصصات الأخرى <span style="color:#ef4444;">*</span></label>
                             <textarea id="m_cross_subject" name="cross_subject" placeholder="تفاصيل الربط بالمواد الأخرى..." style="width: 100%; height: 75px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                        </div>
+
+                        <!-- Notes & Guidance -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">الملاحظات وإرشادات السلامة والتوجيهات</label>
+                            <textarea id="m_notes" name="notes" placeholder="أدخل الملاحظات وإرشادات السلامة إن وجدت..." style="width: 100%; height: 75px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
                         </div>
 
                         <script>
