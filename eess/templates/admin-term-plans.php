@@ -466,25 +466,21 @@ $arabic_term_names = array(
             <button type="button" onclick="eessClosePlanSetupWizard()" style="background: none; border: none; color: #ffffff; font-size: 26px; cursor: pointer; line-height: 1;">&times;</button>
         </div>
 
-        <!-- Full-Width Balanced RTL Stepper Track -->
-        <div style="background: #f8fafc; padding: 14px 24px; border-bottom: 1px solid #e2e8f0; position: relative;">
+        <!-- Full-Width Balanced RTL Stepper Track (Hidden until method selection) -->
+        <div id="eess-wizard-stepper-track" style="display: none; background: #f8fafc; padding: 14px 24px; border-bottom: 1px solid #e2e8f0; position: relative;">
             <div style="position: absolute; top: 50%; left: 40px; right: 40px; height: 2px; background: #e2e8f0; transform: translateY(-50%); z-index: 1;"></div>
             <div style="position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <div id="wiz-step-node-1" class="eess-prep-step-indicator active" style="font-weight: 800; font-size: 11.5px; color: #881337; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                    <span style="background: #881337; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">1</span>
-                    <span>الإعدادات المبدئية</span>
+                    <span id="wiz-step-num-1" style="background: #881337; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">1</span>
+                    <span id="wiz-step-lbl-1">البيانات والجدول</span>
                 </div>
                 <div id="wiz-step-node-2" class="eess-prep-step-indicator" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">2</span>
-                    <span>التواريخ والأسابيع</span>
+                    <span id="wiz-step-num-2" style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">2</span>
+                    <span id="wiz-step-lbl-2">المحتوى والأسابيع</span>
                 </div>
                 <div id="wiz-step-node-3" class="eess-prep-step-indicator" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">3</span>
-                    <span>تخطيط الدروس الأسبوعي</span>
-                </div>
-                <div id="wiz-step-node-4" class="eess-prep-step-indicator" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">4</span>
-                    <span>الاعتماد والتصدير</span>
+                    <span id="wiz-step-num-3" style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">3</span>
+                    <span id="wiz-step-lbl-3">المراجعة والاعتماد</span>
                 </div>
             </div>
         </div>
@@ -502,66 +498,176 @@ $arabic_term_names = array(
             <input type="hidden" id="wiz_academic_year" value="<?php echo esc_attr($active_academic_year); ?>">
             <input type="hidden" id="wiz_subject" value="<?php echo esc_attr($assigned_teacher_subject); ?>">
 
-            <!-- Step 1: Planning Method Selection & Personalized Guidance -->
-            <div id="wiz-step-1" class="wiz-step-content" style="display: block;">
-                <h4 style="margin: 0 0 6px 0; font-size: 15px; font-weight: 800; color: #0f172a;">مرحباً أ. <?php echo esc_html($user->display_name); ?> 👋 — إعداد خطة الفصل الدراسي</h4>
-                <p style="margin: 0 0 18px 0; font-size: 12.5px; color: #64748b; line-height: 1.6;">يرجى اختيار طريقة إعداد الخطة المناسبة لك قبل البدء في تخصيص المحتوى والأسابيع الدراسية:</p>
+            <!-- Initial Method Selection Screen (Pure Card Selection Only) -->
+            <div id="wiz-step-method-select" style="display: block; text-align: center; padding: 10px 0;">
+                <h4 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #0f172a; text-align: center;">مرحباً أ. <?php echo esc_html($user->display_name); ?> — إعداد خطة الفصل الدراسي</h4>
+                <p style="margin: 0 0 24px 0; font-size: 13px; color: #64748b; line-height: 1.6; text-align: center;">يرجى اختيار طريقة إعداد الخطة المناسبة لك للبدء:</p>
 
                 <!-- Method Selection Cards (Side-by-Side) -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px;">
-                    <!-- Option 1: Upload Completed Plan -->
-                    <div id="eess-method-card-upload" onclick="eessSelectPlanningMethod('upload')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 16px; padding: 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                        <div style="width: 48px; height: 48px; background: #e0f2fe; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #0284c7; margin-bottom: 10px;">
-                            <span class="dashicons dashicons-upload" style="font-size: 24px; width: 24px; height: 24px;"></span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 10px;">
+                    <!-- Option 1: Upload Ready-Made Plan -->
+                    <div id="eess-method-card-upload" onclick="eessChooseMethodAndProceed('upload')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 16px; padding: 22px 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                        <div style="width: 52px; height: 52px; background: #e0f2fe; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #0284c7; margin-bottom: 12px;">
+                            <span class="dashicons dashicons-upload" style="font-size: 26px; width: 26px; height: 26px;"></span>
                         </div>
-                        <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 800; color: #0f172a;">رفع خطة جاهزة (PDF / Word)</h4>
-                        <p style="margin: 0; font-size: 11.5px; color: #64748b; line-height: 1.5;">رفع وثيقة خطة مجهزة ومكتملة سابقاً كملف للمراجعة المباشرة.</p>
+                        <h4 style="margin: 0 0 6px 0; font-size: 14.5px; font-weight: 800; color: #0f172a;">رفع خطة جاهزة (PDF / Word)</h4>
+                        <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">رفع وثيقة خطة مجهزة ومكتملة سابقاً مباشرة للمراجعة والاعتماد.</p>
                     </div>
 
                     <!-- Option 2: Create Plan in System -->
-                    <div id="eess-method-card-create" onclick="eessSelectPlanningMethod('create')" style="background: #fef2f2; border: 2px solid #881337; border-radius: 16px; padding: 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(136,19,55,0.06);">
-                        <div style="width: 48px; height: 48px; background: #881337; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #ffffff; margin-bottom: 10px;">
-                            <span class="dashicons dashicons-calendar-alt" style="font-size: 24px; width: 24px; height: 24px;"></span>
+                    <div id="eess-method-card-create" onclick="eessChooseMethodAndProceed('create')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 16px; padding: 22px 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                        <div style="width: 52px; height: 52px; background: #fef2f2; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #881337; margin-bottom: 12px;">
+                            <span class="dashicons dashicons-calendar-alt" style="font-size: 26px; width: 26px; height: 26px;"></span>
                         </div>
-                        <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 800; color: #881337;">إعداد خطة الفصل بالنظام</h4>
-                        <p style="margin: 0; font-size: 11.5px; color: #64748b; line-height: 1.5;">توزيع الدروس والوحدات خطوة بخطوة لكل أسبوع تفصيلياً.</p>
+                        <h4 style="margin: 0 0 6px 0; font-size: 14.5px; font-weight: 800; color: #881337;">إعداد خطة الفصل بالنظام</h4>
+                        <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">توزيع الدروس والوحدات التعليمية خطوة بخطوة لكل أسبوع تفصيلياً.</p>
                     </div>
                 </div>
 
                 <input type="hidden" name="planning_method" id="wiz_planning_method" value="create">
+            </div>
 
-                <!-- Upload Plan Document Block (Shown when Upload method is selected) -->
-                <div id="eess-upload-method-block" style="display: none; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 18px; margin-bottom: 22px;">
-                    <label style="display: block; font-weight: 800; font-size: 12.5px; color: #0369a1; margin-bottom: 6px;">اختر ملف الخطة الدراسية المكتملة (PDF, DOC, DOCX) <span style="color:#ef4444;">*</span></label>
-                    <input type="file" name="plan_document_file" id="wiz_plan_document_file" accept=".pdf,.doc,.docx" class="sm-input" style="height: 42px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 12px; padding: 6px 12px; width: 100%; box-sizing: border-box;">
+            <!-- Step 1: Academic Data & Semester Schedule + Multi-Grade Selection -->
+            <div id="wiz-step-1" class="wiz-step-content" style="display: none;">
+                <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة 1: البيانات الأكاديمية والجدول الزمني</h4>
+                <p style="margin: 0 0 16px 0; font-size: 12px; color: #64748b;">تحديد المناهج والصفوف المستهدفة وجدول الفصل الدراسي.</p>
+
+                <!-- Multi-Grade Capsule Selection (KG to Grade 12) -->
+                <div style="margin-bottom: 16px;">
+                    <label class="sm-label" style="font-weight: 800; font-size: 12.5px; color: #334155; margin-bottom: 8px; display: block;">الصفوف الدراسية المشمولة بالخطة (اختر المناهج/الصفوف المستهدفة) <span style="color:#ef4444;">*</span></label>
+
+                    <?php
+                    $all_grade_options = array(
+                        'مرحلة الروضة', 'الصف الأول', 'الصف الثاني', 'الصف الثالث',
+                        'الصف الرابع', 'الصف الخامس', 'الصف السادس', 'الصف السابع',
+                        'الصف الثامن', 'الصف التاسع', 'الصف العاشر', 'الصف الحادي عشر', 'الصف الثاني عشر'
+                    );
+                    ?>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; background: #ffffff; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; max-height: 130px; overflow-y: auto;">
+                        <?php foreach ($all_grade_options as $g_opt): ?>
+                            <label class="eess-grade-capsule-label" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 11.5px; font-weight: 700; color: #334155; cursor: pointer; user-select: none;">
+                                <input type="checkbox" name="target_grades[]" value="<?php echo esc_attr($g_opt); ?>" onchange="eessTogglePlanGradeCapsule(this)" style="display: none;">
+                                <span><?php echo esc_html($g_opt); ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
 
-                <!-- System-Based Creation Initial Fields (Hidden when Upload method is selected) -->
-                <div id="eess-create-method-block">
-                    <!-- Multi-Grade Capsule Selection (KG to Grade 12) -->
-                    <div style="margin-bottom: 16px;">
-                        <label class="sm-label" style="font-weight: 800; font-size: 12.5px; color: #334155; margin-bottom: 8px; display: block;">الصفوف الدراسية المشمولة بالخطة (اختر المناهج/الصفوف المستهدفة) <span style="color:#ef4444;">*</span></label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div>
+                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الصف الدراسي الرئيسي المستهدف *</label>
+                        <select id="wiz_grade" class="sm-select" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 13px; text-align: right; direction: rtl; box-sizing: border-box; font-weight: 700;">
+                            <option value="">-- اختر الصف الرئيسي --</option>
+                            <?php for ($g = 1; $g <= 12; $g++):
+                                $g_lbl = "الصف " . $g;
+                                $sel = ($g_lbl === $assigned_teacher_grade) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo esc_attr($g_lbl); ?>" <?php echo $sel; ?>><?php echo esc_html($g_lbl); ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الحصص الأسبوعية المحددة *</label>
+                        <input type="number" id="wiz_weekly_lessons" min="1" max="10" value="<?php echo $default_weekly_lessons; ?>" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 20px; font-size: 13.5px; font-weight: 800; text-align: right; box-sizing: border-box;">
+                    </div>
+                </div>
 
-                        <?php
-                        $all_grade_options = array(
-                            'مرحلة الروضة', 'الصف الأول', 'الصف الثاني', 'الصف الثالث',
-                            'الصف الرابع', 'الصف الخامس', 'الصف السادس', 'الصف السابع',
-                            'الصف الثامن', 'الصف التاسع', 'الصف العاشر', 'الصف الحادي عشر', 'الصف الثاني عشر'
-                        );
-                        ?>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px; background: #ffffff; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; max-height: 130px; overflow-y: auto;">
-                            <?php foreach ($all_grade_options as $g_opt): ?>
-                                <label class="eess-grade-capsule-label" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 11.5px; font-weight: 700; color: #334155; cursor: pointer; user-select: none;">
-                                    <input type="checkbox" name="target_grades[]" value="<?php echo esc_attr($g_opt); ?>" onchange="eessTogglePlanGradeCapsule(this)" style="display: none;">
-                                    <span><?php echo esc_html($g_opt); ?></span>
-                                </label>
-                            <?php endforeach; ?>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div>
+                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الفصل الدراسي المحدد (التقويم المعتمد: 3 فصول) *</label>
+                        <select id="wiz_term_number" class="sm-select" disabled style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 13px; text-align: right; direction: rtl; box-sizing: border-box; background: #f8fafc; font-weight: 800; color: #0f172a;">
+                            <option value="1">الفصل الدراسي الأول (Term 1)</option>
+                            <option value="2">الفصل الدراسي الثاني (Term 2)</option>
+                            <option value="3">الفصل الدراسي الثالث (Term 3)</option>
+                        </select>
+                        <input type="hidden" id="wiz_num_terms" value="3">
+                    </div>
+                    <div>
+                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">تاريخ بداية الفصل *</label>
+                        <input type="date" id="wiz_start_date" onchange="wizCalculateWeeksAuto()" class="sm-input" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 12.5px; text-align: right; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div>
+                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">تاريخ نهاية الفصل *</label>
+                        <input type="date" id="wiz_end_date" onchange="wizCalculateWeeksAuto()" class="sm-input" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 12.5px; text-align: right; box-sizing: border-box;">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <div style="width: 100%; background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px 16px; border-radius: 9999px; font-size: 12.5px; color: #0369a1; font-weight: 700; text-align: center;">
+                            إجمالي الأسابيع المحسوبة: <strong id="wiz_weeks_count_label" style="color: #2563eb; font-size: 14px;">0 أسابيع</strong>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Step 2 -->
+            <div id="wiz-step-2" class="wiz-step-content" style="display: none;">
+                <!-- Option A: Upload File Field -->
+                <div id="wiz-upload-step-fields" style="display: none;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة 2: رفع ملف الخطة الدراسية المكتملة</h4>
+                    <p style="margin: 0 0 14px 0; font-size: 12px; color: #64748b;">يرجى رفع الخطة بصيغة PDF أو Word فقط للمراجعة المباشرة والاعتماد.</p>
+                    <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 800; font-size: 12.5px; color: #0369a1; margin-bottom: 6px;">اختر ملف الخطة الدراسية (PDF, DOC, DOCX) <span style="color:#ef4444;">*</span></label>
+                        <input type="file" name="plan_document_file" id="wiz_plan_document_file" accept=".pdf,.doc,.docx" class="sm-input" onchange="eessValidateUploadFile(this)" style="height: 42px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 12px; padding: 6px 12px; width: 100%; box-sizing: border-box;">
+                        <div id="wiz_file_status_preview" style="display: none; margin-top: 10px; font-size: 12px; font-weight: 700; color: #166534; background: #dcfce7; padding: 8px 12px; border-radius: 8px; border: 1px solid #bbf7d0;"></div>
+                    </div>
+                </div>
+
+                <!-- Option B: System Content Fields -->
+                <div id="wiz-create-step-fields" style="display: none;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة 2: محتوى الخطة والتوزيع الأسبوعي</h4>
+                    <p style="margin: 0 0 14px 0; font-size: 12px; color: #64748b;">أضف موضوعات الدروس والنبذة الخاصة بكل أسبوع باختيار الاقتراحات التلقائية للمادة أو الكتابة مباشرة.</p>
+                    <div id="wiz_weekly_inputs_grid" style="display: flex; flex-direction: column; gap: 14px; max-height: 45vh; overflow-y: auto; padding-right: 5px;">
+                        <!-- Generated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div id="wiz-step-3" class="wiz-step-content" style="display: none;">
+                <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة 3: المراجعة النهائية والتأكيد والتقديم</h4>
+                <p style="margin: 0 0 14px 0; font-size: 12px; color: #64748b;">راجع جميع البيانات المكتملة أدناه قبل رفع الخطة رسمياً للاعتماد الإداري.</p>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 15px; font-size: 13px;">
+                    <div style="margin-bottom: 10px;"><strong>المادة والصف الدراسي:</strong> <span id="wiz_rev_subj_grade" style="color: #0284c7; font-weight: 800;">---</span></div>
+                    <div style="margin-bottom: 10px;"><strong>الفصل والتاريخ:</strong> <span id="wiz_rev_dates" style="font-weight: 700;">---</span></div>
+                    <div style="margin-bottom: 10px;"><strong>عدد الأسابيع / نوع التقديم:</strong> <span id="wiz_rev_weeks" style="font-weight: 800; color: #15803d;">---</span></div>
+                    <div style="color: #16a34a; font-weight: 700; margin-top: 12px; background: #dcfce7; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px;">
+                        <span class="dashicons dashicons-yes-alt"></span>
+                        <span>تم حفظ جميع البيانات المدخلة وتجهيزها للارسال والاعتماد.</span>
+                    </div>
+                </div>
+            </div>
+
             <script>
+            function eessChooseMethodAndProceed(method) {
+                document.getElementById('wiz_planning_method').value = method;
+                document.getElementById('wiz-step-method-select').style.display = 'none';
+                document.getElementById('eess-wizard-stepper-track').style.display = 'block';
+
+                if (method === 'upload') {
+                    // Option A Workflow Labels
+                    document.getElementById('wiz-step-lbl-1').innerText = 'البيانات والأجندة';
+                    document.getElementById('wiz-step-lbl-2').innerText = 'رفع ملف الخطة';
+                    document.getElementById('wiz-step-lbl-3').innerText = 'تأكيد الخطة وتقديمها';
+
+                    document.getElementById('wiz-upload-step-fields').style.display = 'block';
+                    document.getElementById('wiz-create-step-fields').style.display = 'none';
+                } else {
+                    // Option B Workflow Labels
+                    document.getElementById('wiz-step-lbl-1').innerText = 'البيانات والجدول';
+                    document.getElementById('wiz-step-lbl-2').innerText = 'المحتوى والأسابيع';
+                    document.getElementById('wiz-step-lbl-3').innerText = 'المراجعة والاعتماد';
+
+                    document.getElementById('wiz-upload-step-fields').style.display = 'none';
+                    document.getElementById('wiz-create-step-fields').style.display = 'block';
+                }
+
+                wizCurrentStep = 1;
+                updateWizardUI();
+            }
+
             function eessSelectPlanningMethod(method) {
                 document.getElementById('wiz_planning_method').value = method;
                 var cardUpload = document.getElementById('eess-method-card-upload');
@@ -609,84 +715,28 @@ $arabic_term_names = array(
                     parentLabel.style.color = '#334155';
                 }
             }
+
+            function eessValidateUploadFile(input) {
+                var preview = document.getElementById('wiz_file_status_preview');
+                if (input.files && input.files[0]) {
+                    var file = input.files[0];
+                    var ext = file.name.split('.').pop().toLowerCase();
+                    if (!['pdf', 'doc', 'docx'].includes(ext)) {
+                        alert('يرجى اختيار ملف بصيغة PDF أو Word فقط.');
+                        input.value = '';
+                        if (preview) preview.style.display = 'none';
+                        return;
+                    }
+                    if (preview) {
+                        preview.innerHTML = '📄 تم اختيار الملف: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' كيلوبايت)';
+                        preview.style.display = 'block';
+                    }
+                } else if (preview) {
+                    preview.style.display = 'none';
+                }
+            }
             </script>
 
-            <!-- Step 2: Academic Selections & Calendar Scheduling -->
-            <div id="wiz-step-2" class="wiz-step-content" style="display: none;">
-                <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة 2: البيانات الأكاديمية والمواعيد الفصليّة</h4>
-                <p style="margin: 0 0 14px 0; font-size: 12px; color: #64748b;">حدد الصف الدراسي وتواريخ بداية ونهاية الفصل الدراسي لحساب الأسابيع تلقائياً.</p>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                    <div>
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الصف الدراسي (الصف 1 إلى 12) *</label>
-                        <select id="wiz_grade" class="sm-select" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 13px; text-align: right; direction: rtl; box-sizing: border-box;">
-                            <?php for ($g_num = 1; $g_num <= 12; $g_num++):
-                                $g_lbl = "الصف $g_num";
-                                $sel = ($g_lbl === $assigned_teacher_grade || $g_num == $assigned_teacher_grade) ? 'selected' : '';
-                            ?>
-                                <option value="<?php echo esc_attr($g_lbl); ?>" <?php echo $sel; ?>><?php echo esc_html($g_lbl); ?></option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الحصص الأسبوعية المحددة *</label>
-                        <input type="number" id="wiz_weekly_lessons" min="1" max="10" value="<?php echo $default_weekly_lessons; ?>" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 20px; font-size: 13.5px; font-weight: 800; text-align: right; box-sizing: border-box;">
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                    <div>
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الفصل الدراسي المحدد (التقويم المعتمد: 3 فصول) *</label>
-                        <select id="wiz_term_number" class="sm-select" disabled style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 13px; text-align: right; direction: rtl; box-sizing: border-box; background: #f8fafc; font-weight: 800; color: #0f172a;">
-                            <option value="1">الفصل الدراسي الأول (Term 1)</option>
-                            <option value="2">الفصل الدراسي الثاني (Term 2)</option>
-                            <option value="3">الفصل الدراسي الثالث (Term 3)</option>
-                        </select>
-                        <input type="hidden" id="wiz_num_terms" value="3">
-                    </div>
-                    <div>
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">تاريخ بداية الفصل *</label>
-                        <input type="date" id="wiz_start_date" onchange="wizCalculateWeeksAuto()" class="sm-input" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 12.5px; text-align: right; box-sizing: border-box;">
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                    <div>
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">تاريخ نهاية الفصل *</label>
-                        <input type="date" id="wiz_end_date" onchange="wizCalculateWeeksAuto()" class="sm-input" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 12.5px; text-align: right; box-sizing: border-box;">
-                    </div>
-                    <div style="display: flex; align-items: flex-end;">
-                        <div style="width: 100%; background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px 16px; border-radius: 9999px; font-size: 12.5px; color: #0369a1; font-weight: 700; text-align: center;">
-                            إجمالي الأسابيع المحسوبة: <strong id="wiz_weeks_count_label" style="color: #2563eb; font-size: 14px;">0 أسابيع</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3 -->
-            <div id="wiz-step-3" class="wiz-step-content" style="display: none;">
-                <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة 3: محتوى الخطة والتوزيع الأسبوعي</h4>
-                <p style="margin: 0 0 14px 0; font-size: 12px; color: #64748b;">أضف موضوعات الدروس والنبذة الخاصة بكل أسبوع باختيار الاقتراحات التلقائية للمادة أو الكتابة مباشرة.</p>
-                <div id="wiz_weekly_inputs_grid" style="display: flex; flex-direction: column; gap: 14px; max-height: 45vh; overflow-y: auto; padding-right: 5px;">
-                    <!-- Generated via JS -->
-                </div>
-            </div>
-
-            <!-- Step 4 -->
-            <div id="wiz-step-4" class="wiz-step-content" style="display: none;">
-                <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة 4: المراجعة النهائية والتقديم</h4>
-                <p style="margin: 0 0 14px 0; font-size: 12px; color: #64748b;">راجع جميع البيانات المكتملة أدناه قبل رفع الخطة رسمياً للاعتماد الإداري.</p>
-
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 15px; font-size: 13px;">
-                    <div style="margin-bottom: 10px;"><strong>المادة والصف الدراسي:</strong> <span id="wiz_rev_subj_grade" style="color: #0284c7; font-weight: 800;">---</span></div>
-                    <div style="margin-bottom: 10px;"><strong>الفصل والتاريخ:</strong> <span id="wiz_rev_dates" style="font-weight: 700;">---</span></div>
-                    <div style="margin-bottom: 10px;"><strong>عدد الأسابيع المخططة:</strong> <span id="wiz_rev_weeks" style="font-weight: 800; color: #15803d;">---</span></div>
-                    <div style="color: #16a34a; font-weight: 700; margin-top: 12px; background: #dcfce7; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px;">
-                        <span class="dashicons dashicons-yes-alt"></span>
-                        <span>تم حفظ جميع الخطوات السابقة تلقائياً كمسودة آمنة قابلة للاستعادة.</span>
-                    </div>
-                </div>
-            </div>
 
             <!-- Wizard Footer Buttons (Wine-Red, Black & White Buttons with Dashicons) -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
@@ -1137,11 +1187,8 @@ function eessOpenPlanSetupWizard(termNum = 1) {
     const existing = eessActiveWizardPlans.find(p => parseInt(p.term_number) === parseInt(termNum));
     if (existing) {
         document.getElementById('tp_plan_id').value = existing.id || 0;
-        if (existing.planning_method && typeof eessSelectPlanningMethod === 'function') {
-            eessSelectPlanningMethod(existing.planning_method);
-        } else if (typeof eessSelectPlanningMethod === 'function') {
-            eessSelectPlanningMethod('create');
-        }
+        const method = existing.planning_method || 'create';
+        eessChooseMethodAndProceed(method);
 
         if (document.getElementById('wiz_academic_year')) document.getElementById('wiz_academic_year').value = existing.academic_year || '2025/2026';
         if (document.getElementById('wiz_grade') && existing.grade) document.getElementById('wiz_grade').value = existing.grade;
@@ -1149,7 +1196,7 @@ function eessOpenPlanSetupWizard(termNum = 1) {
         // Restore multi-grade capsule selections
         if (existing.grade) {
             const gradesArr = existing.grade.split('،').map(g => g.trim());
-            document.querySelectorAll('input[name="assigned_plan_grades[]"]').forEach(cb => {
+            document.querySelectorAll('input[name="target_grades[]"]').forEach(cb => {
                 cb.checked = gradesArr.includes(cb.value);
                 if (typeof eessTogglePlanGradeCapsule === 'function') eessTogglePlanGradeCapsule(cb);
             });
@@ -1159,6 +1206,15 @@ function eessOpenPlanSetupWizard(termNum = 1) {
         if (document.getElementById('wiz_num_terms')) document.getElementById('wiz_num_terms').value = existing.num_terms || 3;
         if (document.getElementById('wiz_start_date')) document.getElementById('wiz_start_date').value = existing.start_date || defaultStart;
         if (document.getElementById('wiz_end_date')) document.getElementById('wiz_end_date').value = existing.end_date || defaultEnd;
+
+        // File preview for upload method
+        if (existing.plan_file_url) {
+            const preview = document.getElementById('wiz_file_status_preview');
+            if (preview) {
+                preview.innerHTML = `📄 ملف الخطة المرفوع حالياً: <a href="${existing.plan_file_url}" target="_blank" style="color:#0369a1; text-decoration:underline; font-weight:800;">عرض/تحميل الملف المرفوع</a>`;
+                preview.style.display = 'block';
+            }
+        }
 
         // Pre-fill weekly data if available
         if (existing.weeks_data) {
@@ -1176,8 +1232,18 @@ function eessOpenPlanSetupWizard(termNum = 1) {
         }
     } else {
         document.getElementById('tp_plan_id').value = 0;
-        if (typeof eessSelectPlanningMethod === 'function') eessSelectPlanningMethod('create');
-        document.querySelectorAll('input[name="assigned_plan_grades[]"]').forEach(cb => {
+        document.getElementById('wiz_planning_method').value = 'create';
+        document.getElementById('wiz-step-method-select').style.display = 'block';
+        document.getElementById('eess-wizard-stepper-track').style.display = 'none';
+        for (let i = 1; i <= 3; i++) {
+            const stepEl = document.getElementById('wiz-step-' + i);
+            if (stepEl) stepEl.style.display = 'none';
+        }
+        document.getElementById('wiz-prev-btn').style.display = 'none';
+        document.getElementById('wiz-next-btn').style.display = 'none';
+        document.getElementById('wiz-submit-btn').style.display = 'none';
+
+        document.querySelectorAll('input[name="target_grades[]"]').forEach(cb => {
             cb.checked = false;
             if (typeof eessTogglePlanGradeCapsule === 'function') eessTogglePlanGradeCapsule(cb);
         });
@@ -1187,7 +1253,6 @@ function eessOpenPlanSetupWizard(termNum = 1) {
     }
 
     wizCalculateWeeksAuto();
-    updateWizardUI();
     document.getElementById('eess-plan-setup-modal').style.display = 'flex';
 }
 
@@ -1215,24 +1280,23 @@ function wizCalculateWeeksAuto() {
 }
 
 function wizNav(dir) {
+    const method = document.getElementById('wiz_planning_method') ? document.getElementById('wiz_planning_method').value : 'create';
+
     if (dir === 1) {
         if (wizCurrentStep === 1) {
             const subj = document.getElementById('wiz_subject') ? document.getElementById('wiz_subject').value.trim() : '';
             const grade = document.getElementById('wiz_grade') ? document.getElementById('wiz_grade').value.trim() : '';
-
-            if (!subj || !grade) {
-                if (typeof smShowNotification === 'function') {
-                    smShowNotification('يرجى التأكد من استكمال المادة والصف الدراسي قبل المتابعة', true);
-                } else {
-                    alert('يرجى التأكد من استكمال المادة والصف الدراسي قبل المتابعة');
-                }
-                return;
-            }
-        }
-        if (wizCurrentStep === 2) {
             const sDate = document.getElementById('wiz_start_date') ? document.getElementById('wiz_start_date').value : '';
             const eDate = document.getElementById('wiz_end_date') ? document.getElementById('wiz_end_date').value : '';
 
+            if (!subj || !grade) {
+                if (typeof smShowNotification === 'function') {
+                    smShowNotification('يرجى التأكد من استكمال المادة والصف الدراسي الرئيسي قبل المتابعة', true);
+                } else {
+                    alert('يرجى التأكد من استكمال المادة والصف الدراسي الرئيسي قبل المتابعة');
+                }
+                return;
+            }
             if (!sDate || !eDate) {
                 if (typeof smShowNotification === 'function') {
                     smShowNotification('يرجى تحديد تواريخ بداية ونهاية الفصل الدراسي قبل المتابعة', true);
@@ -1241,15 +1305,29 @@ function wizNav(dir) {
                 }
                 return;
             }
-            generateWizWeeklyFields();
+        } else if (wizCurrentStep === 2) {
+            if (method === 'upload') {
+                const docFile = document.getElementById('wiz_plan_document_file');
+                const hasExistingFile = document.getElementById('wiz_file_status_preview') && document.getElementById('wiz_file_status_preview').style.display !== 'none';
+                if ((!docFile || !docFile.files || docFile.files.length === 0) && !hasExistingFile) {
+                    if (typeof smShowNotification === 'function') {
+                        smShowNotification('يرجى رفع ملف الخطة الدراسية بصيغة (PDF أو Word) قبل المتابعة', true);
+                    } else {
+                        alert('يرجى رفع ملف الخطة الدراسية بصيغة (PDF أو Word) قبل المتابعة');
+                    }
+                    return;
+                }
+            } else {
+                generateWizWeeklyFields();
+            }
         }
     }
 
     wizCurrentStep += dir;
     if (wizCurrentStep < 1) wizCurrentStep = 1;
-    if (wizCurrentStep > 4) wizCurrentStep = 4;
+    if (wizCurrentStep > 3) wizCurrentStep = 3;
 
-    if (wizCurrentStep === 4) {
+    if (wizCurrentStep === 3) {
         const subj = document.getElementById('wiz_subject') ? document.getElementById('wiz_subject').value : '';
         const grade = document.getElementById('wiz_grade') ? document.getElementById('wiz_grade').value : '';
         const sDate = document.getElementById('wiz_start_date') ? document.getElementById('wiz_start_date').value : '';
@@ -1257,19 +1335,22 @@ function wizNav(dir) {
 
         if (document.getElementById('wiz_rev_subj_grade')) document.getElementById('wiz_rev_subj_grade').innerText = subj + ' - ' + grade;
         if (document.getElementById('wiz_rev_dates')) document.getElementById('wiz_rev_dates').innerText = sDate + ' إلى ' + eDate;
-        if (document.getElementById('wiz_rev_weeks')) document.getElementById('wiz_rev_weeks').innerText = wizCalculateWeeksAuto() + ' أسابيع محددة';
+        if (document.getElementById('wiz_rev_weeks')) {
+            document.getElementById('wiz_rev_weeks').innerText = (method === 'upload') ? 'رفع ملف خطة جاهز (PDF/Word)' : (wizCalculateWeeksAuto() + ' أسابيع محددة');
+        }
     }
 
     updateWizardUI();
 }
 
 function updateWizardUI() {
-    for (let i = 1; i <= 4; i++) {
-        document.getElementById('wiz-step-' + i).style.display = (i === wizCurrentStep) ? 'block' : 'none';
+    for (let i = 1; i <= 3; i++) {
+        const stepEl = document.getElementById('wiz-step-' + i);
+        if (stepEl) stepEl.style.display = (i === wizCurrentStep) ? 'block' : 'none';
+
         const node = document.getElementById('wiz-step-node-' + i);
         if (node) {
             const badge = node.querySelector('span:first-child');
-            const label = node.querySelector('span:last-child');
 
             if (i < wizCurrentStep) {
                 // Completed Step
@@ -1302,9 +1383,13 @@ function updateWizardUI() {
         }
     }
 
-    document.getElementById('wiz-prev-btn').style.display = (wizCurrentStep > 1) ? 'inline-block' : 'none';
-    document.getElementById('wiz-next-btn').style.display = (wizCurrentStep < 4) ? 'inline-block' : 'none';
-    document.getElementById('wiz-submit-btn').style.display = (wizCurrentStep === 4) ? 'inline-block' : 'none';
+    const prevBtn = document.getElementById('wiz-prev-btn');
+    const nextBtn = document.getElementById('wiz-next-btn');
+    const submitBtn = document.getElementById('wiz-submit-btn');
+
+    if (prevBtn) prevBtn.style.display = (wizCurrentStep > 1) ? 'inline-flex' : 'none';
+    if (nextBtn) nextBtn.style.display = (wizCurrentStep < 3) ? 'inline-flex' : 'none';
+    if (submitBtn) submitBtn.style.display = (wizCurrentStep === 3) ? 'inline-flex' : 'none';
 }
 
 function generateWizWeeklyFields() {
@@ -1401,8 +1486,8 @@ function eessSaveWizardPlanSubmit(e) {
     formData.append('status', 'submitted');
 
     // Attach selected multi-grade capsules if present
-    document.querySelectorAll('input[name="assigned_plan_grades[]"]:checked').forEach(cb => {
-        formData.append('assigned_plan_grades[]', cb.value);
+    document.querySelectorAll('input[name="target_grades[]"]:checked').forEach(cb => {
+        formData.append('target_grades[]', cb.value);
     });
 
     // Attach uploaded plan document if method is 'upload'
