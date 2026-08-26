@@ -28,6 +28,17 @@ if (!function_exists('eess_get_teacher_supervisor')) {
     }
 }
 
+// Authoritative Asia/Dubai / WordPress Timezone Timestamp Helper
+if (!function_exists('eess_get_app_timestamp')) {
+    function eess_get_app_timestamp($time_str = 'now') {
+        $tz = wp_timezone();
+        if ($time_str === 'now') {
+            return (new DateTime('now', $tz))->getTimestamp();
+        }
+        return (new DateTime($time_str, $tz))->getTimestamp();
+    }
+}
+
 // Fetch general settings with additional parameters
 $prep_settings = get_option('sm_lesson_prep_settings', array(
     'submission_frequency' => 'daily',
