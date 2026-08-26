@@ -6798,25 +6798,32 @@ class SM_Public {
                 wp_send_json_error('الخطة الفصلية الأصلية غير موجودة.');
             }
 
-            $wpdb->insert("{$wpdb->prefix}sm_term_plans", array(
+            $inserted = $wpdb->insert("{$wpdb->prefix}sm_term_plans", array(
                 'teacher_id'       => $target_uid,
-                'academic_year'    => $orig->academic_year,
-                'term_number'      => $orig->term_number,
+                'academic_year'    => $orig->academic_year ?: '2027/2026',
                 'subject'          => $orig->subject,
                 'grade'            => $orig->grade,
-                'planning_method'  => $orig->planning_method,
-                'plan_file_url'    => $orig->plan_file_url,
+                'weekly_lessons'   => intval($orig->weekly_lessons ?: 1),
+                'num_terms'        => intval($orig->num_terms ?: 3),
+                'term_number'      => intval($orig->term_number ?: 1),
+                'start_date'       => $orig->start_date ?: current_time('Y-m-d'),
+                'end_date'         => $orig->end_date ?: current_time('Y-m-d'),
+                'total_weeks'      => intval($orig->total_weeks ?: 0),
                 'weeks_data'       => $orig->weeks_data,
+                'plan_file_url'    => $orig->plan_file_url,
+                'planning_method'  => $orig->planning_method ?: 'create',
+                'completion_pct'   => intval($orig->completion_pct ?: 100),
                 'status'           => 'submitted',
-                'completion_pct'   => $orig->completion_pct,
                 'review_notes'     => '',
                 'reviewed_by'      => 0,
                 'reviewed_at'      => null,
-                'num_terms'        => $orig->num_terms,
-                'term_dates_json'  => $orig->term_dates_json,
                 'created_at'       => current_time('mysql'),
                 'updated_at'       => current_time('mysql')
             ));
+
+            if (!$inserted) {
+                wp_send_json_error('فشل حفظ النسخة في قاعدة البيانات: ' . $wpdb->last_error);
+            }
 
             $new_id = $wpdb->insert_id;
             SM_Logger::log('نسخ خطة فصلية', "قام مدير النظام بنسخ الخطة الفصلية ID: $record_id للمستخدم: {$target_user->display_name} بالمعرف الجديد ID: $new_id");

@@ -283,13 +283,13 @@ $arabic_term_names = array(
                                 <tr style="border-bottom: 1px solid #f1f5f9;" class="teacher-plan-row" data-status="<?php echo esc_attr($tp->status); ?>">
                                     <!-- Rich Multi-Line Subject & School Cell -->
                                     <td style="padding: 14px 16px;">
-                                        <div style="font-weight: 800; font-size: 14px; color: #0f172a;"><?php echo esc_html($tp->subject); ?></div>
-                                        <div style="font-size: 12.5px; font-weight: 800; color: #334155; margin-top: 3px; display: flex; align-items: center; gap: 4px;">
-                                            <span class="dashicons dashicons-building" style="font-size: 14px; width: 14px; height: 14px; color: #64748b;"></span>
-                                            <span><?php echo esc_html($teacher_school_name); ?></span>
-                                        </div>
-                                        <div style="display: flex; gap: 6px; margin-top: 5px;">
-                                            <span style="display: inline-flex; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10.5px; font-weight: 800;">
+                                        <div style="font-weight: 800; font-size: 14px; color: #0f172a; margin-bottom: 6px;"><?php echo esc_html($tp->subject); ?></div>
+                                        <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 10.5px; font-weight: 800;">
+                                                <span class="dashicons dashicons-building" style="font-size: 12px; width: 12px; height: 12px; color: #64748b;"></span>
+                                                <span><?php echo esc_html($teacher_school_name); ?></span>
+                                            </span>
+                                            <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10.5px; font-weight: 800;">
                                                 <?php echo esc_html($tp->grade); ?>
                                             </span>
                                         </div>
@@ -320,12 +320,17 @@ $arabic_term_names = array(
                                     <!-- Standardized Circular Action Buttons -->
                                     <td style="padding: 14px 16px; text-align: center;">
                                         <div class="sm-action-btn-group">
-                                            <!-- Print / View File Button -->
-                                            <?php if (!empty($tp->plan_file_url)): ?>
-                                                <a href="<?php echo esc_url($tp->plan_file_url); ?>" target="_blank" title="معاينة وطباعة ملف الخطة المرفوعة" class="sm-action-btn sm-action-btn-neutral">
-                                                    <span class="dashicons dashicons-media-document"></span>
+                                            <?php if (!empty($tp->plan_file_url) || $tp->planning_method === 'upload'): ?>
+                                                <!-- Preview File Button -->
+                                                <a href="<?php echo esc_url($tp->plan_file_url); ?>" target="_blank" title="معاينة ملف الخطة المرفوعة" class="sm-action-btn sm-action-btn-neutral">
+                                                    <span class="dashicons dashicons-visibility"></span>
+                                                </a>
+                                                <!-- Direct Download File Button -->
+                                                <a href="<?php echo esc_url($tp->plan_file_url); ?>" download title="تحميل ملف الخطة المرفوعة" class="sm-action-btn sm-action-btn-primary">
+                                                    <span class="dashicons dashicons-download"></span>
                                                 </a>
                                             <?php else: ?>
+                                                <!-- Print System PDF Button -->
                                                 <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $tp->id); ?>" target="_blank" title="طباعة وثيقة الخطة PDF" class="sm-action-btn sm-action-btn-success">
                                                     <span class="dashicons dashicons-printer"></span>
                                                 </a>
@@ -357,7 +362,15 @@ $arabic_term_names = array(
     <div id="panel-reviewer-dashboard" class="term-plan-panel" style="display: block; margin-top: 18px;">
         <div style="background: #ffffff; padding: 22px 26px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
 
-            <!-- Table Header & Live Search Engine Bar -->
+            <?php
+            $term1_count = 0; $term2_count = 0; $term3_count = 0;
+            foreach ($submitted_plans as $sp) {
+                if (intval($sp->term_number) === 1) $term1_count++;
+                elseif (intval($sp->term_number) === 2) $term2_count++;
+                elseif (intval($sp->term_number) === 3) $term3_count++;
+            }
+            ?>
+            <!-- Table Header & Live Search Engine Bar with Semester Counters -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
                 <div>
                     <h3 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
@@ -367,12 +380,27 @@ $arabic_term_names = array(
                     <p style="margin: 0; font-size: 12px; color: #64748b;">متابعة اعتماد الخطط والموافقة الفورية، رفض، أو طلب تعديلات إدارية</p>
                 </div>
 
-                <!-- Professional Live Search Input -->
-                <div style="position: relative; width: 280px;">
-                    <input type="text" id="eess-reviewer-plans-search" onkeyup="eessFilterReviewerPlansTable()" placeholder="ابحث باسم المدرس، المادة، أو الصف..." style="width: 100%; height: 38px; padding: 0 36px 0 14px; border: 1px solid #cbd5e1; border-radius: 9999px !important; font-size: 12.5px; outline: none; background: #f8fafc;">
-                    <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; display: flex; align-items: center;">
-                        <span class="dashicons dashicons-search" style="font-size: 15px; width: 15px; height: 15px;"></span>
-                    </span>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <!-- Semester Status Pastel Counters -->
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #dc2626; background: #fef2f2; border: 1px solid #fecdd3; padding: 4px 10px; border-radius: 9999px;">
+                            الفصل 1: <strong><?php echo $term1_count; ?></strong>
+                        </span>
+                        <span style="font-size: 11px; font-weight: 800; color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd; padding: 4px 10px; border-radius: 9999px;">
+                            الفصل 2: <strong><?php echo $term2_count; ?></strong>
+                        </span>
+                        <span style="font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 9999px;">
+                            الفصل 3: <strong><?php echo $term3_count; ?></strong>
+                        </span>
+                    </div>
+
+                    <!-- Professional Live Search Input -->
+                    <div style="position: relative; width: 240px;">
+                        <input type="text" id="eess-reviewer-plans-search" onkeyup="eessFilterReviewerPlansTable()" placeholder="ابحث باسم المدرس، المادة، أو الصف..." style="width: 100%; height: 38px; padding: 0 36px 0 14px; border: 1px solid #cbd5e1; border-radius: 9999px !important; font-size: 12.5px; outline: none; background: #f8fafc;">
+                        <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; display: flex; align-items: center;">
+                            <span class="dashicons dashicons-search" style="font-size: 15px; width: 15px; height: 15px;"></span>
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -381,7 +409,8 @@ $arabic_term_names = array(
                 <table id="eess-reviewer-plans-table" style="width: 100%; border-collapse: separate; border-spacing: 0; text-align: right;">
                     <thead>
                         <tr style="background: #212121; color: #ffffff;">
-                            <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; border-radius: 0 10px 0 0;">المدرس والرقم الوظيفي</th>
+                            <th style="padding: 12px 12px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center; border-radius: 0 10px 0 0; width: 45px;">#</th>
+                            <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff;">المدرس والرقم الوظيفي</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff;">المدرسة والمادة والتسكين</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff;">الفصل الدراسي</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center;">نسبة الإنجاز</th>
@@ -392,10 +421,10 @@ $arabic_term_names = array(
                     <tbody>
                         <?php if (empty($submitted_plans)): ?>
                             <tr>
-                                <td colspan="6" style="padding: 40px; text-align: center; color: #94a3b8; font-weight: 700;">لا توجد خطط فصلية مرفوعة للمراجعة حالياً.</td>
+                                <td colspan="7" style="padding: 40px; text-align: center; color: #94a3b8; font-weight: 700;">لا توجد خطط فصلية مرفوعة للمراجعة حالياً.</td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($submitted_plans as $sp):
+                            <?php foreach ($submitted_plans as $sp_idx => $sp):
                                 $emp_code = get_user_meta($sp->teacher_id, 'eess_employee_number', true) ?: (get_user_meta($sp->teacher_id, 'sm_teacher_id', true) ?: 'EMP-' . $sp->teacher_id);
                                 $t_school = get_user_meta($sp->teacher_id, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
 
@@ -408,6 +437,11 @@ $arabic_term_names = array(
                                 $term_arabic = $arabic_term_names[intval($sp->term_number)] ?? ('الفصل ' . intval($sp->term_number));
                             ?>
                                 <tr style="border-bottom: 1px solid #f1f5f9;" class="reviewer-plan-row">
+                                    <!-- Index Number Column -->
+                                    <td style="padding: 12px 12px; text-align: center; font-size: 12px; font-weight: 800; color: #64748b;">
+                                        <?php echo ($sp_idx + 1); ?>
+                                    </td>
+
                                     <!-- Teacher Name & Employee ID Pastel Capsule (No "رقم الموظف" text) -->
                                     <td style="padding: 12px 16px;">
                                         <div style="font-weight: 800; font-size: 13.5px; color: #0f172a;"><?php echo esc_html($sp->teacher_name ?: 'مدرس غير محدد'); ?></div>
@@ -456,17 +490,21 @@ $arabic_term_names = array(
                                     <!-- Quick Action Circular Buttons (Approve, Reject, Modification Request) -->
                                     <td style="padding: 12px 16px; text-align: center;">
                                         <div class="sm-action-btn-group">
-                                            <!-- View / Document Button -->
-                                            <?php if (!empty($sp->plan_file_url)): ?>
+                                            <?php if (!empty($sp->plan_file_url) || $sp->planning_method === 'upload'): ?>
+                                                <!-- Preview File Button (For uploaded file plans only) -->
                                                 <a href="<?php echo esc_url($sp->plan_file_url); ?>" target="_blank" title="معاينة ملف الخطة المرفوعة" class="sm-action-btn sm-action-btn-neutral">
-                                                    <span class="dashicons dashicons-media-document"></span>
+                                                    <span class="dashicons dashicons-visibility"></span>
+                                                </a>
+                                                <!-- Direct Download File Button -->
+                                                <a href="<?php echo esc_url($sp->plan_file_url); ?>" download title="تحميل ملف الخطة المرفوعة" class="sm-action-btn sm-action-btn-primary">
+                                                    <span class="dashicons dashicons-download"></span>
+                                                </a>
+                                            <?php else: ?>
+                                                <!-- Administrative Direct Print PDF Button (System-created plans only) -->
+                                                <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $sp->id); ?>" target="_blank" title="طباعة الخطة المعتمدة رسمياً" class="sm-action-btn sm-action-btn-neutral">
+                                                    <span class="dashicons dashicons-printer"></span>
                                                 </a>
                                             <?php endif; ?>
-
-                                            <!-- Administrative Direct Print PDF Button -->
-                                            <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&plan_id=' . $sp->id); ?>" target="_blank" title="طباعة الخطة المعتمدة رسمياً" class="sm-action-btn sm-action-btn-neutral">
-                                                <span class="dashicons dashicons-printer"></span>
-                                            </a>
 
                                             <!-- Approve Button (Positive Green) -->
                                             <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" class="sm-action-btn sm-action-btn-success">
@@ -610,24 +648,8 @@ $arabic_term_names = array(
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                    <div>
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الصف الدراسي الرئيسي المستهدف *</label>
-                        <select id="wiz_grade" class="sm-select" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px; font-size: 13px; text-align: right; direction: rtl; box-sizing: border-box; font-weight: 700;">
-                            <option value="">-- اختر الصف الرئيسي --</option>
-                            <?php for ($g = 1; $g <= 12; $g++):
-                                $g_lbl = "الصف " . $g;
-                                $sel = ($g_lbl === $assigned_teacher_grade) ? 'selected' : '';
-                            ?>
-                                <option value="<?php echo esc_attr($g_lbl); ?>" <?php echo $sel; ?>><?php echo esc_html($g_lbl); ?></option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; display: block;">الحصص الأسبوعية المحددة *</label>
-                        <input type="number" id="wiz_weekly_lessons" min="1" max="10" value="<?php echo $default_weekly_lessons; ?>" required style="height: 42px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 20px; font-size: 13.5px; font-weight: 800; text-align: right; box-sizing: border-box;">
-                    </div>
-                </div>
+                <input type="hidden" id="wiz_grade" value="<?php echo esc_attr($assigned_teacher_grade); ?>">
+                <input type="hidden" id="wiz_weekly_lessons" value="<?php echo $default_weekly_lessons; ?>">
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                     <div>
@@ -795,20 +817,22 @@ $arabic_term_names = array(
             </script>
 
 
-            <!-- Wizard Footer Buttons (Wine-Red, Black & White Buttons with Dashicons) -->
+            <!-- Wizard Footer Buttons (RTL structure: Next/Submit on far-left, Previous on far-right) -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                <div>
+                    <button type="button" id="wiz-next-btn" onclick="wizNav(1)" class="sm-btn" style="background: #881337; color: #ffffff !important; border: none; border-radius: 9999px !important; padding: 8px 24px; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>المتابعة للخطوة التالية</span>
+                        <span class="dashicons dashicons-arrow-left-alt2" style="font-size: 15px; width: 15px; height: 15px;"></span>
+                    </button>
+                    <button type="submit" id="wiz-submit-btn" class="sm-btn" style="background: #dc2626; color: #ffffff !important; border: none; border-radius: 9999px !important; padding: 10px 28px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: none; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
+                        <span class="dashicons dashicons-upload" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                        <span>إرسال الخطة للمراجعة</span>
+                    </button>
+                </div>
+
                 <button type="button" id="wiz-prev-btn" onclick="wizNav(-1)" class="sm-btn sm-btn-outline" style="background: #ffffff; color: #475569 !important; border: 1px solid #cbd5e1; border-radius: 9999px !important; padding: 8px 20px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: none; align-items: center; gap: 6px;">
                     <span class="dashicons dashicons-arrow-right-alt2" style="font-size: 15px; width: 15px; height: 15px;"></span>
                     <span>السابق</span>
-                </button>
-                <div></div>
-                <button type="button" id="wiz-next-btn" onclick="wizNav(1)" class="sm-btn" style="background: #881337; color: #ffffff !important; border: none; border-radius: 9999px !important; padding: 8px 24px; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                    <span>المتابعة للخطوة التالية</span>
-                    <span class="dashicons dashicons-arrow-left-alt2" style="font-size: 15px; width: 15px; height: 15px;"></span>
-                </button>
-                <button type="submit" id="wiz-submit-btn" class="sm-btn" style="background: #dc2626; color: #ffffff !important; border: none; border-radius: 9999px !important; padding: 10px 28px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: none; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
-                    <span class="dashicons dashicons-upload" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                    <span>إرسال الخطة للمراجعة</span>
                 </button>
             </div>
         </form>
@@ -1332,16 +1356,15 @@ function wizNav(dir) {
 
     if (dir === 1) {
         if (wizCurrentStep === 1) {
-            const subj = document.getElementById('wiz_subject') ? document.getElementById('wiz_subject').value.trim() : '';
-            const grade = document.getElementById('wiz_grade') ? document.getElementById('wiz_grade').value.trim() : '';
+            const checkedGrades = document.querySelectorAll('input[name="target_grades[]"]:checked');
             const sDate = document.getElementById('wiz_start_date') ? document.getElementById('wiz_start_date').value : '';
             const eDate = document.getElementById('wiz_end_date') ? document.getElementById('wiz_end_date').value : '';
 
-            if (!subj || !grade) {
+            if (!checkedGrades || checkedGrades.length === 0) {
                 if (typeof smShowNotification === 'function') {
-                    smShowNotification('يرجى التأكد من استكمال المادة والصف الدراسي الرئيسي قبل المتابعة', true);
+                    smShowNotification('يرجى اختيار صف دراسي واحد على الأقل من القائمة أعلاه للمتابعة', true);
                 } else {
-                    alert('يرجى التأكد من استكمال المادة والصف الدراسي الرئيسي قبل المتابعة');
+                    alert('يرجى اختيار صف دراسي واحد على الأقل من القائمة أعلاه للمتابعة');
                 }
                 return;
             }
