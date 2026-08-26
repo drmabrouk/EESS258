@@ -461,11 +461,18 @@ $arabic_term_names = array(
 
                                     <!-- Teacher Name & Employee ID Pastel Capsule (No "رقم الموظف" text) -->
                                     <td style="padding: 12px 16px;">
-                                        <div style="font-weight: 800; font-size: 13.5px; color: #0f172a;"><?php echo esc_html($sp->teacher_name ?: 'مدرس غير محدد'); ?></div>
-                                        <div style="margin-top: 4px;">
+                                        <a href="javascript:void(0)" onclick="window.eessOpenUnifiedUserModal('edit_user', <?php echo $sp->teacher_id; ?>)" style="font-weight: 800; font-size: 13.5px; color: #0f172a; text-decoration: none;" onmouseover="this.style.color='#0284c7'; this.style.textDecoration='underline';" onmouseout="this.style.color='#0f172a'; this.style.textDecoration='none';">
+                                            <?php echo esc_html($sp->teacher_name ?: 'مدرس غير محدد'); ?>
+                                        </a>
+                                        <div style="margin-top: 4px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                                             <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10.5px; font-weight: 800; font-family: monospace;">
                                                 <?php echo esc_html($emp_code); ?>
                                             </span>
+                                            <?php
+                                            $is_contacted_plan = get_user_meta($sp->teacher_id, 'eess_contacted_plan_' . $sp->id, true);
+                                            if ($is_contacted_plan): ?>
+                                                <span style="display:inline-flex; align-items:center; padding:2px 6px; background:#dcfce7; color:#15803d; border-radius:4px; font-size:9.5px; font-weight:800; border:1px solid #bbf7d0;">✓ تم التواصل</span>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
 
@@ -492,8 +499,19 @@ $arabic_term_names = array(
 
                                     <!-- Completion Percentage Capsule -->
                                     <td style="padding: 12px 16px; text-align: center;">
-                                        <span style="display: inline-flex; padding: 3px 10px; border-radius: 9999px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-weight: 900; font-size: 12px;">
-                                            <?php echo intval($sp->completion_pct); ?>%
+                                        <?php
+                                        $p_val = intval($sp->completion_pct);
+                                        $p_bg = '#fee2e2'; $p_col = '#b91c1c'; $p_border = '#fecdd3'; // < 50%
+                                        if ($p_val >= 100) {
+                                            $p_bg = '#dcfce7'; $p_col = '#15803d'; $p_border = '#bbf7d0'; // 100% Green
+                                        } elseif ($p_val >= 80) {
+                                            $p_bg = '#dbeafe'; $p_col = '#1d4ed8'; $p_border = '#bfdbfe'; // 80-99% Blue
+                                        } elseif ($p_val >= 50) {
+                                            $p_bg = '#fef3c7'; $p_col = '#b45309'; $p_border = '#fde68a'; // 50-79% Warning
+                                        }
+                                        ?>
+                                        <span style="display: inline-flex; padding: 3px 10px; border-radius: 9999px; background: <?php echo $p_bg; ?>; color: <?php echo $p_col; ?>; border: 1px solid <?php echo $p_border; ?>; font-weight: 900; font-size: 12px;">
+                                            <?php echo $p_val; ?>%
                                         </span>
                                     </td>
 
@@ -522,6 +540,18 @@ $arabic_term_names = array(
                                                     <span class="dashicons dashicons-printer"></span>
                                                 </a>
                                             <?php endif; ?>
+
+                                            <!-- WhatsApp Direct Contact Button -->
+                                            <?php
+                                            $tp_phone = get_user_meta($sp->teacher_id, 'phone_number', true) ?: (get_user_meta($sp->teacher_id, 'sm_phone', true) ?: (get_user_meta($sp->teacher_id, 'phone', true) ?: ''));
+                                            $clean_tp_phone = preg_replace('/[^0-9]/', '', $tp_phone);
+                                            if (empty($clean_tp_phone) || strlen($clean_tp_phone) < 8) $clean_tp_phone = '971500000000';
+                                            $wa_plan_msg = rawurlencode("السلام عليكم، كيف حالك؟\nتحية طيبة من نظام إدارة المدارس. نود التواصل معك بخصوص متابعتك التعليمية.");
+                                            $wa_plan_url = "https://wa.me/" . $clean_tp_phone . "?text=" . $wa_plan_msg;
+                                            ?>
+                                            <a href="<?php echo esc_url($wa_plan_url); ?>" target="_blank" onclick="eessMarkTeacherContacted(<?php echo $sp->teacher_id; ?>, 'plan', <?php echo $sp->id; ?>)" class="sm-action-btn sm-action-btn-success" title="تواصل مباشر عبر واتساب مع المعلم">
+                                                <span class="dashicons dashicons-whatsapp"></span>
+                                            </a>
 
                                             <!-- Approve Button (Positive Green) -->
                                             <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" class="sm-action-btn sm-action-btn-success">
@@ -855,6 +885,8 @@ $arabic_term_names = array(
         </form>
     </div>
 </div>
+
+<?php include_once SM_PLUGIN_DIR . 'templates/partials/unified-user-modal.php'; ?>
 
 <!-- Assign Term Plan Modal (System Administrator Only) -->
 <div id="eess-assign-plan-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
@@ -1550,6 +1582,30 @@ function eessSelectEducationalSuggestion(inputId, val, subj, inputType) {
     formData.append('input_type', inputType);
     formData.append('content', val);
     fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData });
+}
+
+function eessMarkTeacherContacted(teacherId, recordType, recordId) {
+    var formData = new FormData();
+    formData.append('action', 'sm_mark_teacher_contacted');
+    formData.append('teacher_id', teacherId);
+    formData.append('record_type', recordType);
+    formData.append('record_id', recordId);
+    formData.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
+
+    jQuery.ajax({
+        url: '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            if (res.success) {
+                if (typeof eessShowMobileToast === 'function') {
+                    eessShowMobileToast('✓ ' + res.data.message, 'success');
+                }
+            }
+        }
+    });
 }
 
 function eessSaveWizardPlanSubmit(e) {

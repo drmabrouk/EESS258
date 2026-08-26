@@ -145,6 +145,7 @@ class School_Management {
         $this->loader->add_action('wp_ajax_sm_delete_term_plan', $plugin_public, 'ajax_delete_term_plan');
 
         // Print / PDF action
+        $this->loader->add_action('wp_ajax_sm_mark_teacher_contacted', $plugin_public, 'ajax_sm_mark_teacher_contacted');
         $this->loader->add_action('wp_ajax_sm_assign_term_plan', $plugin_public, 'ajax_sm_assign_term_plan');
         $this->loader->add_action('wp_ajax_sm_assign_lesson_prep', $plugin_public, 'ajax_sm_assign_lesson_prep');
         $this->loader->add_action('wp_ajax_sm_copy_record', $plugin_public, 'ajax_sm_copy_record');
