@@ -470,8 +470,8 @@ $greeting = ($hour >= 5 && $hour < 12) ? 'صباح الخير' : 'مساء ال�
                 <?php endif; ?>
             <?php endif; ?>
 
-            <button type="button" onclick="eessOpenSupportHelpCapsule()" class="sm-btn" style="background-color: #ffffff !important; color: #dc2626 !important; border: 1.5px solid #ef4444 !important; height: 38px !important; border-radius: 9999px !important; padding: 0 18px !important; font-weight: 800 !important; font-size: 12.5px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; box-shadow: 0 2px 6px rgba(239,68,68,0.06) !important; transition: all 0.2s ease !important;">
-                <span class="dashicons dashicons-sos" style="font-size: 17px !important; width: 17px !important; height: 17px !important; color: #dc2626 !important; margin: 0 !important;"></span>
+            <button type="button" onclick="eessOpenSupportHelpCapsule()" class="sm-btn" style="background-color: #ffffff !important; color: #dc2626 !important; border: 1.5px solid #ef4444 !important; height: 32px !important; border-radius: 9999px !important; padding: 0 14px !important; font-weight: 800 !important; font-size: 11.5px !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 6px !important; box-shadow: 0 2px 6px rgba(239,68,68,0.06) !important; transition: all 0.2s ease !important;">
+                <span class="dashicons dashicons-sos" style="font-size: 15px !important; width: 15px !important; height: 15px !important; color: #dc2626 !important; margin: 0 !important;"></span>
                 <span style="color: #dc2626 !important; font-weight: 800 !important;">الدعم والمساعدة</span>
             </button>
 

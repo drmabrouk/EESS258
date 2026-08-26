@@ -285,6 +285,12 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
             <?php endif; ?>
 
             <?php if ($can_review): ?>
+            <!-- Administrative Non-Submission Report Action (Red Token) -->
+            <button type="button" onclick="window.open('<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=non_submission_lesson_prep'); ?>', '_blank')" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
+                <span class="dashicons dashicons-dismiss" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
+                <span>تقرير غير المغطين للتحضير</span>
+            </button>
+
             <!-- Reports Dropdown Container -->
             <div style="position: relative; display: inline-block;">
                 <button type="button" onclick="eessTogglePrepReportsDropdown(event)" class="sm-btn sm-btn-outline" style="height: 38px; display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px !important; cursor: pointer; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; font-weight: 800; font-size: 12.5px; padding: 0 16px;">
@@ -1200,25 +1206,23 @@ function eessSubmitAssignPrepForm(e) {
 </script>
 
 <!-- In-System Custom Confirmation Modal for Deleting Lesson Prep -->
-<div id="eess-delete-prep-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;">
-    <div class="sm-modal-content" style="background: #ffffff; border-radius: 20px; max-width: 480px; width: 100%; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); border: 1px solid #cbd5e1; display: flex; flex-direction: column;">
-        <div style="background: #0f172a; color: #ffffff; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span class="dashicons dashicons-trash" style="color: #ef4444; font-size: 22px; width: 22px; height: 22px;"></span>
-                <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff;">تأكيد حذف وثيقة تحضير الدرس</h3>
-            </div>
-            <button type="button" onclick="document.getElementById('eess-delete-prep-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+<div id="eess-delete-prep-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif; direction: rtl;">
+    <div class="sm-modal-content" style="background: #ffffff; border-radius: 20px; max-width: 440px; width: 100%; border: 1px solid #e2e8f0; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; padding: 28px; text-align: center;">
+        <div style="width: 56px; height: 56px; background: #fef2f2; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #dc2626; margin: 0 auto 16px auto; border: 1px solid #fecdd3;">
+            <span class="dashicons dashicons-trash" style="font-size: 28px; width: 28px; height: 28px;"></span>
         </div>
-        <div style="padding: 22px; text-align: right;">
-            <p style="margin: 0 0 12px 0; font-size: 13px; color: #334155; line-height: 1.6;">هل أنت متأكد من رغبتك في حذف وثيقة التحضير التالية نهائياً؟</p>
-            <div style="background: #fef2f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-weight: 800; font-size: 13.5px; color: #991b1b;" id="eess_delete_prep_title_display">
-                <!-- Title filled dynamically -->
-            </div>
-            <input type="hidden" id="eess_delete_prep_target_id" value="0">
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" onclick="document.getElementById('eess-delete-prep-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 40px; padding: 0 20px; border-radius: 9999px !important; font-size: 12.5px; font-weight: 700; color: #475569;">إلغاء</button>
-                <button type="button" id="eess-btn-confirm-delete-prep" onclick="eessExecuteConfirmDeletePrep()" class="sm-btn" style="height: 40px; padding: 0 24px; border-radius: 9999px !important; font-size: 12.5px; background: #dc2626; color: #ffffff !important; font-weight: 800; border: none; cursor: pointer;">تأكيد الحذف النهائي</button>
-            </div>
+
+        <h3 style="margin: 0 0 8px 0; font-size: 17px; font-weight: 800; color: #0f172a;">تأكيد حذف وثيقة تحضير الدرس</h3>
+        <p style="margin: 0 0 16px 0; font-size: 12.5px; color: #64748b; line-height: 1.5;">هل أنت متأكد من رغبتك في حذف وثيقة التحضير التالية نهائياً؟ لا يمكن التراجع عن هذا الإجراء.</p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin-bottom: 24px; font-weight: 700; font-size: 12px; color: #334155;" id="eess_delete_prep_title_display">
+            <!-- Title filled dynamically -->
+        </div>
+        <input type="hidden" id="eess_delete_prep_target_id" value="0">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button type="button" id="eess-btn-confirm-delete-prep" onclick="eessExecuteConfirmDeletePrep()" class="sm-btn" style="height: 40px; border-radius: 9999px !important; font-size: 13px; background: #dc2626; color: #ffffff !important; font-weight: 800; border: none; cursor: pointer;">تأكيد الحذف</button>
+            <button type="button" onclick="document.getElementById('eess-delete-prep-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 40px; border-radius: 9999px !important; font-size: 13px; color: #475569; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff;">إلغاء</button>
         </div>
     </div>
 </div>

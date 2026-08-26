@@ -79,6 +79,14 @@ $arabic_term_names = array(
 
         <!-- Primary Header Actions (Wine-Red, Black, White Button Tokens) -->
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <?php if ($is_admin || $is_activities_sup || $is_reviewer): ?>
+            <!-- Non-Submission Administrative Report Button (Red Token) -->
+            <button type="button" onclick="document.getElementById('eess-non-submission-plan-modal').style.display='flex'" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
+                <span class="dashicons dashicons-dismiss" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
+                <span>تقرير غير المغطين للخطط</span>
+            </button>
+            <?php endif; ?>
+
             <?php if ($is_admin): ?>
             <!-- Assign Ready-Made Plan to Teacher Button (System Admin Only) -->
             <button type="button" onclick="document.getElementById('eess-assign-plan-modal').style.display='flex'" class="sm-btn" style="background: #0f172a; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
@@ -116,6 +124,49 @@ $arabic_term_names = array(
             <?php endif; ?>
         </div>
     </div>
+
+        <?php if ($is_reviewer):
+            $plan_stats_total_req = count(get_users(array('role' => 'sm_teacher'))) * 3; // 3 terms
+            $plan_stats_submitted = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE status IN ('submitted', 'approved')");
+            $plan_stats_approved  = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE status = 'approved'");
+            $plan_stats_returned  = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE status = 'returned'");
+            $plan_stats_missing   = max(0, $plan_stats_total_req - $plan_stats_submitted);
+            $plan_compliance_rate = $plan_stats_total_req > 0 ? round(($plan_stats_submitted / $plan_stats_total_req) * 100) : 0;
+        ?>
+        <!-- Administrative Compliance & Follow-up Statistics for Term Plans -->
+        <div style="background: #ffffff; padding: 20px 24px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <span class="dashicons dashicons-chart-bar" style="color: #881337; font-size: 18px; width: 18px; height: 18px;"></span>
+                    <span>إحصائيات الامتثال ومتابعة الخطط الفصلية (العام الدراسي <?php echo esc_html($active_academic_year); ?>)</span>
+                </h3>
+                <span style="font-size: 12px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 12px; border-radius: 9999px; border: 1px solid #bae6fd;">نسبة الالتزام الإجمالية: <?php echo $plan_compliance_rate; ?>%</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+                <div onclick="eessShowTermPlanStatDetails('required')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #334155; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">إجمالي المستهدف</div>
+                    <div style="font-size: 18px; font-weight: 900; color: #0f172a;"><?php echo $plan_stats_total_req; ?></div>
+                </div>
+                <div onclick="eessShowTermPlanStatDetails('submitted')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #0284c7; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 11px; color: #0369a1; font-weight: 700; margin-bottom: 4px;">الخطط المرفوعة</div>
+                    <div style="font-size: 18px; font-weight: 900; color: #0284c7;"><?php echo $plan_stats_submitted; ?></div>
+                </div>
+                <div onclick="eessShowTermPlanStatDetails('approved')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #16a34a; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 11px; color: #166534; font-weight: 700; margin-bottom: 4px;">معتمدة رسمياً</div>
+                    <div style="font-size: 18px; font-weight: 900; color: #16a34a;"><?php echo $plan_stats_approved; ?></div>
+                </div>
+                <div onclick="eessShowTermPlanStatDetails('returned')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #d97706; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 11px; color: #b45309; font-weight: 700; margin-bottom: 4px;">طلب تعديل</div>
+                    <div style="font-size: 18px; font-weight: 900; color: #d97706;"><?php echo $plan_stats_returned; ?></div>
+                </div>
+                <div onclick="eessShowTermPlanStatDetails('missing')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #dc2626; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 11px; color: #991b1b; font-weight: 700; margin-bottom: 4px;">غير تسليم / متأخر</div>
+                    <div style="font-size: 18px; font-weight: 900; color: #dc2626;"><?php echo $plan_stats_missing; ?></div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <?php if ($is_teacher): ?>
         <!-- 3 Independent Annual Progress Cards Grid (Teachers Only) -->
@@ -233,7 +284,10 @@ $arabic_term_names = array(
                                     <!-- Rich Multi-Line Subject & School Cell -->
                                     <td style="padding: 14px 16px;">
                                         <div style="font-weight: 800; font-size: 14px; color: #0f172a;"><?php echo esc_html($tp->subject); ?></div>
-                                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">🏫 <?php echo esc_html($teacher_school_name); ?></div>
+                                        <div style="font-size: 12.5px; font-weight: 800; color: #334155; margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+                                            <span class="dashicons dashicons-building" style="font-size: 14px; width: 14px; height: 14px; color: #64748b;"></span>
+                                            <span><?php echo esc_html($teacher_school_name); ?></span>
+                                        </div>
                                         <div style="display: flex; gap: 6px; margin-top: 5px;">
                                             <span style="display: inline-flex; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10.5px; font-weight: 800;">
                                                 <?php echo esc_html($tp->grade); ?>
@@ -366,7 +420,10 @@ $arabic_term_names = array(
 
                                     <!-- School, Subject & Grade Pastel Capsules -->
                                     <td style="padding: 12px 16px;">
-                                        <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px;">🏫 <?php echo esc_html($t_school); ?></div>
+                                        <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;">
+                                            <span class="dashicons dashicons-building" style="font-size: 15px; width: 15px; height: 15px; color: #475569;"></span>
+                                            <span><?php echo esc_html($t_school); ?></span>
+                                        </div>
                                         <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
                                             <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 11px; font-weight: 800;">
                                                 <?php echo esc_html($sp->subject); ?>
@@ -858,30 +915,21 @@ function eessSubmitAssignPlanForm(e) {
 
 <!-- In-System Plan Deletion Confirmation Modal -->
 <div id="eess-delete-plan-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif; direction: rtl;">
-    <div style="background: #ffffff; border-radius: 20px; max-width: 480px; width: 100%; border: 1px solid #fecdd3; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); overflow: hidden; display: flex; flex-direction: column;">
-        <div style="background: #881337; color: #ffffff; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="dashicons dashicons-warning" style="color: #ffffff; font-size: 20px; width: 20px; height: 20px; margin: 0;"></span>
-                <h3 style="margin: 0; font-size: 15.5px; font-weight: 800; color: #ffffff;">تأكيد حذف الخطة التعليمية</h3>
-            </div>
-            <button type="button" onclick="document.getElementById('eess-delete-plan-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+    <div style="background: #ffffff; border-radius: 20px; max-width: 440px; width: 100%; border: 1px solid #e2e8f0; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; padding: 28px; text-align: center;">
+        <div style="width: 56px; height: 56px; background: #fef2f2; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #dc2626; margin: 0 auto 16px auto; border: 1px solid #fecdd3;">
+            <span class="dashicons dashicons-trash" style="font-size: 28px; width: 28px; height: 28px;"></span>
         </div>
 
-        <div style="padding: 22px; text-align: right;">
-            <p style="margin: 0 0 12px 0; font-size: 13.5px; color: #1e293b; font-weight: 700; line-height: 1.6;">
-                هل أنت متأكد من رغبتك في حذف هذه الخطة نهائياً؟
-            </p>
-            <div id="eess-delete-plan-details" style="background: #fef2f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 10px; color: #991b1b; font-size: 12.5px; font-weight: 800; margin-bottom: 20px;">
-                <!-- Filled via JS -->
-            </div>
-            <p style="margin: 0 0 20px 0; font-size: 11.5px; color: #64748b;">
-                ⚠️ تحذير: سيتم إزالة السجل بالكامل وفقاً للصلاحيات التنظيمية للـ EESS ولا يمكن التراجع عن هذا الإجراء بعد التأكيد.
-            </p>
+        <h3 style="margin: 0 0 8px 0; font-size: 17px; font-weight: 800; color: #0f172a;">تأكيد حذف الخطة التعليمية</h3>
+        <p style="margin: 0 0 16px 0; font-size: 12.5px; color: #64748b; line-height: 1.5;">هل أنت متأكد من رغبتك في حذف هذه الخطة نهائياً؟ لا يمكن التراجع عن هذا الإجراء.</p>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="document.getElementById('eess-delete-plan-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 38px; padding: 0 18px; border-radius: 9999px !important; font-size: 12.5px; color: #475569; font-weight: 700;">إلغاء</button>
-                <button type="button" id="eess-confirm-delete-plan-btn" onclick="eessExecutePlanDeletion()" class="sm-btn" style="height: 38px; padding: 0 22px; border-radius: 9999px !important; font-size: 12.5px; background: #dc2626; color: #ffffff !important; font-weight: 800; border: none; cursor: pointer;">نعم، تأكيد الحذف</button>
-            </div>
+        <div id="eess-delete-plan-details" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 10px; color: #334155; font-size: 12px; font-weight: 700; margin-bottom: 24px;">
+            <!-- Filled via JS -->
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button type="button" id="eess-confirm-delete-plan-btn" onclick="eessExecutePlanDeletion()" class="sm-btn" style="height: 40px; border-radius: 9999px !important; font-size: 13px; background: #dc2626; color: #ffffff !important; font-weight: 800; border: none; cursor: pointer;">تأكيد الحذف</button>
+            <button type="button" onclick="document.getElementById('eess-delete-plan-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 40px; border-radius: 9999px !important; font-size: 13px; color: #475569; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff;">إلغاء</button>
         </div>
     </div>
 </div>
@@ -1515,6 +1563,59 @@ function eessSaveWizardPlanSubmit(e) {
     });
 }
 
+</script>
+
+<!-- Non-Submission Administrative Report Modal for Term Plans -->
+<div id="eess-non-submission-plan-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 460px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
+        <div style="background: #dc2626; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-dismiss" style="font-size: 20px; width: 20px; height: 20px; color: #ffffff;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">تقرير عدم تسليم الخطط الفصلية</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-non-submission-plan-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 24px;">
+            <p style="margin: 0 0 16px 0; font-size: 12.5px; color: #64748b; line-height: 1.5;">اختر الفصل الدراسي لرصد المعلمين غير المغطين للخطط وتصدير تقرير A4 المعتمد:</p>
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">الفصل الدراسي المستهدف *</label>
+                <select id="eess_report_term_number" class="sm-input" style="height: 40px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 12.5px; font-weight: 700;">
+                    <option value="1">الفصل الدراسي الأول (Term 1)</option>
+                    <option value="2">الفصل الدراسي الثاني (Term 2)</option>
+                    <option value="3">الفصل الدراسي الثالث (Term 3)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="eessGenerateNonSubmissionReport()" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; padding: 0 22px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <span class="dashicons dashicons-printer" style="font-size: 15px; width: 15px; height: 15px;"></span>
+                    <span>توليد تقرير A4 المعتمد</span>
+                </button>
+                <button type="button" onclick="document.getElementById('eess-non-submission-plan-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 38px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function eessGenerateNonSubmissionReport() {
+    var termNum = document.getElementById('eess_report_term_number').value;
+    window.open('<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=non_submission_term_plans&term_number='); ?>' + termNum, '_blank');
+    document.getElementById('eess-non-submission-plan-modal').style.display = 'none';
+}
+
+function eessShowTermPlanStatDetails(statKey) {
+    if (statKey === 'missing') {
+        document.getElementById('eess-non-submission-plan-modal').style.display = 'flex';
+    } else {
+        const filterInput = document.getElementById('eess-reviewer-plans-search');
+        if (filterInput) {
+            filterInput.value = (statKey === 'approved' ? 'معتمدة' : (statKey === 'returned' ? 'تعديل' : ''));
+            if (typeof eessFilterReviewerPlansTable === 'function') eessFilterReviewerPlansTable();
+            const revTable = document.getElementById('eess-reviewer-plans-table');
+            if (revTable) revTable.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+}
 </script>
 
 <!-- Academic Structure Configuration Modal -->
