@@ -289,19 +289,19 @@ $fields = SM_Settings::get_subject_lesson_fields($prep->subject);
         <div class="section-card-body"><?php echo esc_html(!empty($data['notes']) ? $data['notes'] : 'لا توجد ملاحظات إضافية مسجلة'); ?></div>
     </div>
 
-    <!-- Official Signatures Footer Alignment -->
-    <div style="margin-top: 30px; padding-top: 15px; border-top: 2px solid #cbd5e1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center; page-break-inside: avoid;">
+    <!-- Official Signatures Footer Alignment (Right: Teacher, Center: HOD PE, Left: Principal) -->
+    <div style="margin-top: 25px; padding-top: 12px; border-top: 2px solid #cbd5e1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center; page-break-inside: avoid;">
         <div style="text-align: right;">
-            <div style="font-weight: 800; font-size: 12px; color: #0f172a; margin-bottom: 25px;">توقيع مدير / قائد المدرسة:</div>
-            <div style="font-size: 11px; color: #64748b; font-weight: 700;">الاسم والتوقيع: ...........................</div>
+            <div style="font-weight: 800; font-size: 11.5px; color: #0f172a; margin-bottom: 20px;">توقيع المعلم:</div>
+            <div style="font-size: 11px; color: #334155; font-weight: 800;"><?php echo esc_html($teacher_name); ?></div>
         </div>
         <div style="text-align: center;">
-            <div style="font-weight: 800; font-size: 12px; color: #0f172a; margin-bottom: 25px;">توقيع مشرف الأنشطة / الموجه الفني:</div>
+            <div style="font-weight: 800; font-size: 11.5px; color: #0f172a; margin-bottom: 20px;">توقيع رئيس قسم التربية البدنية:</div>
             <div style="font-size: 11px; color: #64748b; font-weight: 700;">الاسم والتوقيع: ...........................</div>
         </div>
         <div style="text-align: left;">
-            <div style="font-weight: 800; font-size: 12px; color: #0f172a; margin-bottom: 25px;">توقيع المعلم المعدّ للدرس:</div>
-            <div style="font-size: 11px; color: #64748b; font-weight: 700;"><?php echo esc_html($teacher_name); ?></div>
+            <div style="font-weight: 800; font-size: 11.5px; color: #0f172a; margin-bottom: 20px;">توقيع مدير المدرسة:</div>
+            <div style="font-size: 11px; color: #64748b; font-weight: 700;">الاسم والتوقيع: ...........................</div>
         </div>
     </div>
 
