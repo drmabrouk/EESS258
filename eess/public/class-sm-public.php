@@ -6840,6 +6840,28 @@ class SM_Public {
         wp_send_json_success($scope);
     }
 
+    public function ajax_sm_mark_teacher_contacted() {
+        if (!is_user_logged_in()) wp_send_json_error('يجب تسجيل الدخول.');
+        check_ajax_referer('eess_admin_action', 'nonce');
+
+        $teacher_id = intval($_POST['teacher_id'] ?? 0);
+        $record_type = sanitize_text_field($_POST['record_type'] ?? 'general');
+        $record_id   = intval($_POST['record_id'] ?? 0);
+
+        if (!$teacher_id) wp_send_json_error('معرف المعلم غير صحيح.');
+
+        $key = 'eess_contacted_' . $record_type . '_' . $record_id;
+        if ($record_id <= 0) {
+            $key = 'eess_contacted_teacher_' . $teacher_id;
+        }
+
+        update_user_meta($teacher_id, $key, current_time('mysql'));
+
+        SM_Logger::log('التواصل عبر واتساب', "تم توثيق التواصل عبر واتساب مع المعلم ID: $teacher_id للسجل: $record_type ($record_id)");
+
+        wp_send_json_success(array('message' => 'تم توثيق التواصل مع المعلم بنجاح.'));
+    }
+
     public function ajax_sm_assign_term_plan() {
         if (!is_user_logged_in()) wp_send_json_error('يجب تسجيل الدخول.');
         $user = wp_get_current_user();

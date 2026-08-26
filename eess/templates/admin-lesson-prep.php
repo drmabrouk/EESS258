@@ -921,11 +921,18 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             </td>
                             <?php if ($can_review): ?>
                                 <td>
-                                    <?php echo esc_html($sub->teacher_name); ?>
+                                    <a href="javascript:void(0)" onclick="window.eessOpenUnifiedUserModal('edit_user', <?php echo $sub->teacher_id; ?>)" style="font-weight: 800; color: #0f172a; text-decoration: none;" onmouseover="this.style.color='#0284c7'; this.style.textDecoration='underline';" onmouseout="this.style.color='#0f172a'; this.style.textDecoration='none';">
+                                        <?php echo esc_html($sub->teacher_name); ?>
+                                    </a>
                                     <?php
                                     $teacher_emp_id = get_user_meta($sub->teacher_id, 'eess_employee_number', true);
                                     if (!empty($teacher_emp_id)): ?>
                                         <div style="font-size: 10px; color: #64748b; margin-top: 3px;">رقم الموظف: <?php echo esc_html($teacher_emp_id); ?></div>
+                                    <?php endif; ?>
+                                    <?php
+                                    $is_contacted = get_user_meta($sub->teacher_id, 'eess_contacted_prep_' . $sub->id, true);
+                                    if ($is_contacted): ?>
+                                        <span style="display:inline-block; margin-top:4px; padding:2px 6px; background:#dcfce7; color:#15803d; border-radius:4px; font-size:9.5px; font-weight:800; border:1px solid #bbf7d0;">✓ تم التواصل</span>
                                     <?php endif; ?>
                                 </td>
                             <?php endif; ?>
@@ -979,6 +986,18 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                     <!-- Print PDF Button -->
                                     <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=lesson_prep&prep_id=' . $sub->id); ?>" target="_blank" class="sm-action-btn sm-action-btn-neutral" title="طباعة أو تصدير وثيقة PDF المعتمدة">
                                         <span class="dashicons dashicons-printer"></span>
+                                    </a>
+
+                                    <!-- WhatsApp Direct Contact Button -->
+                                    <?php
+                                    $t_phone = get_user_meta($sub->teacher_id, 'phone_number', true) ?: (get_user_meta($sub->teacher_id, 'sm_phone', true) ?: (get_user_meta($sub->teacher_id, 'phone', true) ?: ''));
+                                    $clean_phone = preg_replace('/[^0-9]/', '', $t_phone);
+                                    if (empty($clean_phone) || strlen($clean_phone) < 8) $clean_phone = '971500000000';
+                                    $wa_msg = rawurlencode("السلام عليكم، كيف حالك؟\nتحية طيبة من نظام إدارة المدارس. نود التواصل معك بخصوص متابعتك التعليمية.");
+                                    $wa_url = "https://wa.me/" . $clean_phone . "?text=" . $wa_msg;
+                                    ?>
+                                    <a href="<?php echo esc_url($wa_url); ?>" target="_blank" onclick="eessMarkTeacherContacted(<?php echo $sub->teacher_id; ?>, 'prep', <?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-success" title="تواصل مباشر عبر واتساب مع المعلم">
+                                        <span class="dashicons dashicons-whatsapp"></span>
                                     </a>
 
                                     <?php if ($can_review && ($sub->status === 'submitted' || $sub->status === 'late' || $sub->status === 'resubmitted')): ?>
@@ -1180,6 +1199,8 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
     </div>
 </div>
 
+<?php include_once SM_PLUGIN_DIR . 'templates/partials/unified-user-modal.php'; ?>
+
 <!-- Assign Lesson Prep Modal (System Administrator Only) -->
 <div id="eess-assign-prep-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
     <div style="background: #ffffff; border-radius: 20px; max-width: 540px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
@@ -1237,6 +1258,30 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
 </div>
 
 <script>
+function eessMarkTeacherContacted(teacherId, recordType, recordId) {
+    var formData = new FormData();
+    formData.append('action', 'sm_mark_teacher_contacted');
+    formData.append('teacher_id', teacherId);
+    formData.append('record_type', recordType);
+    formData.append('record_id', recordId);
+    formData.append('nonce', '<?php echo wp_create_nonce("eess_admin_action"); ?>');
+
+    jQuery.ajax({
+        url: '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            if (res.success) {
+                if (typeof eessShowMobileToast === 'function') {
+                    eessShowMobileToast('✓ ' + res.data.message, 'success');
+                }
+            }
+        }
+    });
+}
+
 function eessSubmitAssignPrepForm(e) {
     e.preventDefault();
     var tUid = document.getElementById('assign_prep_teacher_id').value;
