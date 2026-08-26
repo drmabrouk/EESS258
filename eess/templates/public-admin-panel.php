@@ -2155,23 +2155,25 @@ window.eessExecuteCopyRecordSubmit = function(e) {
 <?php include_once SM_PLUGIN_DIR . 'templates/partials/teacher-behavior-referral-modal.php'; ?>
 <!-- TECHNICAL SUPPORT & HELP CAPSULE MODAL -->
 <div id="eess-support-capsule-modal" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif; direction: rtl;">
-    <div style="background: #ffffff; border-radius: 20px; max-width: 680px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column;">
-        <!-- Taller Header with White Title & White Icon -->
-        <div style="background: #1e293b; color: #ffffff; padding: 22px 26px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;">
-            <h3 style="margin: 0; font-size: 16.5px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 10px;">
-                <span class="dashicons dashicons-sos" style="color: #ffffff; font-size: 22px; width: 22px; height: 22px; margin: 0;"></span>
-                <span>الدعم الفني والمساعدة</span>
-            </h3>
-            <button type="button" onclick="eessCloseSupportHelpCapsule()" style="background: none; border: none; color: #ffffff; font-size: 26px; cursor: pointer; line-height: 1;">&times;</button>
+    <div style="background: #ffffff; border-radius: 20px; max-width: 640px; width: 100%; border: 1px solid #e2e8f0; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; padding: 28px; position: relative;">
+        <!-- Circular Close Button -->
+        <button type="button" onclick="eessCloseSupportHelpCapsule()" style="position: absolute; top: 18px; left: 18px; width: 34px; height: 34px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">&times;</button>
+
+        <!-- Clean White Header -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 52px; height: 52px; background: #fef2f2; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #dc2626; margin-bottom: 10px; border: 1px solid #fecdd3;">
+                <span class="dashicons dashicons-sos" style="font-size: 26px; width: 26px; height: 26px;"></span>
+            </div>
+            <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #0f172a;">المساعدة والدعم الفني</h3>
+            <p style="margin: 0; font-size: 12.5px; color: #64748b; font-weight: 600;">يرجى اختيار إحدى الخدمات المتاحة للتواصل مع فريق الدعم والتطوير</p>
         </div>
 
         <!-- Body -->
-        <div style="padding: 26px; box-sizing: border-box;">
+        <div style="box-sizing: border-box;">
             <div id="eess-capsule-msg" style="display: none; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; font-weight: 700;"></div>
 
             <!-- Main Menu Options (3 Equal Square Cards on 1 Row) -->
             <div id="capsule-menu-view">
-                <p style="font-size: 13px; color: #64748b; margin: 0 0 22px 0; line-height: 1.6; text-align: center; font-weight: 600;">يرجى اختيار إحدى الخدمات المتاحة للبدء في التواصل مع فريق الدعم والتطوير:</p>
 
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                     <!-- Card 1: Suggestion -->
