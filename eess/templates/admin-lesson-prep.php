@@ -498,13 +498,15 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <div class="eess-prep-upload-stage" id="eess-prep-upload-stage-1" style="display: block;">
                                 <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الأولى: بيانات الدرس الرئيسية</h4>
                                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
-                                    <div style="position: relative;">
-                                        <input type="text" id="eess_upload_lesson_title" name="upload_lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input eess-float-input" placeholder=" " style="height: 44px; font-size: 13px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;">
-                                        <label for="eess_upload_lesson_title" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #0284c7; border-radius: 4px; pointer-events: none;">عنوان وثيقة التحضير <span style="color:#ef4444;">*</span></label>
+                                    <div>
+                                        <label for="eess_upload_lesson_title" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">عنوان وثيقة التحضير <span style="color:#ef4444;">*</span></label>
+                                        <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">أدخل اسم الوثيقة الشامل المكتوب بملف التحضير المرفوع</span>
+                                        <input type="text" id="eess_upload_lesson_title" name="upload_lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input" placeholder="عنوان وثيقة التحضير الكامل..." style="height: 42px; font-size: 13px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; width: 100%; box-sizing: border-box;">
                                     </div>
                                     <div>
-                                        <label class="sm-label" style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px; display: block;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
-                                        <input type="date" id="eess_upload_lesson_date" name="upload_lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px;">
+                                        <label for="eess_upload_lesson_date" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
+                                        <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">تاريخ تنفيذ وتوثيق الدرس بالأجندة</span>
+                                        <input type="date" id="eess_upload_lesson_date" name="upload_lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; width: 100%; box-sizing: border-box;">
                                     </div>
                                 </div>
                             </div>
@@ -513,7 +515,8 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <div class="eess-prep-upload-stage" id="eess-prep-upload-stage-2" style="display: none;">
                                 <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثانية: رفع ملف التحضير الجاهز</h4>
                                 <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 22px; margin-bottom: 16px;">
-                                    <label style="display: block; font-weight: 800; font-size: 13px; color: #0369a1; margin-bottom: 10px;">اختر ملف التحضير المكتمل بصيغة (PDF, DOC, DOCX) <span style="color:#ef4444;">*</span></label>
+                                    <label for="eess_prep_document_file" style="display: block; font-weight: 800; font-size: 13px; color: #0369a1; margin-bottom: 2px;">اختر ملف التحضير المكتمل بصيغة (PDF, DOC, DOCX) <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #0284c7; font-weight: 500; margin-bottom: 10px;">يجب ألا يتجاوز حجم الملف المرفق 10 ميجابايت وأن يكون مطابقاً لنموذج التحضير المعتمد</span>
                                     <input type="file" name="prep_document_file" id="eess_prep_document_file" accept=".pdf,.doc,.docx" class="sm-input" onchange="eessValidatePrepFile(this)" style="height: 44px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 12.5px; padding: 8px 12px; width: 100%; box-sizing: border-box;">
                                     <div id="eess_prep_file_status_preview" style="display: none; margin-top: 12px; font-size: 12px; font-weight: 700; color: #166534; background: #dcfce7; padding: 10px 14px; border-radius: 8px; border: 1px solid #bbf7d0;"></div>
                                 </div>
@@ -534,53 +537,60 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <div class="eess-prep-create-stage" id="eess-prep-create-stage-1" style="display: block;">
                                 <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الأولى: البيانات الأساسية والهدف العام</h4>
                                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
-                                    <div style="position: relative;">
-                                        <input type="text" id="eess_lesson_title" name="lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input eess-float-input" placeholder=" " style="height: 44px; font-size: 13px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;">
-                                        <label for="eess_lesson_title" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">عنوان الدرس الرئيسي <span style="color:#ef4444;">*</span></label>
+                                    <div>
+                                        <label for="eess_lesson_title" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">عنوان الدرس الرئيسي <span style="color:#ef4444;">*</span></label>
+                                        <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">عنوان المهارة أو الوحدة الدراسية المقررة بالمنهج</span>
+                                        <input type="text" id="eess_lesson_title" name="lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input" placeholder="عنوان الدرس..." style="height: 42px; font-size: 13px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; width: 100%; box-sizing: border-box;">
                                     </div>
                                     <div>
-                                        <label class="sm-label" style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px; display: block;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
-                                        <input type="date" id="eess_lesson_date" name="lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px;">
+                                        <label for="eess_lesson_date" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">تاريخ تنفيذ الدرس <span style="color:#ef4444;">*</span></label>
+                                        <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">تاريخ حصة الدرس بالجدول</span>
+                                        <input type="date" id="eess_lesson_date" name="lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; width: 100%; box-sizing: border-box;">
                                     </div>
                                 </div>
 
                                 <!-- Lesson Objective Field (150 - 350 chars) -->
-                                <div style="position: relative; margin-bottom: 8px;">
-                                    <textarea id="eess_objectives" name="objectives" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_objectives')" class="sm-input eess-float-input" style="height: 110px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['objectives'] ?? ''); ?></textarea>
-                                    <label for="eess_objectives" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">هدف الدرس (150 – 350 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                <div style="margin-bottom: 6px;">
+                                    <label for="eess_objectives" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">هدف الدرس السلوكي والتعليمي <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">صياغة الأهداف السلوكية (أن يتعلم الطالب المهارة المحددة) — الحد الأدنى: 150 حرفاً، الحد الأقصى: 350 حرفاً</span>
+                                    <textarea id="eess_objectives" name="objectives" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_objectives')" class="sm-input" style="height: 100px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 12px; width: 100%; box-sizing: border-box; line-height: 1.5;" placeholder="أدخل هدف الدرس تفصيلياً..."><?php echo esc_textarea($data['objectives'] ?? ''); ?></textarea>
                                 </div>
                                 <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 20px;" id="cnt_objectives">0 / 150 - 350 حرف (المتبقي 150 حرف على الأقل)</div>
                             </div>
 
                             <!-- Create Step 2: Physical Education Lesson Components -->
                             <div class="eess-prep-create-stage" id="eess-prep-create-stage-2" style="display: none;">
-                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثانية: مكونات درس التربية البدنية</h4>
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثانية: مكونات درس التربية البدنية والصحية</h4>
 
                                 <!-- Warm-up (150 - 350 chars) -->
-                                <div style="position: relative; margin-bottom: 4px;">
-                                    <textarea id="eess_warmup" name="warmup" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_warmup')" class="sm-input eess-float-input" style="height: 85px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['warmup'] ?? ''); ?></textarea>
-                                    <label for="eess_warmup" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">1. الإحماء والتهيئة البدنية (150 – 350 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                <div style="margin-bottom: 4px;">
+                                    <label for="eess_warmup" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">1. الإحماء والتهيئة البدنية (Warm-Up) <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">شرح تمارين الإحماء العامة والمرونة والحركات التمهيدية (150 – 350 حرفاً)</span>
+                                    <textarea id="eess_warmup" name="warmup" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_warmup')" class="sm-input" style="height: 85px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 12px; width: 100%; box-sizing: border-box; line-height: 1.5;" placeholder="أدخل تفاصيل الإحماء والتهيئة البدنية..."><?php echo esc_textarea($data['warmup'] ?? ''); ?></textarea>
                                 </div>
                                 <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_warmup">0 / 150 - 350 حرف (المتبقي 150 حرف على الأقل)</div>
 
                                 <!-- Physical Preparation (150 - 400 chars) -->
-                                <div style="position: relative; margin-bottom: 4px;">
-                                    <textarea id="eess_physical_prep" name="physical_prep" maxlength="400" oninput="eessUpdateCharBounds(this, 150, 400, 'cnt_physical_prep')" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['physical_prep'] ?? ''); ?></textarea>
-                                    <label for="eess_physical_prep" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">2. الإعداد البدني العام والخاص (150 – 400 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                <div style="margin-bottom: 4px;">
+                                    <label for="eess_physical_prep" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">2. الإعداد البدني العام والخاص <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">تدريبات التوافق والتحمل والقوة الخاصة بالمهارة (150 – 400 حرفاً)</span>
+                                    <textarea id="eess_physical_prep" name="physical_prep" maxlength="400" oninput="eessUpdateCharBounds(this, 150, 400, 'cnt_physical_prep')" class="sm-input" style="height: 90px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 12px; width: 100%; box-sizing: border-box; line-height: 1.5;" placeholder="أدخل تفاصيل الإعداد البدني..."><?php echo esc_textarea($data['physical_prep'] ?? ''); ?></textarea>
                                 </div>
                                 <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_physical_prep">0 / 150 - 400 حرف (المتبقي 150 حرف على الأقل)</div>
 
                                 <!-- Skill Preparation (150 - 400 chars) -->
-                                <div style="position: relative; margin-bottom: 4px;">
-                                    <textarea id="eess_skill_prep" name="skill_prep" maxlength="400" oninput="eessUpdateCharBounds(this, 150, 400, 'cnt_skill_prep')" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['skill_prep'] ?? ''); ?></textarea>
-                                    <label for="eess_skill_prep" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">3. الإعداد المهاري والخططي (150 – 400 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                <div style="margin-bottom: 4px;">
+                                    <label for="eess_skill_prep" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">3. الإعداد المهاري والخططي <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">خطوات شرح وتطبيق المهارة الأساسية والربط الحركي (150 – 400 حرفاً)</span>
+                                    <textarea id="eess_skill_prep" name="skill_prep" maxlength="400" oninput="eessUpdateCharBounds(this, 150, 400, 'cnt_skill_prep')" class="sm-input" style="height: 90px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 12px; width: 100%; box-sizing: border-box; line-height: 1.5;" placeholder="أدخل الخطوات المهارية والخططية..."><?php echo esc_textarea($data['skill_prep'] ?? ''); ?></textarea>
                                 </div>
                                 <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_skill_prep">0 / 150 - 400 حرف (المتبقي 150 حرف على الأقل)</div>
 
                                 <!-- Conclusion (150 - 350 chars) -->
-                                <div style="position: relative; margin-bottom: 4px;">
-                                    <textarea id="eess_conclusion" name="conclusion" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_conclusion')" class="sm-input eess-float-input" style="height: 85px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['conclusion'] ?? ''); ?></textarea>
-                                    <label for="eess_conclusion" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">4. الخاتمة والتهدئة (150 – 350 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                <div style="margin-bottom: 4px;">
+                                    <label for="eess_conclusion" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">4. الخاتمة والتهدئة والإطالات <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">تمارين العودة إلى الحالة الطبيعية والتقويم الختامي (150 – 350 حرفاً)</span>
+                                    <textarea id="eess_conclusion" name="conclusion" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_conclusion')" class="sm-input" style="height: 85px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 12px; width: 100%; box-sizing: border-box; line-height: 1.5;" placeholder="أدخل تفاصيل التهدئة والختام..."><?php echo esc_textarea($data['conclusion'] ?? ''); ?></textarea>
                                 </div>
                                 <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_conclusion">0 / 150 - 350 حرف (المتبقي 150 حرف على الأقل)</div>
                             </div>
@@ -590,15 +600,17 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                 <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثالثة: الروابط والربط التربوي</h4>
 
                                 <!-- Connection to National Agenda -->
-                                <div style="position: relative; margin-bottom: 22px;">
-                                    <textarea id="eess_national_agenda" name="national_agenda" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['national_agenda'] ?? ''); ?></textarea>
-                                    <label for="eess_national_agenda" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #0f172a; border-radius: 4px; pointer-events: none;">الربط بالأجندة الوطنية ورؤية الدولة <span style="color:#ef4444;">*</span></label>
+                                <div style="margin-bottom: 20px;">
+                                    <label for="eess_national_agenda" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">الربط بالأجندة الوطنية ورؤية الدولة <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">شرح كيفية ربط المهارة بقيم الأجندة الوطنية وجودة الحياة الصحية</span>
+                                    <textarea id="eess_national_agenda" name="national_agenda" class="sm-input" style="height: 85px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 12px; width: 100%; box-sizing: border-box; line-height: 1.5;" placeholder="أدخل تفاصيل الربط بالأجندة الوطنية..."><?php echo esc_textarea($data['national_agenda'] ?? ''); ?></textarea>
                                 </div>
 
                                 <!-- Connection to Other Subjects -->
-                                <div style="position: relative; margin-bottom: 18px;">
-                                    <textarea id="eess_cross_subject" name="cross_subject" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['cross_subject'] ?? ''); ?></textarea>
-                                    <label for="eess_cross_subject" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #0f172a; border-radius: 4px; pointer-events: none;">الربط بالمواد والتخصصات الأخرى <span style="color:#ef4444;">*</span></label>
+                                <div style="margin-bottom: 18px;">
+                                    <label for="eess_cross_subject" style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">الربط بالمواد والتخصصات الأخرى <span style="color:#ef4444;">*</span></label>
+                                    <span style="display: block; font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 6px;">الربط بالعلوم، الرياضيات، اللغة العربية، أو الدراسات الاجتماعية</span>
+                                    <textarea id="eess_cross_subject" name="cross_subject" class="sm-input" style="height: 85px; font-size: 12.5px; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px 12px; width: 100%; box-sizing: border-box; line-height: 1.5;" placeholder="أدخل تفاصيل الربط بالمواد الأخرى..."><?php echo esc_textarea($data['cross_subject'] ?? ''); ?></textarea>
                                 </div>
                             </div>
 

@@ -559,8 +559,9 @@ class SM_Public {
                 });
             }
             </script>
-            <?php else: ?>
             <?php endif; ?>
+
+            <?php if (!is_user_logged_in()): ?>
             <div id="m-step-verify" style="background: #ffffff; border-radius: 16px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <h3 style="margin: 0 0 15px 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
                     <span style="background: #2563eb; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px;">1</span>
@@ -602,32 +603,19 @@ class SM_Public {
                     </div>
                 </div>
             </div>
-
-            <!-- STEP 2: Identity Confirmation Card -->
-            <div id="m-step-confirm" style="display: none; background: #ffffff; border-radius: 16px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-top: 15px;">
-                <h3 style="margin: 0 0 15px 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                    <span style="background: #16a34a; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px;">✓</span>
-                    تأكيد هوية المعلم والتسكين
-                </h3>
-
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 15px;">
-                    <div style="font-size: 11px; color: #64748b; font-weight: 700;">اسم المعلم المعتمد:</div>
-                    <div id="m_confirmed_name" style="font-size: 16px; font-weight: 800; color: #0f172a; margin-top: 2px;">-</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px; color: #334155; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                        <div><span class="dashicons dashicons-admin-home" style="font-size: 14px; width: 14px; height: 14px; color: #881337;"></span> <strong>المدرسة:</strong> <span id="m_confirmed_school">-</span></div>
-                        <div><span class="dashicons dashicons-book" style="font-size: 14px; width: 14px; height: 14px; color: #881337;"></span> <strong>المادة:</strong> <span id="m_confirmed_subject">-</span></div>
-                        <div><span class="dashicons dashicons-id" style="font-size: 14px; width: 14px; height: 14px; color: #881337;"></span> <strong>الرقم:</strong> <span id="m_confirmed_empid">-</span></div>
-                        <div><span class="dashicons dashicons-category" style="font-size: 14px; width: 14px; height: 14px; color: #881337;"></span> <strong>القسم:</strong> <span id="m_confirmed_dept">-</span></div>
-                    </div>
-                </div>
-
-                <button type="button" onclick="eessConfirmMobileIdentity()" style="width: 100%; height: 44px; background: #16a34a; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer;">
-                    تأكيد الهوية والمتابعة للتحضير
-                </button>
-            </div>
+            <?php endif; ?>
 
             <!-- DEDICATED 4-BUTTON MOBILE MAIN DASHBOARD -->
             <?php if (is_user_logged_in() && in_array('sm_teacher', (array)$user->roles)): ?>
+            <!-- Clean Centered Welcome Area -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 16px; margin-bottom: 18px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="width: 52px; height: 52px; background: #f1f5f9; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #0f172a; margin-bottom: 10px; border: 1px solid #cbd5e1;">
+                    <span class="dashicons dashicons-admin-users" style="font-size: 26px; width: 26px; height: 26px;"></span>
+                </div>
+                <h2 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 800; color: #0f172a;">أهلاً بك أ. <?php echo esc_html($user->display_name); ?></h2>
+                <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: 600; line-height: 1.5;">البوابة الذكية لإعداد وتوثيق تحضير الدروس والخطط الفصلية أسبوعياً</p>
+            </div>
+
             <div id="m-teacher-dashboard-overview" style="margin-bottom: 16px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
                     <!-- ACTION 1: CREATE LESSON PREP -->
@@ -895,19 +883,7 @@ class SM_Public {
                     btn.innerText = 'تسجيل الدخول والتحقق';
 
                     if (res.success) {
-                        currentTeacherData = res.data;
-                        if (res.data.fresh_nonce) {
-                            const nonceInput = document.querySelector('#eess_mobile_prep_form input[name="sm_nonce"]');
-                            if (nonceInput) nonceInput.value = res.data.fresh_nonce;
-                        }
-                        document.getElementById('m_confirmed_name').innerText = res.data.teacher_name;
-                        document.getElementById('m_confirmed_school').innerText = res.data.school || 'المدرسة الرئيسية';
-                        document.getElementById('m_confirmed_subject').innerText = res.data.subject || 'عام';
-                        document.getElementById('m_confirmed_empid').innerText = res.data.emp_id;
-                        document.getElementById('m_confirmed_dept').innerText = res.data.department || 'قسم المادة';
-
-                        document.getElementById('m-step-confirm').style.display = 'block';
-                        document.getElementById('m-step-confirm').scrollIntoView({ behavior: 'smooth' });
+                        location.reload();
                     } else {
                         msgBox.style.display = 'block';
                         msgBox.style.background = '#fef2f2';
