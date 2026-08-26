@@ -841,29 +841,75 @@ class SM_Public {
                         </div>
                     </div>
 
-                    <!-- Academic Content Box -->
+                    <!-- Academic Content Box (Fully Synchronized with Desktop) -->
                     <div style="background: #ffffff; border-radius: 16px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">2. عناصر ومحتوى التحضير</h4>
+                        <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">2. عناصر ومحتوى التحضير الشامل</h4>
 
-                        <div style="margin-bottom: 12px;">
-                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">الأهداف السلوكية والتعليمية</label>
-                            <textarea id="m_objectives" name="objectives" rows="3" placeholder="أدخل الأهداف السلوكية للدرس..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 13px; box-sizing: border-box;"></textarea>
+                        <!-- Objectives (150-350 chars) -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">هدف الدرس السلوكي والتعلمي <span style="color:#ef4444;">*</span></label>
+                            <textarea id="m_objectives" name="objectives" maxlength="350" oninput="eessUpdateMobileCharBounds(this, 150, 350, 'm_cnt_objectives')" placeholder="صياغة هدف الدرس (150 – 350 حرفاً)..." style="width: 100%; height: 90px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                            <div id="m_cnt_objectives" style="text-align: left; font-size: 10.5px; font-weight: 700; color: #dc2626; font-family: monospace; margin-top: 2px;">0 / 150 - 350 حرف</div>
                         </div>
 
-                        <div style="margin-bottom: 12px;">
-                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">التمهيد والتهيئة الحافزة</label>
-                            <textarea id="m_warmup" name="warmup" rows="2" placeholder="النشاط التمهيدي لجذب انتباه الطلاب..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 13px; box-sizing: border-box;"></textarea>
+                        <!-- Warmup (150-350 chars) -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">1. الإحماء والتهيئة البدنية (Warm-Up) <span style="color:#ef4444;">*</span></label>
+                            <textarea id="m_warmup" name="warmup" maxlength="350" oninput="eessUpdateMobileCharBounds(this, 150, 350, 'm_cnt_warmup')" placeholder="تمارين الإحماء والتهيئة (150 – 350 حرفاً)..." style="width: 100%; height: 85px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                            <div id="m_cnt_warmup" style="text-align: left; font-size: 10.5px; font-weight: 700; color: #dc2626; font-family: monospace; margin-top: 2px;">0 / 150 - 350 حرف</div>
                         </div>
 
-                        <div style="margin-bottom: 12px;">
-                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">الاستراتيجيات والأنشطة التعليمية</label>
-                            <textarea id="m_activities" name="activities" rows="3" placeholder="شرح طريقة العرض والأنشطة..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 13px; box-sizing: border-box;"></textarea>
+                        <!-- Physical Prep (150-400 chars) -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">2. الإعداد البدني العام والخاص <span style="color:#ef4444;">*</span></label>
+                            <textarea id="m_physical_prep" name="physical_prep" maxlength="400" oninput="eessUpdateMobileCharBounds(this, 150, 400, 'm_cnt_physical_prep')" placeholder="تدريبات اللياقة والإعداد البدني (150 – 400 حرفاً)..." style="width: 100%; height: 85px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                            <div id="m_cnt_physical_prep" style="text-align: left; font-size: 10.5px; font-weight: 700; color: #dc2626; font-family: monospace; margin-top: 2px;">0 / 150 - 400 حرف</div>
                         </div>
 
-                        <div style="margin-bottom: 12px;">
-                            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">التقويم الصفي والواجب المنزلي</label>
-                            <textarea id="m_evaluation" name="evaluation" rows="2" placeholder="أدوات التقييم والواجب الصفي..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 13px; box-sizing: border-box;"></textarea>
+                        <!-- Skill Prep (150-400 chars) -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">3. الإعداد المهاري والخططي <span style="color:#ef4444;">*</span></label>
+                            <textarea id="m_skill_prep" name="skill_prep" maxlength="400" oninput="eessUpdateMobileCharBounds(this, 150, 400, 'm_cnt_skill_prep')" placeholder="شرح الخطوات المهارية والخططية (150 – 400 حرفاً)..." style="width: 100%; height: 85px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                            <div id="m_cnt_skill_prep" style="text-align: left; font-size: 10.5px; font-weight: 700; color: #dc2626; font-family: monospace; margin-top: 2px;">0 / 150 - 400 حرف</div>
                         </div>
+
+                        <!-- Conclusion (150-350 chars) -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">4. الخاتمة والتهدئة والإطالات <span style="color:#ef4444;">*</span></label>
+                            <textarea id="m_conclusion" name="conclusion" maxlength="350" oninput="eessUpdateMobileCharBounds(this, 150, 350, 'm_cnt_conclusion')" placeholder="تمارين التهدئة والختام (150 – 350 حرفاً)..." style="width: 100%; height: 85px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                            <div id="m_cnt_conclusion" style="text-align: left; font-size: 10.5px; font-weight: 700; color: #dc2626; font-family: monospace; margin-top: 2px;">0 / 150 - 350 حرف</div>
+                        </div>
+
+                        <!-- National Agenda -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">الربط بالأجندة الوطنية ورؤية الدولة <span style="color:#ef4444;">*</span></label>
+                            <textarea id="m_national_agenda" name="national_agenda" placeholder="تفاصيل الربط بالأجندة الوطنية..." style="width: 100%; height: 75px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                        </div>
+
+                        <!-- Cross Subject -->
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">الربط بالمواد والتخصصات الأخرى <span style="color:#ef4444;">*</span></label>
+                            <textarea id="m_cross_subject" name="cross_subject" placeholder="تفاصيل الربط بالمواد الأخرى..." style="width: 100%; height: 75px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-sizing: border-box; line-height: 1.5;"></textarea>
+                        </div>
+
+                        <script>
+                        function eessUpdateMobileCharBounds(input, minLen, maxLen, badgeId) {
+                            var len = input.value.length;
+                            var badge = document.getElementById(badgeId);
+                            if (badge) {
+                                if (len < minLen) {
+                                    badge.style.color = '#dc2626';
+                                    badge.innerText = len + ' / ' + minLen + ' - ' + maxLen + ' حرف (المتبقي ' + (minLen - len) + ' حرف على الأقل)';
+                                } else if (len > maxLen) {
+                                    badge.style.color = '#dc2626';
+                                    badge.innerText = len + ' / ' + minLen + ' - ' + maxLen + ' حرف (تجاوزت الحد الأقصى بـ ' + (len - maxLen) + ' حرف)';
+                                } else {
+                                    badge.style.color = '#16a34a';
+                                    badge.innerText = len + ' / ' + minLen + ' - ' + maxLen + ' حرف ✓ (مكتمل ومستوفي)';
+                                }
+                            }
+                        }
+                        </script>
                     </div>
 
                     <div id="m_submit_status" style="display: none; margin-bottom: 15px; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center;"></div>
@@ -7968,14 +8014,19 @@ class SM_Public {
         }
 
         $lesson_data = array(
-            'objectives' => sanitize_textarea_field($_POST['objectives'] ?? ''),
-            'warmup'     => sanitize_textarea_field($_POST['warmup'] ?? ''),
-            'activities' => sanitize_textarea_field($_POST['activities'] ?? ''),
-            'evaluation' => sanitize_textarea_field($_POST['evaluation'] ?? ''),
-            'homework'   => sanitize_textarea_field($_POST['homework'] ?? ''),
-            'notes'      => sanitize_textarea_field($_POST['notes'] ?? ''),
-            'file_url'   => $file_url,
-            'submitted_via' => 'mobile_app'
+            'objectives'      => sanitize_textarea_field($_POST['objectives'] ?? ''),
+            'warmup'          => sanitize_textarea_field($_POST['warmup'] ?? ''),
+            'physical_prep'   => sanitize_textarea_field($_POST['physical_prep'] ?? ''),
+            'skill_prep'      => sanitize_textarea_field($_POST['skill_prep'] ?? ''),
+            'conclusion'      => sanitize_textarea_field($_POST['conclusion'] ?? ''),
+            'national_agenda' => sanitize_textarea_field($_POST['national_agenda'] ?? ''),
+            'cross_subject'   => sanitize_textarea_field($_POST['cross_subject'] ?? ''),
+            'activities'      => sanitize_textarea_field($_POST['activities'] ?? ''),
+            'evaluation'      => sanitize_textarea_field($_POST['evaluation'] ?? ''),
+            'homework'        => sanitize_textarea_field($_POST['homework'] ?? ''),
+            'notes'           => sanitize_textarea_field($_POST['notes'] ?? ''),
+            'file_url'        => $file_url,
+            'submitted_via'   => 'mobile_app'
         );
 
         $supervisors = get_users(array('role__in' => array('sm_supervisor', 'sm_principal', 'administrator')));
