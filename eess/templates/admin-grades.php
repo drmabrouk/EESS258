@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) exit;
 $user = wp_get_current_user();
 $roles = (array) $user->roles;
 $is_teacher = in_array('sm_teacher', $roles);
-$can_manage = current_user_can('manage_grades') || current_user_can('manage_options') || $is_teacher || in_array('sm_coordinator', $roles) || in_array('sm_hod', $roles);
+$can_manage = current_user_can('manage_grades') || current_user_can('manage_options') || $is_teacher || in_array('sm_coordinator', $roles) || in_array('sm_hod', $roles) || in_array('sm_activities_supervisor', $roles);
 
 if (!$can_manage) {
     echo '<p>غير مسموح لك بالوصول لهذه الصفحة.</p>';

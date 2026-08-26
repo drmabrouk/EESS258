@@ -5258,8 +5258,20 @@ class SM_Public {
                 if (isset($_POST['terms_count'])) {
                     $existing['terms_count'] = intval($_POST['terms_count']);
                 }
+                if (!isset($existing['term_dates'])) {
+                    $existing['term_dates'] = array('term1' => array(), 'term2' => array(), 'term3' => array());
+                }
+                if (isset($_POST['deadline_term1'])) {
+                    $existing['term_dates']['term1']['deadline'] = sanitize_text_field($_POST['deadline_term1']);
+                }
+                if (isset($_POST['deadline_term2'])) {
+                    $existing['term_dates']['term2']['deadline'] = sanitize_text_field($_POST['deadline_term2']);
+                }
+                if (isset($_POST['deadline_term3'])) {
+                    $existing['term_dates']['term3']['deadline'] = sanitize_text_field($_POST['deadline_term3']);
+                }
                 if (isset($_POST['term_dates'])) {
-                    $existing['term_dates'] = $_POST['term_dates'];
+                    $existing['term_dates'] = array_merge($existing['term_dates'], $_POST['term_dates']);
                 }
                 if (isset($_POST['academic_stages'])) {
                     $existing['academic_stages'] = $_POST['academic_stages'];
@@ -6880,6 +6892,14 @@ class SM_Public {
             $monday_deadline = $monday_date . ' 12:00:00';
 
             $teachers = get_users(array('role' => 'sm_teacher', 'orderby' => 'display_name', 'order' => 'ASC'));
+
+            // Sort teachers consecutively by school
+            usort($teachers, function($a, $b) {
+                $schA = get_user_meta($a->ID, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+                $schB = get_user_meta($b->ID, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+                return strcmp($schA, $schB);
+            });
+
             $preps_raw = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}sm_lesson_preps ORDER BY created_at DESC");
 
             $preps_by_teacher = array();
@@ -6889,39 +6909,57 @@ class SM_Public {
                 }
             }
 
+            $school_info = SM_Settings::get_school_info();
+            $school_logo = !empty($school_info['logo_url']) ? $school_info['logo_url'] : '';
+            $school_name = !empty($school_info['name']) ? $school_info['name'] : 'نظام EESS الموحد لإدارة المدارس';
+
             header('Content-Type: text/html; charset=utf-8');
             ?>
             <!DOCTYPE html>
             <html lang="ar" dir="rtl">
             <head>
                 <meta charset="UTF-8">
-                <title>تقرير متابعة تسليم تحضير الدروس للأسبوع الحالي</title>
+                <title>التقرير الموحد لمتابعة تسليم تحضير الدروس للأسبوع الحالي</title>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
-                    body { font-family: 'Cairo', sans-serif; background: #fff; color: #0f172a; margin: 0; padding: 25px; direction: rtl; }
-                    .report-header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 20px; }
-                    .report-title { font-size: 20px; font-weight: 800; color: #881337; margin: 0 0 5px 0; }
-                    .report-subtitle { font-size: 13px; color: #475569; font-weight: 700; margin: 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12.5px; }
-                    th { background: #1e293b; color: #fff; padding: 10px 12px; font-weight: 800; text-align: right; border: 1px solid #1e293b; }
-                    td { padding: 9px 12px; border: 1px solid #cbd5e1; text-align: right; }
+                    @page { size: A4 portrait; margin: 12mm 15mm; }
+                    body { font-family: 'Cairo', sans-serif; background: #fff; color: #0f172a; margin: 0; padding: 15px; direction: rtl; font-size: 11px; }
+                    .report-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 15px; }
+                    .brand-box { display: flex; align-items: center; gap: 12px; }
+                    .brand-logo { width: 48px; height: 48px; object-fit: contain; }
+                    .report-title { font-size: 16px; font-weight: 800; color: #881337; margin: 0 0 2px 0; }
+                    .report-subtitle { font-size: 11px; color: #475569; font-weight: 700; margin: 0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+                    th { background: #1e293b; color: #fff; padding: 7px 10px; font-weight: 800; text-align: right; border: 1px solid #1e293b; }
+                    td { padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right; vertical-align: middle; }
                     tr:nth-child(even) { background: #f8fafc; }
-                    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 9999px; font-weight: 800; font-size: 11px; }
-                    .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecdd3; }
-                    .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-                    .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-                    .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
-                    .summary-card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; text-align: center; }
+                    .status-pill { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-weight: 800; font-size: 10px; text-align: center; }
+                    .pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+                    .pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+                    .pill-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecdd3; }
+                    .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+                    .summary-card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 8px; text-align: center; }
                     @media print { body { padding: 0; } .no-print { display: none; } }
                 </style>
             </head>
             <body>
-                <div class="no-print" style="margin-bottom: 20px; text-align: left;">
-                    <button onclick="window.print()" style="background: #881337; color: #fff; border: none; padding: 8px 20px; font-family: 'Cairo'; font-weight: 800; border-radius: 9999px; cursor: pointer;">🖨️ طباعة التقرير A4</button>
+                <div class="no-print" style="margin-bottom: 15px; text-align: left;">
+                    <button onclick="window.print()" style="background: #881337; color: #fff; border: none; padding: 7px 18px; font-family: 'Cairo'; font-weight: 800; border-radius: 9999px; cursor: pointer; font-size: 12px;">🖨️ طباعة التقرير الرسمية A4</button>
                 </div>
                 <div class="report-header">
-                    <h1 class="report-title">كشف رصد ومتابعة تسليم تحضيرات الدروس أسبوعياً</h1>
-                    <p class="report-subtitle">موعد الاستحقاق المعتمد: يوم الإثنين 12:00 ظهراً (تاريخ الموعد: <?php echo esc_html($monday_deadline); ?>)</p>
+                    <div class="brand-box">
+                        <?php if ($school_logo): ?>
+                            <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo">
+                        <?php endif; ?>
+                        <div>
+                            <div style="font-size: 14px; font-weight: 900; color: #0f172a;"><?php echo esc_html($school_name); ?></div>
+                            <div style="font-size: 11px; color: #64748b; font-weight: 700;">إدارة الشؤون التعليمية والتدريب</div>
+                        </div>
+                    </div>
+                    <div style="text-align: left;">
+                        <h1 class="report-title">كشف رصد ومتابعة تسليم تحضيرات الدروس أسبوعياً</h1>
+                        <p class="report-subtitle">موعد الاستحقاق المعتمد: يوم الإثنين 12:00 ظهراً (التاريخ: <?php echo esc_html($monday_deadline); ?>)</p>
+                    </div>
                 </div>
 
                 <?php
@@ -7035,8 +7073,20 @@ class SM_Public {
             $acad_struct = SM_Settings::get_academic_structure();
             $acad_year = $acad_struct['academic_year'] ?? '2027/2026';
 
+            // Get configured deadline for the selected term
+            $term_key = 'term' . $term_num;
+            $raw_deadline = $acad_struct['term_dates'][$term_key]['deadline'] ?? '';
+            $configured_deadline = !empty($raw_deadline) ? date('Y-m-d H:i:s', strtotime($raw_deadline)) : date('Y-m-d 23:59:59');
+
             // Fetch all active teachers
             $teachers = get_users(array('role' => 'sm_teacher', 'orderby' => 'display_name', 'order' => 'ASC'));
+
+            // Sort teachers consecutively by school name
+            usort($teachers, function($a, $b) {
+                $schA = get_user_meta($a->ID, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+                $schB = get_user_meta($b->ID, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+                return strcmp($schA, $schB);
+            });
 
             // Fetch all plans for target term number
             $plans_raw = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sm_term_plans WHERE term_number = %d", $term_num));
@@ -7045,44 +7095,63 @@ class SM_Public {
                 $plans_by_teacher[$p->teacher_id] = $p;
             }
 
+            $school_info = SM_Settings::get_school_info();
+            $school_logo = !empty($school_info['logo_url']) ? $school_info['logo_url'] : '';
+            $school_name = !empty($school_info['name']) ? $school_info['name'] : 'نظام EESS الموحد لإدارة المدارس';
+
             header('Content-Type: text/html; charset=utf-8');
             ?>
             <!DOCTYPE html>
             <html lang="ar" dir="rtl">
             <head>
                 <meta charset="UTF-8">
-                <title>تقرير متابعة تسليم الخطط الفصلية — الفصل <?php echo $term_num; ?></title>
+                <title>التقرير الموحد لمتابعة تسليم الخطط الفصلية — الفصل <?php echo $term_num; ?></title>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
-                    body { font-family: 'Cairo', sans-serif; background: #fff; color: #0f172a; margin: 0; padding: 25px; direction: rtl; }
-                    .report-header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 20px; }
-                    .report-title { font-size: 20px; font-weight: 800; color: #881337; margin: 0 0 5px 0; }
-                    .report-subtitle { font-size: 13px; color: #475569; font-weight: 700; margin: 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12.5px; }
-                    th { background: #1e293b; color: #fff; padding: 10px 12px; font-weight: 800; text-align: right; border: 1px solid #1e293b; }
-                    td { padding: 9px 12px; border: 1px solid #cbd5e1; text-align: right; }
+                    @page { size: A4 portrait; margin: 12mm 15mm; }
+                    body { font-family: 'Cairo', sans-serif; background: #fff; color: #0f172a; margin: 0; padding: 15px; direction: rtl; font-size: 11px; }
+                    .report-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 15px; }
+                    .brand-box { display: flex; align-items: center; gap: 12px; }
+                    .brand-logo { width: 48px; height: 48px; object-fit: contain; }
+                    .report-title { font-size: 16px; font-weight: 800; color: #881337; margin: 0 0 2px 0; }
+                    .report-subtitle { font-size: 11px; color: #475569; font-weight: 700; margin: 0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+                    th { background: #1e293b; color: #fff; padding: 7px 10px; font-weight: 800; text-align: right; border: 1px solid #1e293b; }
+                    td { padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right; vertical-align: middle; }
                     tr:nth-child(even) { background: #f8fafc; }
-                    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 9999px; font-weight: 800; font-size: 11px; }
-                    .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecdd3; }
-                    .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-                    .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-                    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-                    .summary-card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; text-align: center; }
+                    .status-pill { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-weight: 800; font-size: 10px; text-align: center; }
+                    .pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+                    .pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+                    .pill-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecdd3; }
+                    .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+                    .summary-card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 8px; text-align: center; }
                     @media print { body { padding: 0; } .no-print { display: none; } }
                 </style>
             </head>
             <body>
-                <div class="no-print" style="margin-bottom: 20px; text-align: left;">
-                    <button onclick="window.print()" style="background: #881337; color: #fff; border: none; padding: 8px 20px; font-family: 'Cairo'; font-weight: 800; border-radius: 9999px; cursor: pointer;">🖨️ طباعة التقرير A4</button>
+                <div class="no-print" style="margin-bottom: 15px; text-align: left;">
+                    <button onclick="window.print()" style="background: #881337; color: #fff; border: none; padding: 7px 18px; font-family: 'Cairo'; font-weight: 800; border-radius: 9999px; cursor: pointer; font-size: 12px;">🖨️ طباعة التقرير الرسمية A4</button>
                 </div>
                 <div class="report-header">
-                    <h1 class="report-title">تقرير كشف متابعة وتسليم الخطط الفصلية (الفصل الدراسي <?php echo $term_num; ?>)</h1>
-                    <p class="report-subtitle">العام الأكاديمي: <?php echo esc_html($acad_year); ?> | تاريخ التقرير: <?php echo date_i18n('Y-m-d H:i'); ?></p>
+                    <div class="brand-box">
+                        <?php if ($school_logo): ?>
+                            <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo">
+                        <?php endif; ?>
+                        <div>
+                            <div style="font-size: 14px; font-weight: 900; color: #0f172a;"><?php echo esc_html($school_name); ?></div>
+                            <div style="font-size: 11px; color: #64748b; font-weight: 700;">المكتب التنفيذي والاعتماد الأكاديمي</div>
+                        </div>
+                    </div>
+                    <div style="text-align: left;">
+                        <h1 class="report-title">كشف متابعة تسليم الخطط الفصلية (الفصل <?php echo $term_num; ?>)</h1>
+                        <p class="report-subtitle">العام الأكاديمي: <?php echo esc_html($acad_year); ?> | الموعد النهائي: <?php echo date_i18n('Y-m-d H:i', strtotime($configured_deadline)); ?></p>
+                    </div>
                 </div>
 
                 <?php
                 $total_teachers = count($teachers);
-                $submitted_count = 0;
+                $on_time_count = 0;
+                $late_count = 0;
                 $missing_count = 0;
                 $rows_html = '';
 
@@ -7093,58 +7162,77 @@ class SM_Public {
 
                     $p = $plans_by_teacher[$t->ID] ?? null;
                     if ($p && in_array($p->status, array('submitted', 'approved'))) {
-                        $submitted_count++;
-                        $st_class = 'badge-success';
-                        $st_text = ($p->status === 'approved') ? '✓ معتمدة رسمياً' : 'مرفوعة للمراجعة';
-                        $sub_date = esc_html($p->updated_at ?: 'مسجلة');
+                        $sub_created = $p->updated_at ?: $p->created_at;
+                        $sub_time = date_i18n('Y-m-d H:i', strtotime($sub_created));
+
+                        if (strtotime($sub_created) <= strtotime($configured_deadline)) {
+                            $on_time_count++;
+                            $st_class = 'pill-success';
+                            $st_text = '✓ تم في الموعد';
+                            $delay_txt = 'في الموعد المحدد';
+                        } else {
+                            $late_count++;
+                            $st_class = 'pill-warning';
+                            $st_text = '⏱️ تسليم متأخر';
+                            $diff_sec = strtotime($sub_created) - strtotime($configured_deadline);
+                            $diff_hours = round($diff_sec / 3600, 1);
+                            $delay_txt = 'تأخير ' . $diff_hours . ' ساعة';
+                        }
                     } else {
                         $missing_count++;
-                        $st_class = 'badge-danger';
+                        $st_class = 'pill-danger';
                         $st_text = '⚠️ لم يتم التسليم';
-                        $sub_date = '---';
+                        $sub_time = '---';
+                        $delay_txt = '---';
                     }
 
                     $rows_html .= '<tr>';
-                    $rows_html .= '<td>' . ($idx + 1) . '</td>';
-                    $rows_html .= '<td><strong>' . esc_html($t->display_name) . '</strong><br><small style="color:#64748b; font-family:monospace;">' . esc_html($emp_id) . '</small></td>';
+                    $rows_html .= '<td style="text-align:center;">' . ($idx + 1) . '</td>';
+                    $rows_html .= '<td><strong>' . esc_html($t->display_name) . '</strong> <span style="color:#64748b; font-family:monospace; font-size:10px;">(' . esc_html($emp_id) . ')</span></td>';
                     $rows_html .= '<td>' . esc_html($t_school) . '</td>';
                     $rows_html .= '<td>' . esc_html($t_subj) . '</td>';
-                    $rows_html .= '<td><span class="status-badge ' . $st_class . '">' . $st_text . '</span></td>';
-                    $rows_html .= '<td>' . $sub_date . '</td>';
+                    $rows_html .= '<td style="text-align:center;"><span class="status-pill ' . $st_class . '">' . $st_text . '</span></td>';
+                    $rows_html .= '<td>' . $sub_time . '</td>';
+                    $rows_html .= '<td>' . $delay_txt . '</td>';
                     $rows_html .= '</tr>';
                 }
 
-                $compliance_rate = $total_teachers > 0 ? round(($submitted_count / $total_teachers) * 100) : 0;
+                $compliance_rate = $total_teachers > 0 ? round(($on_time_count / $total_teachers) * 100) : 0;
                 ?>
 
                 <div class="summary-grid">
                     <div class="summary-card">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 700;">إجمالي المعلمين</div>
-                        <div style="font-size: 18px; font-weight: 900; color: #0f172a;"><?php echo $total_teachers; ?></div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">إجمالي المعلمين</div>
+                        <div style="font-size: 16px; font-weight: 900; color: #0f172a;"><?php echo $total_teachers; ?></div>
                     </div>
                     <div class="summary-card">
-                        <div style="font-size: 11px; color: #166534; font-weight: 700;">تم التسليم</div>
-                        <div style="font-size: 18px; font-weight: 900; color: #15803d;"><?php echo $submitted_count; ?></div>
+                        <div style="font-size: 10px; color: #166534; font-weight: 700;">في الموعد</div>
+                        <div style="font-size: 16px; font-weight: 900; color: #15803d;"><?php echo $on_time_count; ?></div>
                     </div>
                     <div class="summary-card">
-                        <div style="font-size: 11px; color: #991b1b; font-weight: 700;">غير المغطين (لم يتم التسليم)</div>
-                        <div style="font-size: 18px; font-weight: 900; color: #dc2626;"><?php echo $missing_count; ?></div>
+                        <div style="font-size: 10px; color: #b45309; font-weight: 700;">متأخر عن الموعد</div>
+                        <div style="font-size: 16px; font-weight: 900; color: #d97706;"><?php echo $late_count; ?></div>
                     </div>
                     <div class="summary-card">
-                        <div style="font-size: 11px; color: #0369a1; font-weight: 700;">نسبة الالتزام الإجمالية</div>
-                        <div style="font-size: 18px; font-weight: 900; color: #0284c7;"><?php echo $compliance_rate; ?>%</div>
+                        <div style="font-size: 10px; color: #991b1b; font-weight: 700;">لم يتم التسليم</div>
+                        <div style="font-size: 16px; font-weight: 900; color: #dc2626;"><?php echo $missing_count; ?></div>
+                    </div>
+                    <div class="summary-card">
+                        <div style="font-size: 10px; color: #0369a1; font-weight: 700;">نسبة الالتزام</div>
+                        <div style="font-size: 16px; font-weight: 900; color: #0284c7;"><?php echo $compliance_rate; ?>%</div>
                     </div>
                 </div>
 
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 40px;">#</th>
+                            <th style="width: 30px; text-align:center;">#</th>
                             <th>اسم المعلم والرقم الوظيفي</th>
                             <th>المؤسسة / المدرسة</th>
                             <th>التخصص / المادة</th>
-                            <th>حالة التسليم</th>
-                            <th>تاريخ آخر تحديث</th>
+                            <th style="text-align:center;">حالة التسليم</th>
+                            <th>تاريخ ووقت التسليم</th>
+                            <th>مدة التأخير</th>
                         </tr>
                     </thead>
                     <tbody>

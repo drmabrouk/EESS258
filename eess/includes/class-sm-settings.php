@@ -118,9 +118,9 @@ class SM_Settings {
             'academic_year' => '2027/2026',
             'terms_count' => 3,
             'term_dates' => array(
-                'term1' => array('start' => '', 'end' => ''),
-                'term2' => array('start' => '', 'end' => ''),
-                'term3' => array('start' => '', 'end' => '')
+                'term1' => array('start' => '', 'end' => '', 'deadline' => ''),
+                'term2' => array('start' => '', 'end' => '', 'deadline' => ''),
+                'term3' => array('start' => '', 'end' => '', 'deadline' => '')
             ),
             'grades_count' => 12,
             'active_grades' => array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
@@ -424,7 +424,7 @@ class SM_Settings {
                     'sm_student' => false,
                     'sm_parent' => false,
                     'sm_discipline_supervisor' => false,
-                    'sm_activities_supervisor' => false,
+                    'sm_activities_supervisor' => true,
                     'sm_transportation_supervisor' => false,
                     'sm_bus_supervisor' => false,
                     'sm_hr' => false,

@@ -77,30 +77,15 @@ $arabic_term_names = array(
             </div>
         </div>
 
-        <!-- Primary Header Actions (Wine-Red, Black, White Button Tokens) -->
+        <!-- Primary Header Actions (Reordered: Settings Gear on far-left, Print/Export, Red Report button, Assign) -->
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <?php if ($is_admin || $is_activities_sup || $is_reviewer): ?>
-            <!-- Non-Submission Administrative Report Button (Red Token) -->
-            <button type="button" onclick="document.getElementById('eess-non-submission-plan-modal').style.display='flex'" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
-                <span class="dashicons dashicons-dismiss" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
-                <span>تقرير غير المغطين للخطط</span>
-            </button>
-            <?php endif; ?>
-
-            <?php if ($is_admin): ?>
-            <!-- Assign Ready-Made Plan to Teacher Button (System Admin Only) -->
-            <button type="button" onclick="document.getElementById('eess-assign-plan-modal').style.display='flex'" class="sm-btn" style="background: #0f172a; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                <span class="dashicons dashicons-user-freelance" style="font-size: 16px; width: 16px; height: 16px; color: #38bdf8;"></span>
-                <span>إسناد خطة لمعلم</span>
-            </button>
-            <?php endif; ?>
-
             <?php if ($is_admin || $is_reviewer): ?>
-            <!-- Academic Config Gear Button -->
-            <button type="button" onclick="document.getElementById('eess-acad-config-modal').style.display='flex'" title="إعدادات العام الدراسي والفصول" class="sm-btn sm-btn-outline" style="height: 38px; width: 38px; padding: 0; border-radius: 50% !important; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+            <!-- Academic Config Gear Button (Positioned on far left) -->
+            <button type="button" onclick="document.getElementById('eess-acad-config-modal').style.display='flex'" title="إعدادات العام الدراسي والفصول والمهل" class="sm-btn sm-btn-outline" style="height: 38px; width: 38px; padding: 0; border-radius: 50% !important; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
                 <span class="dashicons dashicons-admin-generic" style="font-size: 18px; width: 18px; height: 18px; margin: 0; color: #475569;"></span>
             </button>
             <?php endif; ?>
+
             <!-- Annual Plan Printing Dropdown -->
             <div style="position: relative; display: inline-block;">
                 <button type="button" onclick="const d = document.getElementById('eess-print-annual-dropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; event.stopPropagation();" class="sm-btn" style="background: #1e293b; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
@@ -116,6 +101,22 @@ $arabic_term_names = array(
                     <a href="javascript:void(0)" onclick="eessCheckAnnualPlanPrintComplete(<?php echo $completed_terms_count; ?>)" style="display: block; padding: 10px 16px; color: #881337; font-size: 12px; font-weight: 800; text-decoration: none;">📘 تحميل الخطة السنوية الشاملة</a>
                 </div>
             </div>
+
+            <?php if ($is_admin || $is_activities_sup || $is_reviewer): ?>
+            <!-- Non-Submission Administrative Report Button (Red Token) -->
+            <button type="button" onclick="document.getElementById('eess-non-submission-plan-modal').style.display='flex'" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
+                <span class="dashicons dashicons-dismiss" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
+                <span>تقرير غير المغطين للخطط</span>
+            </button>
+            <?php endif; ?>
+
+            <?php if ($is_admin): ?>
+            <!-- Assign Ready-Made Plan to Teacher Button (System Admin Only) -->
+            <button type="button" onclick="document.getElementById('eess-assign-plan-modal').style.display='flex'" class="sm-btn" style="background: #0f172a; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <span class="dashicons dashicons-user-freelance" style="font-size: 16px; width: 16px; height: 16px; color: #38bdf8;"></span>
+                <span>إسناد خطة لمعلم</span>
+            </button>
+            <?php endif; ?>
             <?php if ($is_teacher && !$is_reviewer): ?>
             <button type="button" onclick="eessOpenPlanSetupWizard(1)" class="sm-btn" style="background: #881337; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 20px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                 <span class="dashicons dashicons-plus-alt2" style="font-size: 15px; width: 15px; height: 15px; color: #fff;"></span>
@@ -126,10 +127,26 @@ $arabic_term_names = array(
     </div>
 
         <?php if ($is_reviewer):
-            $plan_stats_total_req = count(get_users(array('role' => 'sm_teacher'))) * 3; // 3 terms
-            $plan_stats_submitted = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE status IN ('submitted', 'approved')");
-            $plan_stats_approved  = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE status = 'approved'");
-            $plan_stats_returned  = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE status = 'returned'");
+            $all_teachers = get_users(array('role' => 'sm_teacher'));
+            if ($is_activities_sup) {
+                $all_teachers = array_filter($all_teachers, function($t) {
+                    $spec = get_user_meta($t->ID, 'sm_specialization', true) ?: (get_user_meta($t->ID, 'specialization', true) ?: (get_user_meta($t->ID, 'subject', true) ?: ''));
+                    return (mb_strpos($spec, 'بدنية') !== false || mb_strpos($spec, 'رياضة') !== false || mb_strpos($spec, 'Health') !== false || mb_strpos($spec, 'Physical') !== false);
+                });
+            }
+            $target_teacher_ids = array_map(function($t) { return $t->ID; }, $all_teachers);
+            $plan_stats_total_req = count($target_teacher_ids) * 3;
+
+            if (!empty($target_teacher_ids)) {
+                $id_placeholders = implode(',', array_fill(0, count($target_teacher_ids), '%d'));
+                $plan_stats_submitted = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status IN ('submitted', 'approved')", ...$target_teacher_ids));
+                $plan_stats_approved  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status = 'approved'", ...$target_teacher_ids));
+                $plan_stats_returned  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status = 'returned'", ...$target_teacher_ids));
+            } else {
+                $plan_stats_submitted = 0;
+                $plan_stats_approved = 0;
+                $plan_stats_returned = 0;
+            }
             $plan_stats_missing   = max(0, $plan_stats_total_req - $plan_stats_submitted);
             $plan_compliance_rate = $plan_stats_total_req > 0 ? round(($plan_stats_submitted / $plan_stats_total_req) * 100) : 0;
         ?>
@@ -1667,6 +1684,24 @@ function eessShowTermPlanStatDetails(statKey) {
                     <option value="2" <?php selected($acad_struct['terms_count'] ?? 3, 2); ?>>فصلان دراسيان (2)</option>
                     <option value="3" <?php selected($acad_struct['terms_count'] ?? 3, 3); ?>>ثلاثة فصول دراسية (3)</option>
                 </select>
+            </div>
+
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 14px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 800; color: #0f172a;">المواعيد والمهل النهائية المعتمدة للتسليم (الخطط)</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <label style="font-size: 11.5px; font-weight: 700; color: #475569; display: block; margin-bottom: 3px;">الموعد النهائي للفصل الأول (Term 1) *</label>
+                        <input type="datetime-local" name="deadline_term1" value="<?php echo esc_attr($acad_struct['term_dates']['term1']['deadline'] ?? '2026-10-15T23:59'); ?>" class="sm-input" style="height: 36px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11.5px; font-weight: 700; color: #475569; display: block; margin-bottom: 3px;">الموعد النهائي للفصل الثاني (Term 2) *</label>
+                        <input type="datetime-local" name="deadline_term2" value="<?php echo esc_attr($acad_struct['term_dates']['term2']['deadline'] ?? '2027-01-15T23:59'); ?>" class="sm-input" style="height: 36px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11.5px; font-weight: 700; color: #475569; display: block; margin-bottom: 3px;">الموعد النهائي للفصل الثالث (Term 3) *</label>
+                        <input type="datetime-local" name="deadline_term3" value="<?php echo esc_attr($acad_struct['term_dates']['term3']['deadline'] ?? '2027-04-15T23:59'); ?>" class="sm-input" style="height: 36px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
+                    </div>
+                </div>
             </div>
 
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
