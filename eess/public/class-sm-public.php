@@ -683,7 +683,7 @@ class SM_Public {
                         <h4 style="margin: 0; font-size: 14.5px; font-weight: 800; color: #0f172a;">رفع تحضير درس جاهز</h4>
                         <button type="button" onclick="eessBackToMobileMenu()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 12px; border-radius: 9999px; font-size: 11.5px; font-weight: 800; cursor: pointer;">➔ عودة</button>
                     </div>
-                    <form method="post" enctype="multipart/form-data" action="">
+                    <form id="eess_mobile_prep_upload_form" onsubmit="eessSubmitMobileUpload(event, 'prep')" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="sm_submit_mobile_lesson">
                         <?php wp_nonce_field('sm_mobile_prep_nonce', 'sm_nonce'); ?>
                         <div style="margin-bottom: 10px;">
@@ -692,9 +692,10 @@ class SM_Public {
                         </div>
                         <div style="margin-bottom: 12px;">
                             <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف التحضير (PDF / Word) <span style="color:#ef4444;">*</span></label>
-                            <input type="file" name="lesson_file" accept=".pdf,.doc,.docx" required style="width: 100%; font-size: 12px;">
+                            <input type="file" id="m_prep_file_input" name="lesson_file" accept=".pdf,.doc,.docx" required onchange="eessMobileHandleFileSelect(this, 'prep')" style="width: 100%; font-size: 12px;">
                         </div>
-                        <button type="submit" class="sm-btn" style="width: 100%; height: 42px; background: #0f172a; color: white !important; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer;">رفع وإرسال التحضير</button>
+                        <div id="m_prep_file_status" style="display: none; margin-top: 10px; margin-bottom: 12px; padding: 12px; border-radius: 10px; font-size: 12px;"></div>
+                        <button type="submit" id="m_prep_submit_btn" disabled class="sm-btn" style="width: 100%; height: 42px; background: #0f172a; color: white !important; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: not-allowed; opacity: 0.5;">رفع وإرسال التحضير</button>
                     </form>
                 </div>
 
@@ -704,19 +705,21 @@ class SM_Public {
                         <h4 style="margin: 0; font-size: 14.5px; font-weight: 800; color: #0284c7;">تقديم خطة فصلية جديدة</h4>
                         <button type="button" onclick="eessBackToMobileMenu()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 12px; border-radius: 9999px; font-size: 11.5px; font-weight: 800; cursor: pointer;">➔ عودة</button>
                     </div>
-                    <form method="post" enctype="multipart/form-data" action="">
+                    <form id="eess_mobile_plan_upload_form" onsubmit="eessSubmitMobileUpload(event, 'plan')" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="sm_save_term_plan">
                         <input type="hidden" name="planning_method" value="upload">
+                        <input type="hidden" name="status" value="submitted">
                         <?php wp_nonce_field('sm_term_plan_action', 'sm_nonce'); ?>
                         <div style="margin-bottom: 10px;">
                             <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">عنوان الخطة / المادة <span style="color:#ef4444;">*</span></label>
-                            <input type="text" name="plan_title" required class="sm-input" placeholder="اسم المادة والخطة..." style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
+                            <input type="text" name="subject" required class="sm-input" placeholder="اسم المادة والخطة..." style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
                         </div>
                         <div style="margin-bottom: 12px;">
                             <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف الخطة الفصلية (PDF / Word) <span style="color:#ef4444;">*</span></label>
-                            <input type="file" name="plan_document_file" accept=".pdf,.doc,.docx" required style="width: 100%; font-size: 12px;">
+                            <input type="file" id="m_plan_file_input" name="plan_document_file" accept=".pdf,.doc,.docx" required onchange="eessMobileHandleFileSelect(this, 'plan')" style="width: 100%; font-size: 12px;">
                         </div>
-                        <button type="submit" class="sm-btn" style="width: 100%; height: 42px; background: #0284c7; color: white !important; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer;">رفع وإرسال الخطة الفصلية</button>
+                        <div id="m_plan_file_status" style="display: none; margin-top: 10px; margin-bottom: 12px; padding: 12px; border-radius: 10px; font-size: 12px;"></div>
+                        <button type="submit" id="m_plan_submit_btn" disabled class="sm-btn" style="width: 100%; height: 42px; background: #0284c7; color: white !important; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: not-allowed; opacity: 0.5;">رفع وإرسال الخطة الفصلية</button>
                     </form>
                 </div>
 
@@ -764,6 +767,104 @@ class SM_Public {
                 document.getElementById('m-screen-view-plans').style.display = 'none';
                 document.getElementById('m-step-form').style.display = 'none';
                 document.getElementById('m-teacher-dashboard-overview').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            function eessMobileHandleFileSelect(input, mode) {
+                var statusBox = document.getElementById(mode === 'prep' ? 'm_prep_file_status' : 'm_plan_file_status');
+                var submitBtn = document.getElementById(mode === 'prep' ? 'm_prep_submit_btn' : 'm_plan_submit_btn');
+
+                if (!input.files || !input.files[0]) {
+                    statusBox.style.display = 'none';
+                    statusBox.innerHTML = '';
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    submitBtn.style.cursor = 'not-allowed';
+                    return;
+                }
+
+                var file = input.files[0];
+                var ext = file.name.split('.').pop().toLowerCase();
+                var allowedExts = ['pdf', 'doc', 'docx'];
+
+                if (!allowedExts.includes(ext)) {
+                    statusBox.style.display = 'block';
+                    statusBox.style.background = '#fef2f2';
+                    statusBox.style.border = '1px solid #fca5a5';
+                    statusBox.style.color = '#991b1b';
+                    statusBox.innerHTML = '<div style="font-weight: 800; margin-bottom: 2px;">✕ صياغة الملف غير مدعومة</div>' +
+                                          '<div style="font-size: 11px;">يرجى اختيار ملف بصلة PDF أو Word (.doc, .docx) فقط.</div>';
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    submitBtn.style.cursor = 'not-allowed';
+                    return;
+                }
+
+                var fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                statusBox.style.display = 'block';
+                statusBox.style.background = '#f0fdf4';
+                statusBox.style.border = '1px solid #86efac';
+                statusBox.style.color = '#166534';
+                statusBox.innerHTML = '<div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12.5px; margin-bottom: 4px;">' +
+                                      '<span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: #22c55e; color: white; border-radius: 50%; font-size: 12px; font-weight: 900;">✓</span>' +
+                                      '<span>تم فحص وتأكيد جاهزية الملف</span>' +
+                                      '</div>' +
+                                      '<div style="font-size: 11px; color: #15803d; line-height: 1.4;">' +
+                                      '<strong>اسم الملف:</strong> ' + file.name + '<br>' +
+                                      '<strong>الحجم:</strong> ' + fileSizeMB + ' ميجابايت' +
+                                      '</div>';
+
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            }
+
+            function eessSubmitMobileUpload(e, mode) {
+                e.preventDefault();
+                var form = e.target;
+                var submitBtn = document.getElementById(mode === 'prep' ? 'm_prep_submit_btn' : 'm_plan_submit_btn');
+                var fileInput = document.getElementById(mode === 'prep' ? 'm_prep_file_input' : 'm_plan_file_input');
+
+                if (!fileInput.files || !fileInput.files[0]) {
+                    eessShowMobileToast('يرجى اختيار ملف التحضير أولاً قبل الإرسال.', 'error');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.6';
+                submitBtn.innerHTML = 'جاري التحميل والحفظ... ⏳';
+
+                var formData = new FormData(form);
+
+                jQuery.ajax({
+                    url: '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.innerHTML = (mode === 'prep') ? 'رفع وإرسال التحضير' : 'رفع وإرسال الخطة الفصلية';
+
+                        if (res.success) {
+                            eessShowMobileToast('✓ ' + (res.data && res.data.message ? res.data.message : 'تم رفع وإرسال الملف بنجاح!'), 'success');
+                            form.reset();
+                            eessMobileHandleFileSelect(fileInput, mode);
+
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1200);
+                        } else {
+                            eessShowMobileToast('✕ ' + (res.data || 'حدث خطأ أثناء رفع الملف، يرجى المحاولة لاحقاً.'), 'error');
+                        }
+                    },
+                    error: function() {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.innerHTML = (mode === 'prep') ? 'رفع وإرسال التحضير' : 'رفع وإرسال الخطة الفصلية';
+                        eessShowMobileToast('✕ فشل الاتصال بالخادم، يرجى التحقق من الاتصال والمحاولة مجدداً.', 'error');
+                    }
+                });
             }
             </script>
             <?php endif; ?>
@@ -7851,7 +7952,13 @@ class SM_Public {
             if ($inserted) {
                 $new_id = $wpdb->insert_id;
                 SM_Logger::log('إنشاء خطة فصلية', "تم إنشاء خطة فصلية جديدة (ID: $new_id)");
-                wp_send_json_success(array('plan_id' => $new_id, 'status' => $status, 'completion_pct' => $completion_pct, 'total_weeks' => $total_weeks));
+                wp_send_json_success(array(
+                    'plan_id' => $new_id,
+                    'status' => $status,
+                    'completion_pct' => $completion_pct,
+                    'total_weeks' => $total_weeks,
+                    'message' => 'تم رفع وإرسال الخطة الفصلية بنجاح وتوثيقها في قاعدة البيانات.'
+                ));
             } else {
                 wp_send_json_error('فشل حفظ الخطة في قاعدة البيانات.');
             }
