@@ -377,20 +377,22 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
         <div id="prep-modal" class="sm-modal-overlay" style="display: <?php echo ($edit_prep && $edit_prep->id > 0) ? 'flex' : 'none'; ?>; position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;">
             <div class="sm-modal-content" style="background: #ffffff; border-radius: 20px; max-width: 960px; width: 100%; max-height: 94vh; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); border: 1px solid #cbd5e1; display: flex; flex-direction: column;">
 
-                <!-- Flush Full-Width Modal Header Banner with White Title and White Icon -->
-                <div style="background: #0f172a; color: #ffffff; padding: 18px 24px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; margin: 0;">
+                <!-- Clean White Modal Header without Colored Banner -->
+                <div style="background: #ffffff; padding: 22px 28px 14px 28px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="dashicons dashicons-welcome-write-blog" style="color: #ffffff; font-size: 22px; width: 22px; height: 22px; margin: 0;"></span>
+                        <div style="width: 44px; height: 44px; background: #f8fafc; border-radius: 50%; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center; color: #0f172a;">
+                            <span class="dashicons dashicons-welcome-write-blog" style="font-size: 22px; width: 22px; height: 22px; margin: 0;"></span>
+                        </div>
                         <div>
-                            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff; font-family: 'Cairo', sans-serif;">
-                                <?php echo ($edit_prep && $edit_prep->id > 0) ? 'تعديل وثيقة تحضير درس' : 'إضافة تحضير جديد – المساعد الأكاديمي'; ?>
+                            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #0f172a; font-family: 'Cairo', sans-serif;">
+                                <?php echo ($edit_prep && $edit_prep->id > 0) ? 'تعديل وثيقة تحضير درس' : 'إعداد وتحضير درس جديد'; ?>
                             </h3>
-                            <p style="margin: 3px 0 0 0; font-size: 11.5px; color: #94a3b8; font-weight: 600;">إعداد وتوثيق الخطة الدراسية خطوة بخطوة وفق الهيكل الأكاديمي</p>
+                            <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b; font-weight: 500;">إعداد وتوثيق الخطط والأنشطة الدراسية خطوة بخطوة</p>
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span id="prep-autosave-badge" style="background: rgba(255,255,255,0.1); color: #cbd5e1; padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700;">مسودة</span>
-                        <button type="button" onclick="document.getElementById('prep-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 26px; cursor: pointer; line-height: 1;">&times;</button>
+                        <span id="prep-autosave-badge" style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; border: 1px solid #cbd5e1;">مسودة</span>
+                        <button type="button" onclick="document.getElementById('prep-modal').style.display='none'" style="width: 34px; height: 34px; border-radius: 50%; background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; font-size: 20px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s;">&times;</button>
                     </div>
                 </div>
 
@@ -409,48 +411,62 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                         <?php wp_nonce_field('eess_lesson_prep_action', 'eess_lesson_prep_nonce'); ?>
                         <input type="hidden" name="prep_id" id="eess_prep_db_id" value="<?php echo $edit_prep->id ?? 0; ?>">
 
-                        <!-- Full-Width Balanced RTL Stepper Track -->
-                        <div style="background: #f8fafc; padding: 14px 20px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 22px; position: relative;">
-                            <div style="position: absolute; top: 50%; left: 40px; right: 40px; height: 2px; background: #e2e8f0; transform: translateY(-50%); z-index: 1;"></div>
-                            <div style="position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                <div class="eess-prep-step-indicator active" id="eess-prep-ind-1" style="font-weight: 800; font-size: 11.5px; color: var(--sm-primary-color); display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: var(--sm-primary-color); color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">1</span>
-                                    <span>البيانات العامة</span>
+                        <input type="hidden" name="prep_method" id="eess_prep_method" value="create">
+
+                        <!-- Initial Preparation Method Selection Screen -->
+                        <div id="eess-prep-method-select" style="display: <?php echo ($edit_prep && $edit_prep->id > 0) ? 'none' : 'block'; ?>; text-align: center; padding: 15px 0;">
+                            <h4 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #0f172a; text-align: center;">مرحباً أ. <?php echo esc_html($user->display_name); ?> — اختيار طريقة التحضير</h4>
+                            <p style="margin: 0 0 24px 0; font-size: 13px; color: #64748b; line-height: 1.6; text-align: center;">يرجى اختيار طريقة إعداد وتوثيق تحضير الدرس للبدء:</p>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 10px;">
+                                <!-- Option 1: Create Lesson Preparation -->
+                                <div id="eess-prep-card-create" onclick="eessChoosePrepMethod('create')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 16px; padding: 22px 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);" onmouseover="this.style.borderColor='#881337'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.transform='translateY(0)';">
+                                    <div style="width: 52px; height: 52px; background: #fef2f2; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #881337; margin-bottom: 12px;">
+                                        <span class="dashicons dashicons-welcome-write-blog" style="font-size: 26px; width: 26px; height: 26px;"></span>
+                                    </div>
+                                    <h4 style="margin: 0 0 6px 0; font-size: 14.5px; font-weight: 800; color: #881337;">إعداد تحضير الدرس بالنظام</h4>
+                                    <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">إدخال الأهداف والتهيئة والأنشطة والتقويم خطوة بخطوة.</p>
                                 </div>
-                                <div class="eess-prep-step-indicator" id="eess-prep-ind-2" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">2</span>
-                                    <span>الأهداف والتمهيد</span>
-                                </div>
-                                <div class="eess-prep-step-indicator" id="eess-prep-ind-3" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">3</span>
-                                    <span>الأنشطة والتقويم</span>
-                                </div>
-                                <div class="eess-prep-step-indicator" id="eess-prep-ind-4" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">4</span>
-                                    <span>الواجبات والملاحظات</span>
-                                </div>
-                                <div class="eess-prep-step-indicator" id="eess-prep-ind-5" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">5</span>
-                                    <span>المراجعة والإرسال</span>
+
+                                <!-- Option 2: Upload Ready Lesson File -->
+                                <div id="eess-prep-card-upload" onclick="eessChoosePrepMethod('upload')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 16px; padding: 22px 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);" onmouseover="this.style.borderColor='#0284c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.transform='translateY(0)';">
+                                    <div style="width: 52px; height: 52px; background: #e0f2fe; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #0284c7; margin-bottom: 12px;">
+                                        <span class="dashicons dashicons-upload" style="font-size: 26px; width: 26px; height: 26px;"></span>
+                                    </div>
+                                    <h4 style="margin: 0 0 6px 0; font-size: 14.5px; font-weight: 800; color: #0f172a;">رفع ملف تحضير جاهز (PDF / Word)</h4>
+                                    <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">رفع وثيقة تحضير مكتملة جاهزة مباشرة للمراجعة والاعتماد.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Stage 1: Basic Information (Only عنوان الدرس & تاريخ الدرس) -->
-                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-1" style="display: block;">
+                        <!-- Stepper Track Container (Hidden initially until method chosen) -->
+                        <div id="eess-prep-stepper-track" style="display: <?php echo ($edit_prep && $edit_prep->id > 0) ? 'block' : 'none'; ?>; background: #f8fafc; padding: 14px 20px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 22px; position: relative;">
+                            <div style="position: absolute; top: 50%; left: 40px; right: 40px; height: 2px; background: #e2e8f0; transform: translateY(-50%); z-index: 1;"></div>
+                            <div style="position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <div class="eess-prep-step-indicator active" id="eess-prep-ind-1" style="font-weight: 800; font-size: 11.5px; color: #881337; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
+                                    <span style="background: #881337; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">1</span>
+                                    <span id="eess-prep-step-lbl-1">البيانات والتمهيد</span>
+                                </div>
+                                <div class="eess-prep-step-indicator" id="eess-prep-ind-2" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
+                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">2</span>
+                                    <span id="eess-prep-step-lbl-2">الأنشطة والتقويم</span>
+                                </div>
+                                <div class="eess-prep-step-indicator" id="eess-prep-ind-3" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
+                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">3</span>
+                                    <span id="eess-prep-step-lbl-3">المراجعة والتقديم</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stage 1: Basic Information & Objective Setup -->
+                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-1" style="display: none;">
                             <?php
                                 $teacher_school = get_user_meta($user_id, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
                                 $teacher_grade  = get_user_meta($user_id, 'sm_grade_level', true) ?: (get_user_meta($user_id, 'grade', true) ?: 'الصف العاشر');
                                 $teacher_section= get_user_meta($user_id, 'sm_class_section', true) ?: (get_user_meta($user_id, 'section', true) ?: 'أ');
                             ?>
-                            <!-- Personalized Step 1 Educational Instructional Note -->
-                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;">
-                                <div style="font-weight: 800; font-size: 13.5px; color: #166534; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-                                    <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px;"></span>
-                                    <span>أهلاً بك أ. <?php echo esc_html($user->display_name); ?> - الإرشادات الأكاديمية للخطوة الأولى:</span>
-                                </div>
-                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #15803d; line-height: 1.5;">تتيح لك هذه الخطوة إدخال عنوان الدرس الرئيسي وتحديد تاريخ إعطائه. تم استرجاع مادتك وتسكينك الأكاديمي تلقائياً لتسريع وتسهيل إدخال البيانات.</p>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; color: #15803d; font-weight: 700; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 8px; border: 1px solid #bbf7d0;">
+                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; color: #15803d; font-weight: 700;">
                                     <div>📚 <strong>المادة:</strong> <?php echo esc_html($current_subject); ?></div>
                                     <div>🏫 <strong>المدرسة:</strong> <?php echo esc_html($teacher_school); ?></div>
                                     <div>🎓 <strong>التسكين:</strong> <?php echo esc_html($teacher_grade . ' (' . $teacher_section . ')'); ?></div>
@@ -461,15 +477,45 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <input type="hidden" id="eess_lesson_grade" name="lesson_grade" value="<?php echo esc_attr($edit_prep->grade_level ?? $teacher_grade); ?>">
                             <input type="hidden" id="eess_lesson_section" name="lesson_section" value="<?php echo esc_attr($edit_prep->class_section ?? $teacher_section); ?>">
 
-                            <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الأولى: عنوان وتاريخ الدرس</h4>
-                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
-                                <div>
-                                    <label class="sm-label" style="font-weight: 700; font-size: 12.5px; color: #334155; margin-bottom: 6px; display: block;">عنوان الدرس <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" id="eess_lesson_title" name="lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input" placeholder="أدخل عنوان الدرس الرئيسي..." style="height: 42px; font-size: 13px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 16px;" required>
+                            <!-- Option A Form Fields -->
+                            <div id="eess-prep-create-fields">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الأولى: البيانات الرئيسية والأهداف السلوكية</h4>
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
+                                    <div style="position: relative;">
+                                        <input type="text" id="eess_lesson_title" name="lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input eess-float-input" placeholder=" " style="height: 44px; font-size: 13px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" required>
+                                        <label for="eess_lesson_title" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">عنوان الدرس الرئيسي <span style="color:#ef4444;">*</span></label>
+                                    </div>
+                                    <div>
+                                        <label class="sm-label" style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px; display: block;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
+                                        <input type="date" id="eess_lesson_date" name="lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px;" required>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="sm-label" style="font-weight: 700; font-size: 12.5px; color: #334155; margin-bottom: 6px; display: block;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
-                                    <input type="date" id="eess_lesson_date" name="lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 14px;" required>
+
+                                <!-- Behavioral Objectives Field -->
+                                <div style="position: relative; margin-bottom: 18px;">
+                                    <textarea id="eess_objectives" name="objectives" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" " required><?php echo esc_textarea($data['objectives'] ?? ''); ?></textarea>
+                                    <label for="eess_objectives" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">1. الأهداف السلوكية والتعلمية <span style="color:#ef4444;">*</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Option B Upload Fields -->
+                            <div id="eess-prep-upload-fields" style="display: none;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">رفع ملف التحضير الجاهز</h4>
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
+                                    <div style="position: relative;">
+                                        <input type="text" id="eess_upload_lesson_title" name="upload_lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input eess-float-input" placeholder=" " style="height: 44px; font-size: 13px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;">
+                                        <label for="eess_upload_lesson_title" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #0284c7; border-radius: 4px; pointer-events: none;">عنوان وثيقة التحضير <span style="color:#ef4444;">*</span></label>
+                                    </div>
+                                    <div>
+                                        <label class="sm-label" style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px; display: block;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
+                                        <input type="date" id="eess_upload_lesson_date" name="upload_lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px;">
+                                    </div>
+                                </div>
+
+                                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 20px; margin-bottom: 16px;">
+                                    <label style="display: block; font-weight: 800; font-size: 12.5px; color: #0369a1; margin-bottom: 8px;">اختر ملف التحضير بصيغة (PDF, DOC, DOCX) <span style="color:#ef4444;">*</span></label>
+                                    <input type="file" name="prep_document_file" id="eess_prep_document_file" accept=".pdf,.doc,.docx" class="sm-input" onchange="eessValidatePrepFile(this)" style="height: 42px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 12px; padding: 6px 12px; width: 100%; box-sizing: border-box;">
+                                    <div id="eess_prep_file_status_preview" style="display: none; margin-top: 10px; font-size: 12px; font-weight: 700; color: #166534; background: #dcfce7; padding: 8px 12px; border-radius: 8px; border: 1px solid #bbf7d0;"></div>
                                 </div>
                             </div>
                         </div>
@@ -570,6 +616,50 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                         </div>
 
                         <script>
+                            function eessValidatePrepFile(input) {
+                                var preview = document.getElementById('eess_prep_file_status_preview');
+                                if (input.files && input.files[0]) {
+                                    var file = input.files[0];
+                                    var ext = file.name.split('.').pop().toLowerCase();
+                                    if (!['pdf', 'doc', 'docx'].includes(ext)) {
+                                        alert('يرجى اختيار ملف بصيغة PDF أو Word فقط.');
+                                        input.value = '';
+                                        if (preview) preview.style.display = 'none';
+                                        return;
+                                    }
+                                    if (preview) {
+                                        preview.innerHTML = '📄 تم اختيار الملف: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' كيلوبايت)';
+                                        preview.style.display = 'block';
+                                    }
+                                } else if (preview) {
+                                    preview.style.display = 'none';
+                                }
+                            }
+
+                            function eessChoosePrepMethod(method) {
+                                document.getElementById('eess_prep_method').value = method;
+                                document.getElementById('eess-prep-method-select').style.display = 'none';
+                                document.getElementById('eess-prep-stepper-track').style.display = 'block';
+
+                                if (method === 'upload') {
+                                    document.getElementById('eess-prep-step-lbl-1').innerText = 'عنوان ومعلومات الوثيقة';
+                                    document.getElementById('eess-prep-step-lbl-2').innerText = 'رفع المستند';
+                                    document.getElementById('eess-prep-step-lbl-3').innerText = 'تأكيد وإرسال';
+
+                                    document.getElementById('eess-prep-create-fields').style.display = 'none';
+                                    document.getElementById('eess-prep-upload-fields').style.display = 'block';
+                                } else {
+                                    document.getElementById('eess-prep-step-lbl-1').innerText = 'البيانات والأهداف';
+                                    document.getElementById('eess-prep-step-lbl-2').innerText = 'الأنشطة والتقويم';
+                                    document.getElementById('eess-prep-step-lbl-3').innerText = 'المراجعة والتقديم';
+
+                                    document.getElementById('eess-prep-create-fields').style.display = 'block';
+                                    document.getElementById('eess-prep-upload-fields').style.display = 'none';
+                                }
+
+                                eessGoToPrepStage(1);
+                            }
+
                             function eessToggleResourceCapsule(element, resourceName) {
                                 const hiddenInput = document.getElementById('eess_selected_resources_json');
                                 let currentSelected = [];
@@ -604,40 +694,28 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             }
                         </script>
 
-                        <!-- Stage 4: Homework & Notes -->
-                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-4" style="display: none;">
-                            <h4 style="margin: 0 0 15px 0; font-size: 13px; font-weight: 800; color: var(--sm-primary-color);">الخطوة الرابعة: الواجبات والملاحظات التربوية</h4>
-                            <div style="margin-bottom: 15px;">
-                                <label class="sm-label" style="font-weight: 700; font-size: 12px;">5. الواجبات المنزلية والمهام الأكاديمية (Homework)</label>
-                                <textarea id="eess_homework" name="homework" class="sm-input" style="height: 80px; font-size: 12px;" placeholder="حدد المهام أو الواجبات المطلوبة من الطلاب..."><?php echo esc_textarea($data['homework'] ?? ''); ?></textarea>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label class="sm-label" style="font-weight: 700; font-size: 12px;">6. ملاحظات وإرشادات وتأملات مهنية إضافية</label>
-                                <textarea id="eess_notes" name="notes" class="sm-input" style="height: 80px; font-size: 12px;" placeholder="أي ملاحظات أو إرشادات تربوية إضافية..."><?php echo esc_textarea($data['notes'] ?? ''); ?></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Stage 5: Final Review & Confirmation -->
-                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-5" style="display: none;">
-                            <h4 style="margin: 0 0 15px 0; font-size: 13px; font-weight: 800; color: var(--sm-primary-color);">الخطوة الخامسة: مراجعة وثيقة التحضير والتقديم للمراجعة</h4>
-                            <div style="background: #f8fafc; padding: 20px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 12px; line-height: 1.6; margin-bottom: 20px;" id="eess-prep-review-live-summary">
+                        <!-- Stage 3: Final Review & Confirmation -->
+                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-3" style="display: none;">
+                            <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثالثة: مراجعة وثيقة التحضير والتقديم النهائي</h4>
+                            <div style="background: #f8fafc; padding: 20px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 12.5px; line-height: 1.6; margin-bottom: 20px;" id="eess-prep-review-live-summary">
                                 <!-- Filled live via JavaScript -->
                             </div>
                         </div>
 
-                        <!-- Wizard Step Action Controls -->
-                        <div style="display: flex; gap: 12px; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 15px;">
-                            <div>
-                                <button type="button" id="eess-prep-prev-btn" class="sm-btn sm-btn-outline" style="width: auto; height: 38px; padding: 0 18px; font-size: 12.5px; border-radius: 9999px !important; display: none; cursor:pointer;" onclick="eessGoToPrepStage(eessActivePrepStage - 1)">السابق</button>
+                        <!-- Wizard Step Action Controls (RTL structure: Next/Submit on far-left, Previous on far-right) -->
+                        <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 15px;">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <button type="button" id="eess-prep-next-btn" class="sm-btn" style="width: auto; height: 38px; padding: 0 22px; font-size: 12.5px; background: #881337; border: none; border-radius: 9999px !important; cursor:pointer; color: white !important; font-weight: 800;" onclick="eessGoToPrepStage(eessActivePrepStage + 1)">المتابعة للخطوة التالية ➔</button>
+
+                                <!-- Submit for Review Action (Dark Red Primary Token) -->
+                                <button type="submit" name="eess_save_lesson_prep" id="eess-prep-submit-btn" onclick="document.getElementById('lesson_status').value='submitted'; eessClearPrepDraftBackup();" class="sm-btn" style="width: auto; height: 38px; padding: 0 22px; font-size: 12.5px; background: #dc2626; border-radius: 9999px !important; border: none; color: white !important; font-weight: 800; display: none; cursor:pointer; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">إرسال للمراجعة</button>
+
+                                <!-- Save as Draft Action (Secondary Token) -->
+                                <button type="submit" name="eess_save_lesson_prep" id="eess-prep-draft-btn" onclick="document.getElementById('lesson_status').value='draft'" class="sm-btn sm-btn-secondary" style="width: auto; height: 38px; padding: 0 18px; font-size: 12.5px; background: #475569; color: white !important; border-radius: 9999px !important; border: none; font-weight: 700; display: none; cursor:pointer;">حفظ كمسودة</button>
                             </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button type="button" id="eess-prep-next-btn" class="sm-btn" style="width: auto; height: 38px; padding: 0 22px; font-size: 12.5px; background: #881337; border: none; border-radius: 9999px !important; cursor:pointer; color: white !important; font-weight: 800;" onclick="eessGoToPrepStage(eessActivePrepStage + 1)">المتابعة للخطوة التالية</button>
 
-                                <!-- Submit actions (Hidden until last stage) -->
-                                <button type="submit" name="eess_save_lesson_prep" id="eess-prep-submit-btn" onclick="document.getElementById('lesson_status').value='submitted'; eessClearPrepDraftBackup();" class="sm-btn" style="width: auto; height: 38px; padding: 0 20px; font-size: 12.5px; background: #16a34a; border-radius: 9999px !important; border: none; color: white !important; font-weight: 800; display: none; cursor:pointer;">تم التقديم للمراجعة</button>
-                                <button type="submit" name="eess_save_lesson_prep" id="eess-prep-draft-btn" onclick="document.getElementById('lesson_status').value='draft'" class="sm-btn sm-btn-secondary" style="width: auto; height: 38px; padding: 0 18px; font-size: 12.5px; background: #334155; color: white !important; border-radius: 9999px !important; border: none; font-weight: 700; display: none; cursor:pointer;">حفظ كمسودة</button>
-
-                                <button type="button" onclick="document.getElementById('prep-modal').style.display='none'" class="sm-btn sm-btn-outline" style="width: auto; height: 38px; font-size: 12px; border-radius: 9999px !important;">إغلاق</button>
+                            <div>
+                                <button type="button" id="eess-prep-prev-btn" class="sm-btn sm-btn-outline" style="width: auto; height: 38px; padding: 0 18px; font-size: 12.5px; border-radius: 9999px !important; display: none; cursor:pointer; border: 1px solid #cbd5e1; color: #475569; font-weight: 700;" onclick="eessGoToPrepStage(eessActivePrepStage - 1)">السابق</button>
                             </div>
                         </div>
 
@@ -1268,33 +1346,44 @@ function eessSubmitAssignPrepForm(e) {
 let eessActivePrepStage = 1;
 
 function eessGoToPrepStage(stageNum) {
-    if (stageNum < 1 || stageNum > 5) return;
+    if (stageNum < 1 || stageNum > 3) return;
 
-    // Live validation before proceeding
+    const method = document.getElementById('eess_prep_method') ? document.getElementById('eess_prep_method').value : 'create';
+
+    // Validation before advancing
     if (stageNum > eessActivePrepStage) {
         if (eessActivePrepStage === 1) {
-            const title = document.getElementById('eess_lesson_title').value.trim();
-            const subject = document.getElementById('eess_lesson_subject').value.trim();
-            const grade = document.getElementById('eess_lesson_grade').value.trim();
-            const section = document.getElementById('eess_lesson_section').value.trim();
-            const date = document.getElementById('eess_lesson_date').value.trim();
-            if (!title || !subject || !grade || !section || !date) {
-                alert('يرجى إكمال كافة البيانات العامة المطلوبة المميزة بنجمة (*)');
-                return;
+            if (method === 'upload') {
+                const upTitle = document.getElementById('eess_upload_lesson_title').value.trim();
+                const docFile = document.getElementById('eess_prep_document_file');
+                const hasExistingFile = document.getElementById('eess_prep_file_status_preview') && document.getElementById('eess_prep_file_status_preview').style.display !== 'none';
+                if (!upTitle) {
+                    alert('يرجى إدخال عنوان وثيقة التحضير للمتابعة.');
+                    return;
+                }
+                if ((!docFile || !docFile.files || docFile.files.length === 0) && !hasExistingFile) {
+                    alert('يرجى اختيار ملف التحضير الجاهز (PDF أو Word) قبل المتابعة.');
+                    return;
+                }
+                // Sync values for submission
+                document.getElementById('eess_lesson_title').value = upTitle;
+                document.getElementById('eess_lesson_date').value = document.getElementById('eess_upload_lesson_date').value;
+            } else {
+                const title = document.getElementById('eess_lesson_title').value.trim();
+                const objectives = document.getElementById('eess_objectives').value.trim();
+                if (!title || !objectives) {
+                    alert('يرجى إدخال عنوان الدرس والأهداف السلوكية قبل المتابعة (*).');
+                    return;
+                }
             }
         } else if (eessActivePrepStage === 2) {
-            const objectives = document.getElementById('eess_objectives').value.trim();
-            const warmup = document.getElementById('eess_warmup').value.trim();
-            if (!objectives || !warmup) {
-                alert('الأهداف السلوكية والتمهيد حقول إلزامية للتحضير (*)');
-                return;
-            }
-        } else if (eessActivePrepStage === 3) {
-            const activities = document.getElementById('eess_activities').value.trim();
-            const evaluation = document.getElementById('eess_evaluation').value.trim();
-            if (!activities || !evaluation) {
-                alert('الأنشطة والتقويم الصفي حقول إلزامية للتحضير (*)');
-                return;
+            if (method === 'create') {
+                const warmup = document.getElementById('eess_warmup') ? document.getElementById('eess_warmup').value.trim() : '';
+                const activities = document.getElementById('eess_activities') ? document.getElementById('eess_activities').value.trim() : '';
+                if (!warmup || !activities) {
+                    alert('الإحماء والأنشطة حقول إلزامية للتحضير (*).');
+                    return;
+                }
             }
         }
     }
@@ -1311,58 +1400,60 @@ function eessGoToPrepStage(stageNum) {
         const stepNum = idx + 1;
         const span = el.querySelector('span');
         if (stepNum === stageNum) {
-            el.style.color = 'var(--sm-primary-color)';
-            if (span) span.style.background = 'var(--sm-primary-color)';
-            if (span) span.style.color = 'white';
+            el.style.color = '#881337';
+            if (span) { span.style.background = '#881337'; span.style.color = 'white'; }
         } else if (stepNum < stageNum) {
             el.style.color = '#15803d';
-            if (span) span.style.background = '#dcfce7';
-            if (span) span.style.color = '#15803d';
+            if (span) { span.style.background = '#dcfce7'; span.style.color = '#15803d'; span.innerText = '✓'; }
         } else {
             el.style.color = '#94a3b8';
-            if (span) span.style.background = '#e2e8f0';
-            if (span) span.style.color = '#475569';
+            if (span) { span.style.background = '#e2e8f0'; span.style.color = '#475569'; span.innerText = stepNum; }
         }
     });
 
     // Toggle Back/Next/Submit button displays
-    document.getElementById('eess-prep-prev-btn').style.display = (stageNum > 1) ? 'inline-block' : 'none';
-    if (stageNum === 5) {
-        document.getElementById('eess-prep-next-btn').style.display = 'none';
-        document.getElementById('eess-prep-submit-btn').style.display = 'inline-block';
-        document.getElementById('eess-prep-draft-btn').style.display = 'inline-block';
+    const prevBtn = document.getElementById('eess-prep-prev-btn');
+    const nextBtn = document.getElementById('eess-prep-next-btn');
+    const submitBtn = document.getElementById('eess-prep-submit-btn');
+    const draftBtn = document.getElementById('eess-prep-draft-btn');
 
-        // Render live summary of all details
+    if (prevBtn) prevBtn.style.display = (stageNum > 1) ? 'inline-flex' : 'none';
+
+    if (stageNum === 3) {
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (submitBtn) submitBtn.style.display = 'inline-flex';
+        if (draftBtn) draftBtn.style.display = 'inline-flex';
+
+        // Render live summary
         const summaryEl = document.getElementById('eess-prep-review-live-summary');
         if (summaryEl) {
-            const isPeSubject = <?php echo $is_pe_subject ? 'true' : 'false'; ?>;
-            const label1 = isPeSubject ? 'الإعداد البدني (Physical Prep):' : 'الأهداف السلوكية والتعليمية:';
-            const label2 = isPeSubject ? 'الإعداد المهاري (Skill Prep):' : 'التمهيد والتهيئة الحافزة:';
-            const label3 = isPeSubject ? 'النشاط الرئيسي/العملي (Practical Activity):' : 'الاستراتيجيات والأنشطة والخطوات:';
-            const label4 = isPeSubject ? 'الخاتمة والتهدئة (Cool-down & Closing):' : 'التقويم الصفي وأدوات القياس:';
-            const label5 = isPeSubject ? 'الواجبات أو التكليفات البدنية:' : 'الواجبات المنزلية والمهام الأكاديمية:';
-            const label6 = isPeSubject ? 'توجيهات الأمن والسلامة والملاحظات:' : 'ملاحظات وإرشادات وتأملات مهنية:';
+            const titleVal = document.getElementById('eess_lesson_title').value || document.getElementById('eess_upload_lesson_title').value;
+            const dateVal = document.getElementById('eess_lesson_date').value;
+            const subjVal = document.getElementById('eess_lesson_subject').value;
 
-            summaryEl.innerHTML = `
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; border-bottom:1px solid #cbd5e1; padding-bottom:10px; margin-bottom:10px;">
-                    <div><strong>عنوان الدرس:</strong> ${document.getElementById('eess_lesson_title').value}</div>
-                    <div><strong>المادة:</strong> ${document.getElementById('eess_lesson_subject').value}</div>
-                    <div><strong>الصف:</strong> ${document.getElementById('eess_lesson_grade').value}</div>
-                    <div><strong>الشعبة:</strong> ${document.getElementById('eess_lesson_section').value}</div>
-                    <div><strong>التاريخ:</strong> ${document.getElementById('eess_lesson_date').value}</div>
-                </div>
-                <div style="margin-bottom:10px;"><strong>1. ${label1}</strong><p style="margin:5px 0 0 0; color:#475569;">${document.getElementById('eess_objectives').value.replace(/\n/g, '<br>')}</p></div>
-                <div style="margin-bottom:10px;"><strong>2. ${label2}</strong><p style="margin:5px 0 0 0; color:#475569;">${document.getElementById('eess_warmup').value.replace(/\n/g, '<br>')}</p></div>
-                <div style="margin-bottom:10px;"><strong>3. ${label3}</strong><p style="margin:5px 0 0 0; color:#475569;">${document.getElementById('eess_activities').value.replace(/\n/g, '<br>')}</p></div>
-                <div style="margin-bottom:10px;"><strong>4. ${label4}</strong><p style="margin:5px 0 0 0; color:#475569;">${document.getElementById('eess_evaluation').value.replace(/\n/g, '<br>')}</p></div>
-                <div style="margin-bottom:10px;"><strong>5. ${label5}</strong><p style="margin:5px 0 0 0; color:#475569;">${document.getElementById('eess_homework').value.replace(/\n/g, '<br>')}</p></div>
-                <div><strong>6. ${label6}</strong><p style="margin:5px 0 0 0; color:#475569;">${document.getElementById('eess_notes').value.replace(/\n/g, '<br>')}</p></div>
-            `;
+            if (method === 'upload') {
+                summaryEl.innerHTML = `
+                    <div style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:10px;">ملخص إرسال تحضير درس جاهز (PDF/Word):</div>
+                    <div style="margin-bottom:6px;"><strong>عنوان التحضير:</strong> ${titleVal}</div>
+                    <div style="margin-bottom:6px;"><strong>المادة والتاريخ:</strong> ${subjVal} — ${dateVal}</div>
+                    <div style="color:#16a34a; font-weight:800; margin-top:10px;">✓ تم إرفاق المستند وجاهز للإرسال النهائي للمراجعة.</div>
+                `;
+            } else {
+                summaryEl.innerHTML = `
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-bottom:1px solid #cbd5e1; padding-bottom:8px; margin-bottom:10px;">
+                        <div><strong>عنوان الدرس:</strong> ${titleVal}</div>
+                        <div><strong>المادة والتاريخ:</strong> ${subjVal} — ${dateVal}</div>
+                    </div>
+                    <div style="margin-bottom:8px;"><strong>1. الأهداف السلوكية:</strong><p style="margin:4px 0 0 0; color:#475569;">${document.getElementById('eess_objectives').value.replace(/\n/g, '<br>')}</p></div>
+                    <div style="margin-bottom:8px;"><strong>2. التهيئة والأنشطة:</strong><p style="margin:4px 0 0 0; color:#475569;">${document.getElementById('eess_activities').value.replace(/\n/g, '<br>')}</p></div>
+                    <div><strong>3. التقويم والملاحظات:</strong><p style="margin:4px 0 0 0; color:#475569;">${document.getElementById('eess_evaluation').value.replace(/\n/g, '<br>')}</p></div>
+                `;
+            }
         }
     } else {
-        document.getElementById('eess-prep-next-btn').style.display = 'inline-block';
-        document.getElementById('eess-prep-submit-btn').style.display = 'none';
-        document.getElementById('eess-prep-draft-btn').style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'inline-flex';
+        if (submitBtn) submitBtn.style.display = 'none';
+        if (draftBtn) draftBtn.style.display = 'none';
     }
 }
 
