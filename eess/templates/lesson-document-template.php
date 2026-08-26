@@ -35,29 +35,32 @@ $fields = SM_Settings::get_subject_lesson_fields($prep->subject);
     <style>
         @page {
             size: A4 portrait;
-            margin: 15mm 15mm 15mm 15mm;
+            margin: 10mm 12mm;
         }
         body {
             font-family: 'Cairo', Arial, sans-serif;
-            padding: 25px;
+            padding: 15px;
             color: #0f172a;
             background: #ffffff;
-            line-height: 1.6;
+            line-height: 1.4;
             direction: rtl;
             text-align: right;
+            box-sizing: border-box;
+            max-width: 210mm;
+            margin: 0 auto;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
         .doc-header {
-            border-bottom: 3px solid #0f172a;
-            padding-bottom: 12px;
-            margin-bottom: 20px;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .doc-title {
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 900;
             margin: 0;
             color: #0f172a;
@@ -65,69 +68,91 @@ $fields = SM_Settings::get_subject_lesson_fields($prep->subject);
         .meta-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 22px;
+            margin-bottom: 12px;
             page-break-inside: avoid;
         }
         .meta-table th, .meta-table td {
             border: 1px solid #cbd5e1;
-            padding: 9px 12px;
+            padding: 6px 10px;
             text-align: right;
-            font-size: 12.5px;
+            font-size: 11px;
         }
         .meta-table th {
             background: #f8fafc;
             font-weight: bold;
-            width: 22%;
+            width: 20%;
             color: #334155;
         }
         .section-card {
             background: #ffffff;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 14px 16px;
-            margin-bottom: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
             page-break-inside: avoid;
         }
         .section-card-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
-            color: #2563eb;
-            margin: 0 0 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 6px;
+            color: #881337;
+            margin: 0 0 4px 0;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         .section-card-body {
-            font-size: 12.5px;
+            font-size: 11px;
             color: #334155;
             white-space: pre-line;
-            line-height: 1.6;
-            min-height: 35px;
+            line-height: 1.45;
         }
         .status-badge {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 50px;
             font-weight: 800;
-            font-size: 11px;
+            font-size: 10px;
         }
         .status-approved { background: #dcfce7; color: #15803d; }
         .status-submitted { background: #dbeafe; color: #1e40af; }
         .status-draft { background: #fef3c7; color: #92400e; }
         @media print {
             .no-print { display: none !important; }
-            body { padding: 0; }
+            body { padding: 0; margin: 0; }
         }
     </style>
 </head>
 <body onload="window.print()">
 
-    <div class="no-print" style="background: #f1f5f9; padding: 12px 20px; border-radius: 10px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #cbd5e1;">
-        <span style="font-weight: 700; font-size: 13px; color: #334155;">وثيقة تحضير رسمية جاهزة للطباعة والتصدير كملف PDF مع الحقول المخصصة للمادة</span>
-        <button onclick="window.print()" style="padding: 8px 18px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">🖨️ بدء طباعة الوثيقة / حفظ PDF</button>
+    <div class="no-print" style="background: #f1f5f9; padding: 10px 16px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #cbd5e1;">
+        <span style="font-weight: 700; font-size: 12px; color: #334155;">وثيقة تحضير رسمية معتمدة (A4) قابلة للطباعة والمشاركة الحية</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button onclick="eessShareDocumentPDF()" style="padding: 6px 14px; background: #881337; color: white; border: none; border-radius: 9999px; font-weight: bold; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;">📤 مشاركة الوثيقة</button>
+            <button onclick="window.print()" style="padding: 6px 14px; background: #0f172a; color: white; border: none; border-radius: 9999px; font-weight: bold; cursor: pointer; font-size: 12px;">🖨️ طباعة / حفظ PDF</button>
+        </div>
     </div>
+
+    <script>
+    function eessShareDocumentPDF() {
+        const docTitle = "<?php echo esc_js($prep->title); ?>";
+        const shareUrl = window.location.href;
+        if (navigator.share) {
+            navigator.share({
+                title: 'وثيقة تحضير درس: ' + docTitle,
+                text: 'استعراض وثيقة تحضير درس معتمدة - ' + docTitle,
+                url: shareUrl
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('تم نسخ رابط وثيقة التحضير إلى الحافظة لمشاركتها بنجاح!');
+            }).catch(() => {
+                alert('رابط الوثيقة: ' + shareUrl);
+            });
+        }
+    }
+    </script>
 
     <!-- Official Header (Dynamic Institutional Branding) -->
     <div class="doc-header">
@@ -190,10 +215,38 @@ $fields = SM_Settings::get_subject_lesson_fields($prep->subject);
 
     <!-- Subject Specific Dynamic Fields -->
     <div class="section-card">
-        <h3 class="section-card-title">1. <?php echo esc_html($fields['label1']); ?></h3>
+        <h3 class="section-card-title">1. هدف الدرس السلوكي والتعلمي</h3>
         <div class="section-card-body"><?php echo esc_html(!empty($data['objectives']) ? $data['objectives'] : 'غير مسجل'); ?></div>
     </div>
 
+    <?php
+    $sub_name = strtolower($prep->subject);
+    $is_pe_doc = (strpos($sub_name, 'رياضية') !== false || strpos($sub_name, 'بدنية') !== false || strpos($sub_name, 'pe') !== false || strpos($sub_name, 'physical') !== false);
+    if ($is_pe_doc || !empty($data['physical_prep'])):
+    ?>
+    <!-- Specialized Physical Education Lesson Practical Cards (2x2 Grid) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+        <div class="section-card" style="margin-bottom: 0; border-color: #bae6fd; background: #f0f9ff;">
+            <h3 class="section-card-title" style="color: #0369a1; font-size: 11.5px;">🏃 1. الإحماء والتهيئة البدنية (Warm-Up)</h3>
+            <div class="section-card-body" style="font-size: 11px;"><?php echo esc_html(!empty($data['warmup']) ? $data['warmup'] : 'غير مسجل'); ?></div>
+        </div>
+
+        <div class="section-card" style="margin-bottom: 0; border-color: #bbf7d0; background: #f0fdf4;">
+            <h3 class="section-card-title" style="color: #15803d; font-size: 11.5px;">💪 2. الإعداد البدني العام والخاص</h3>
+            <div class="section-card-body" style="font-size: 11px;"><?php echo esc_html(!empty($data['physical_prep']) ? $data['physical_prep'] : 'غير مسجل'); ?></div>
+        </div>
+
+        <div class="section-card" style="margin-bottom: 0; border-color: #fef3c7; background: #fffbeb;">
+            <h3 class="section-card-title" style="color: #b45309; font-size: 11.5px;">⚽ 3. الإعداد المهاري والخططي</h3>
+            <div class="section-card-body" style="font-size: 11px;"><?php echo esc_html(!empty($data['skill_prep']) ? $data['skill_prep'] : 'غير مسجل'); ?></div>
+        </div>
+
+        <div class="section-card" style="margin-bottom: 0; border-color: #fecdd3; background: #fff1f2;">
+            <h3 class="section-card-title" style="color: #991b1b; font-size: 11.5px;">🧘 4. الخاتمة والتهدئة الإطالات</h3>
+            <div class="section-card-body" style="font-size: 11px;"><?php echo esc_html(!empty($data['conclusion']) ? $data['conclusion'] : 'غير مسجل'); ?></div>
+        </div>
+    </div>
+    <?php else: ?>
     <div class="section-card">
         <h3 class="section-card-title">2. <?php echo esc_html($fields['label2']); ?></h3>
         <div class="section-card-body"><?php echo esc_html(!empty($data['warmup']) ? $data['warmup'] : 'غير مسجل'); ?></div>
@@ -203,13 +256,27 @@ $fields = SM_Settings::get_subject_lesson_fields($prep->subject);
         <h3 class="section-card-title">3. <?php echo esc_html($fields['label3']); ?></h3>
         <div class="section-card-body"><?php echo esc_html(!empty($data['activities']) ? $data['activities'] : 'غير مسجل'); ?></div>
     </div>
+    <?php endif; ?>
+
+    <!-- Educational Connections Card -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+        <div class="section-card" style="margin-bottom: 0; background: #f8fafc;">
+            <h3 class="section-card-title" style="color: #0f172a; font-size: 11.5px;">🇦🇪 الربط بالأجندة الوطنية ورؤية الدولة</h3>
+            <div class="section-card-body" style="font-size: 11px;"><?php echo esc_html(!empty($data['national_agenda']) ? $data['national_agenda'] : 'غير مسجل'); ?></div>
+        </div>
+
+        <div class="section-card" style="margin-bottom: 0; background: #f8fafc;">
+            <h3 class="section-card-title" style="color: #0f172a; font-size: 11.5px;">🔗 الربط بالمواد والتخصصات الأخرى</h3>
+            <div class="section-card-body" style="font-size: 11px;"><?php echo esc_html(!empty($data['cross_subject']) ? $data['cross_subject'] : 'غير مسجل'); ?></div>
+        </div>
+    </div>
 
     <?php if (!empty($data['resources']) && is_array($data['resources'])): ?>
     <div class="section-card">
         <h3 class="section-card-title">📚 مصادر ووسائل التعلم المعتمدة للدرس</h3>
-        <div class="section-card-body" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+        <div class="section-card-body" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px;">
             <?php foreach ($data['resources'] as $res_item): ?>
-                <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 4px 12px; border-radius: 50px; font-weight: 700; font-size: 11.5px;">
+                <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 50px; font-weight: 700; font-size: 10.5px;">
                     <?php echo esc_html($res_item); ?>
                 </span>
             <?php endforeach; ?>
@@ -217,45 +284,8 @@ $fields = SM_Settings::get_subject_lesson_fields($prep->subject);
     </div>
     <?php endif; ?>
 
-    <?php
-    $sub_name = strtolower($prep->subject);
-    $is_pe_doc = (strpos($sub_name, 'رياضية') !== false || strpos($sub_name, 'بدنية') !== false || strpos($sub_name, 'pe') !== false || strpos($sub_name, 'physical') !== false);
-    if ($is_pe_doc):
-    ?>
-    <!-- Specialized Physical Education Lesson Practical Cards (3 Equal-Width Cards in 1 Row) -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-        <div class="section-card" style="margin-bottom: 0; border-color: #bae6fd; background: #f0f9ff; text-align: center;">
-            <h3 class="section-card-title" style="color: #0369a1; justify-content: center; font-size: 12.5px;">🏃 التهيئة والإنماء (Warm-Up)</h3>
-            <div style="font-size: 11px; font-weight: 800; color: #0284c7; margin-bottom: 6px;">الزمن المخصص: 5 دقائق</div>
-            <div class="section-card-body" style="font-size: 11.5px; text-align: right;"><?php echo esc_html(!empty($data['warmup']) ? $data['warmup'] : 'إحماء وتهيئة حركية عامة'); ?></div>
-        </div>
-
-        <div class="section-card" style="margin-bottom: 0; border-color: #bbf7d0; background: #f0fdf4; text-align: center;">
-            <h3 class="section-card-title" style="color: #15803d; justify-content: center; font-size: 12.5px;">💪 الإعداد البدني (Physical Prep)</h3>
-            <div style="font-size: 11px; font-weight: 800; color: #16a34a; margin-bottom: 6px;">الزمن المخصص: 15 دقيقة</div>
-            <div class="section-card-body" style="font-size: 11.5px; text-align: right;"><?php echo esc_html(!empty($data['objectives']) ? $data['objectives'] : 'تدريبات لياقة وإنماء عناصر اللياقة'); ?></div>
-        </div>
-
-        <div class="section-card" style="margin-bottom: 0; border-color: #fef3c7; background: #fffbeb; text-align: center;">
-            <h3 class="section-card-title" style="color: #b45309; justify-content: center; font-size: 12.5px;">⚽ الإعداد المهاري (Skill Prep)</h3>
-            <div style="font-size: 11px; font-weight: 800; color: #d97706; margin-bottom: 6px;">الزمن المخصص: 20 دقيقة</div>
-            <div class="section-card-body" style="font-size: 11.5px; text-align: right;"><?php echo esc_html(!empty($data['activities']) ? $data['activities'] : 'خطوات وتطبيقات المهارة الحركية الرئيسية'); ?></div>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <div class="section-card">
-        <h3 class="section-card-title">4. <?php echo esc_html($fields['label4']); ?></h3>
-        <div class="section-card-body"><?php echo esc_html(!empty($data['evaluation']) ? $data['evaluation'] : 'غير مسجل'); ?></div>
-    </div>
-
-    <div class="section-card">
-        <h3 class="section-card-title">5. الواجبات والمهام المقررة</h3>
-        <div class="section-card-body"><?php echo esc_html(!empty($data['homework']) ? $data['homework'] : 'لا يوجد واجب مقرر لهذا الدرس'); ?></div>
-    </div>
-
-    <div class="section-card">
-        <h3 class="section-card-title">6. الملاحظات والتأملات التربوية / إرشادات السلامة والتوجيهات</h3>
+        <h3 class="section-card-title">الملاحظات والتأملات التربوية / إرشادات السلامة والتوجيهات</h3>
         <div class="section-card-body"><?php echo esc_html(!empty($data['notes']) ? $data['notes'] : 'لا توجد ملاحظات إضافية مسجلة'); ?></div>
     </div>
 
