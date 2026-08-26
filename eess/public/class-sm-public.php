@@ -8148,6 +8148,28 @@ class SM_Public {
         $supervisors = get_users(array('role__in' => array('sm_supervisor', 'sm_principal', 'administrator')));
         $supervisor_id = !empty($supervisors) ? $supervisors[0]->ID : 1;
 
+        // Calculate Late Submission Status & Delay Seconds against authoritative deadline
+        $prep_settings = get_option('sm_lesson_prep_settings', array('deadline_time' => '12:00'));
+        $deadline_time = $prep_settings['deadline_time'] ?? '12:00';
+        if (strlen($deadline_time) == 5) $deadline_time .= ':00';
+
+        $tz = wp_timezone();
+        $now_dt = new DateTime('now', $tz);
+        $deadline_dt = new DateTime($lesson_date . ' ' . $deadline_time, $tz);
+
+        $delay_seconds = 0;
+        $status = 'submitted';
+
+        // Exemption check for Physical Education
+        $is_pe = (strpos(strtolower($subject), 'رياضية') !== false || strpos(strtolower($subject), 'بدنية') !== false || strpos(strtolower($subject), 'pe') !== false || strpos(strtolower($subject), 'physical') !== false);
+        $is_monday = (date('N', strtotime($lesson_date)) == 1);
+        $exempt = ($is_pe && ($prep_settings['pe_monday_only'] ?? 'yes') === 'yes' && !$is_monday);
+
+        if ($now_dt > $deadline_dt && !$exempt) {
+            $delay_seconds = $now_dt->getTimestamp() - $deadline_dt->getTimestamp();
+            $status = 'late';
+        }
+
         global $wpdb;
         $inserted = $wpdb->insert(
             "{$wpdb->prefix}sm_lesson_preps",
@@ -8160,8 +8182,8 @@ class SM_Public {
                 'class_section'   => $class_section,
                 'lesson_date'     => $lesson_date,
                 'submission_time' => current_time('H:i:s'),
-                'status'          => 'submitted',
-                'delay_seconds'   => 0,
+                'status'          => $status,
+                'delay_seconds'   => $delay_seconds,
                 'lesson_data'     => json_encode($lesson_data),
                 'version'         => 1,
                 'parent_id'       => 0,
