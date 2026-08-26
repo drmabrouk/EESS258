@@ -62,25 +62,46 @@ if (isset($_POST['eess_delete_lesson_prep']) && wp_verify_nonce($_POST['eess_les
 
 // Handle Form Submissions
 if (isset($_POST['eess_save_lesson_prep']) && wp_verify_nonce($_POST['eess_lesson_prep_nonce'], 'eess_lesson_prep_action')) {
-    $title         = sanitize_text_field($_POST['lesson_title']);
+    $prep_method   = sanitize_text_field($_POST['prep_method'] ?? 'create');
+    $title         = ($prep_method === 'upload') ? sanitize_text_field($_POST['upload_lesson_title'] ?? $_POST['lesson_title']) : sanitize_text_field($_POST['lesson_title']);
     $subject       = sanitize_text_field($_POST['lesson_subject']);
     $grade_level   = sanitize_text_field($_POST['lesson_grade']);
     $class_section = sanitize_text_field($_POST['lesson_section']);
-    $lesson_date   = sanitize_text_field($_POST['lesson_date']);
+    $lesson_date   = ($prep_method === 'upload') ? sanitize_text_field($_POST['upload_lesson_date'] ?? $_POST['lesson_date']) : sanitize_text_field($_POST['lesson_date']);
     $status        = sanitize_text_field($_POST['lesson_status']); // draft or submitted or scheduled
 
     $resources_json = isset($_POST['selected_resources_json']) ? sanitize_text_field($_POST['selected_resources_json']) : '[]';
     $resources_array = json_decode(stripslashes($resources_json), true);
 
+    // Handle document file upload if uploaded
+    $uploaded_file_url = '';
+    if (!empty($_FILES['prep_document_file']['name'])) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+
+        $uploaded = wp_handle_upload($_FILES['prep_document_file'], array('test_form' => false));
+        if (isset($uploaded['url'])) {
+            $uploaded_file_url = $uploaded['url'];
+        }
+    }
+
     $lesson_data = array(
-        'objectives'     => sanitize_textarea_field($_POST['objectives']),
-        'warmup'         => sanitize_textarea_field($_POST['warmup']),
-        'activities'     => sanitize_textarea_field($_POST['activities']),
-        'resources'      => is_array($resources_array) ? array_map('sanitize_text_field', $resources_array) : array(),
-        'evaluation'     => sanitize_textarea_field($_POST['evaluation']),
-        'homework'       => sanitize_textarea_field($_POST['homework']),
-        'notes'          => sanitize_textarea_field($_POST['notes']),
-        'scheduled_time' => isset($_POST['scheduled_time']) ? sanitize_text_field($_POST['scheduled_time']) : '',
+        'prep_method'     => $prep_method,
+        'file_url'        => $uploaded_file_url,
+        'objectives'      => sanitize_textarea_field($_POST['objectives'] ?? ''),
+        'warmup'          => sanitize_textarea_field($_POST['warmup'] ?? ''),
+        'physical_prep'   => sanitize_textarea_field($_POST['physical_prep'] ?? ''),
+        'skill_prep'      => sanitize_textarea_field($_POST['skill_prep'] ?? ''),
+        'conclusion'      => sanitize_textarea_field($_POST['conclusion'] ?? ''),
+        'national_agenda' => sanitize_textarea_field($_POST['national_agenda'] ?? ''),
+        'cross_subject'   => sanitize_textarea_field($_POST['cross_subject'] ?? ''),
+        'activities'      => sanitize_textarea_field($_POST['activities'] ?? ''),
+        'resources'       => is_array($resources_array) ? array_map('sanitize_text_field', $resources_array) : array(),
+        'evaluation'      => sanitize_textarea_field($_POST['evaluation'] ?? ''),
+        'homework'        => sanitize_textarea_field($_POST['homework'] ?? ''),
+        'notes'           => sanitize_textarea_field($_POST['notes'] ?? ''),
+        'scheduled_time'  => isset($_POST['scheduled_time']) ? sanitize_text_field($_POST['scheduled_time']) : '',
     );
 
     // Compute Late Submission status if submitted
@@ -407,7 +428,7 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                     $data = $edit_prep ? json_decode($edit_prep->lesson_data, true) : array();
                     ?>
 
-                    <form method="post" id="eess-lesson-prep-wizard-form" oninput="eessTriggerPrepAutoSave()">
+                    <form method="post" enctype="multipart/form-data" id="eess-lesson-prep-wizard-form" oninput="eessTriggerPrepAutoSave()">
                         <?php wp_nonce_field('eess_lesson_prep_action', 'eess_lesson_prep_nonce'); ?>
                         <input type="hidden" name="prep_id" id="eess_prep_db_id" value="<?php echo $edit_prep->id ?? 0; ?>">
 
@@ -444,63 +465,38 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <div style="position: absolute; top: 50%; left: 40px; right: 40px; height: 2px; background: #e2e8f0; transform: translateY(-50%); z-index: 1;"></div>
                             <div style="position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                 <div class="eess-prep-step-indicator active" id="eess-prep-ind-1" style="font-weight: 800; font-size: 11.5px; color: #881337; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: #881337; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">1</span>
-                                    <span id="eess-prep-step-lbl-1">البيانات والتمهيد</span>
+                                    <span id="eess-prep-num-1" style="background: #881337; color: white; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">1</span>
+                                    <span id="eess-prep-step-lbl-1">البيانات الأساسية</span>
                                 </div>
                                 <div class="eess-prep-step-indicator" id="eess-prep-ind-2" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">2</span>
-                                    <span id="eess-prep-step-lbl-2">الأنشطة والتقويم</span>
+                                    <span id="eess-prep-num-2" style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">2</span>
+                                    <span id="eess-prep-step-lbl-2">رفع المستند</span>
                                 </div>
                                 <div class="eess-prep-step-indicator" id="eess-prep-ind-3" style="font-weight: 700; font-size: 11.5px; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
-                                    <span style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">3</span>
-                                    <span id="eess-prep-step-lbl-3">المراجعة والتقديم</span>
+                                    <span id="eess-prep-num-3" style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">3</span>
+                                    <span id="eess-prep-step-lbl-3">المراجعة والإرسال</span>
+                                </div>
+                                <div class="eess-prep-step-indicator" id="eess-prep-ind-4" style="display: none; font-weight: 700; font-size: 11.5px; color: #94a3b8; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; padding: 0 6px;">
+                                    <span id="eess-prep-num-4" style="background: #e2e8f0; color: #475569; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 4px #f8fafc;">4</span>
+                                    <span id="eess-prep-step-lbl-4">المراجعة والإرسال</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Stage 1: Basic Information & Objective Setup -->
-                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-1" style="display: none;">
-                            <?php
-                                $teacher_school = get_user_meta($user_id, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
-                                $teacher_grade  = get_user_meta($user_id, 'sm_grade_level', true) ?: (get_user_meta($user_id, 'grade', true) ?: 'الصف العاشر');
-                                $teacher_section= get_user_meta($user_id, 'sm_class_section', true) ?: (get_user_meta($user_id, 'section', true) ?: 'أ');
-                            ?>
-                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; color: #15803d; font-weight: 700;">
-                                    <div>📚 <strong>المادة:</strong> <?php echo esc_html($current_subject); ?></div>
-                                    <div>🏫 <strong>المدرسة:</strong> <?php echo esc_html($teacher_school); ?></div>
-                                    <div>🎓 <strong>التسكين:</strong> <?php echo esc_html($teacher_grade . ' (' . $teacher_section . ')'); ?></div>
-                                </div>
-                            </div>
+                        <?php
+                            $teacher_school = get_user_meta($user_id, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+                            $teacher_grade  = get_user_meta($user_id, 'sm_grade_level', true) ?: (get_user_meta($user_id, 'grade', true) ?: 'الصف العاشر');
+                            $teacher_section= get_user_meta($user_id, 'sm_class_section', true) ?: (get_user_meta($user_id, 'section', true) ?: 'أ');
+                        ?>
+                        <input type="hidden" id="eess_lesson_subject" name="lesson_subject" value="<?php echo esc_attr($current_subject); ?>">
+                        <input type="hidden" id="eess_lesson_grade" name="lesson_grade" value="<?php echo esc_attr($edit_prep->grade_level ?? $teacher_grade); ?>">
+                        <input type="hidden" id="eess_lesson_section" name="lesson_section" value="<?php echo esc_attr($edit_prep->class_section ?? $teacher_section); ?>">
 
-                            <input type="hidden" id="eess_lesson_subject" name="lesson_subject" value="<?php echo esc_attr($current_subject); ?>">
-                            <input type="hidden" id="eess_lesson_grade" name="lesson_grade" value="<?php echo esc_attr($edit_prep->grade_level ?? $teacher_grade); ?>">
-                            <input type="hidden" id="eess_lesson_section" name="lesson_section" value="<?php echo esc_attr($edit_prep->class_section ?? $teacher_section); ?>">
-
-                            <!-- Option A Form Fields -->
-                            <div id="eess-prep-create-fields">
-                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الأولى: البيانات الرئيسية والأهداف السلوكية</h4>
-                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
-                                    <div style="position: relative;">
-                                        <input type="text" id="eess_lesson_title" name="lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input eess-float-input" placeholder=" " style="height: 44px; font-size: 13px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" required>
-                                        <label for="eess_lesson_title" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">عنوان الدرس الرئيسي <span style="color:#ef4444;">*</span></label>
-                                    </div>
-                                    <div>
-                                        <label class="sm-label" style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px; display: block;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
-                                        <input type="date" id="eess_lesson_date" name="lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px;" required>
-                                    </div>
-                                </div>
-
-                                <!-- Behavioral Objectives Field -->
-                                <div style="position: relative; margin-bottom: 18px;">
-                                    <textarea id="eess_objectives" name="objectives" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" " required><?php echo esc_textarea($data['objectives'] ?? ''); ?></textarea>
-                                    <label for="eess_objectives" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">1. الأهداف السلوكية والتعلمية <span style="color:#ef4444;">*</span></label>
-                                </div>
-                            </div>
-
-                            <!-- Option B Upload Fields -->
-                            <div id="eess-prep-upload-fields" style="display: none;">
-                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">رفع ملف التحضير الجاهز</h4>
+                        <!-- ==================== WORKFLOW 1: UPLOAD READY FILE (3 STEPS) ==================== -->
+                        <div id="eess-prep-workflow-upload" style="display: none;">
+                            <!-- Upload Step 1: Lesson Information -->
+                            <div class="eess-prep-upload-stage" id="eess-prep-upload-stage-1" style="display: block;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الأولى: بيانات الدرس الرئيسية</h4>
                                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
                                     <div style="position: relative;">
                                         <input type="text" id="eess_upload_lesson_title" name="upload_lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input eess-float-input" placeholder=" " style="height: 44px; font-size: 13px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;">
@@ -511,111 +507,128 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                         <input type="date" id="eess_upload_lesson_date" name="upload_lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px;">
                                     </div>
                                 </div>
+                            </div>
 
-                                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 20px; margin-bottom: 16px;">
-                                    <label style="display: block; font-weight: 800; font-size: 12.5px; color: #0369a1; margin-bottom: 8px;">اختر ملف التحضير بصيغة (PDF, DOC, DOCX) <span style="color:#ef4444;">*</span></label>
-                                    <input type="file" name="prep_document_file" id="eess_prep_document_file" accept=".pdf,.doc,.docx" class="sm-input" onchange="eessValidatePrepFile(this)" style="height: 42px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 12px; padding: 6px 12px; width: 100%; box-sizing: border-box;">
-                                    <div id="eess_prep_file_status_preview" style="display: none; margin-top: 10px; font-size: 12px; font-weight: 700; color: #166534; background: #dcfce7; padding: 8px 12px; border-radius: 8px; border: 1px solid #bbf7d0;"></div>
+                            <!-- Upload Step 2: Upload File -->
+                            <div class="eess-prep-upload-stage" id="eess-prep-upload-stage-2" style="display: none;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثانية: رفع ملف التحضير الجاهز</h4>
+                                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 22px; margin-bottom: 16px;">
+                                    <label style="display: block; font-weight: 800; font-size: 13px; color: #0369a1; margin-bottom: 10px;">اختر ملف التحضير المكتمل بصيغة (PDF, DOC, DOCX) <span style="color:#ef4444;">*</span></label>
+                                    <input type="file" name="prep_document_file" id="eess_prep_document_file" accept=".pdf,.doc,.docx" class="sm-input" onchange="eessValidatePrepFile(this)" style="height: 44px; border-radius: 10px; border: 1px solid #cbd5e1; background: #ffffff; font-size: 12.5px; padding: 8px 12px; width: 100%; box-sizing: border-box;">
+                                    <div id="eess_prep_file_status_preview" style="display: none; margin-top: 12px; font-size: 12px; font-weight: 700; color: #166534; background: #dcfce7; padding: 10px 14px; border-radius: 8px; border: 1px solid #bbf7d0;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Upload Step 3: Confirmation & Submission -->
+                            <div class="eess-prep-upload-stage" id="eess-prep-upload-stage-3" style="display: none;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثالثة: مراجعة المستند المرفوع والتقديم للمراجعة</h4>
+                                <div style="background: #f8fafc; padding: 20px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 12.5px; line-height: 1.6; margin-bottom: 20px;" id="eess-prep-upload-review-summary">
+                                    <!-- Dynamic Upload Summary -->
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Stage 2: Specialized PE & Subject-Aware Objectives & Planning (Logical 9-Field Structure) -->
-                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-2" style="display: none;">
-                            <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثانية: الربط والتفكير والإعداد البدني لدرس (<?php echo esc_html($current_subject); ?>)</h4>
-
-                            <!-- Connection to Other Subjects (max 250 chars) -->
-                            <div class="eess-float-group" style="margin-bottom: 22px;">
-                                <textarea id="eess_cross_subject" name="cross_subject" maxlength="250" oninput="eessUpdateCharCount(this, 250, 'cnt_cross_subject')" class="sm-input eess-float-input" style="height: 80px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px;" placeholder=" "><?php echo esc_textarea($data['cross_subject'] ?? ''); ?></textarea>
-                                <label for="eess_cross_subject" class="eess-float-label">2. الربط بالمواد الأخرى (الحد الأقصى: 250 حرف)</label>
-                                <div style="text-align: left; font-size: 10.5px; color: #64748b; font-family: monospace; margin-top: 2px;" id="cnt_cross_subject">0 / 250</div>
-                            </div>
-
-                            <!-- Critical Thinking Questions (max 250 chars) -->
-                            <div class="eess-float-group" style="margin-bottom: 22px;">
-                                <textarea id="eess_critical_thinking" name="critical_thinking" maxlength="250" oninput="eessUpdateCharCount(this, 250, 'cnt_critical_thinking')" class="sm-input eess-float-input" style="height: 80px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px;" placeholder=" "><?php echo esc_textarea($data['critical_thinking'] ?? ''); ?></textarea>
-                                <label for="eess_critical_thinking" class="eess-float-label">3. أسئلة التفكير الناقد والتحدي الحركي (الحد الأقصى: 250 حرف)</label>
-                                <div style="text-align: left; font-size: 10.5px; color: #64748b; font-family: monospace; margin-top: 2px;" id="cnt_critical_thinking">0 / 250</div>
-                            </div>
-
-                            <!-- Warm-Up (5 min, max 250 chars) -->
-                            <div class="eess-float-group" style="margin-bottom: 15px;">
-                                <textarea id="eess_warmup" name="warmup" maxlength="250" oninput="eessUpdateCharCount(this, 250, 'cnt_warmup')" class="sm-input eess-float-input" style="height: 85px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px;" placeholder=" " required><?php echo esc_textarea($data['warmup'] ?? ''); ?></textarea>
-                                <label for="eess_warmup" class="eess-float-label">4. الإحماء والتهيئة البدنية (Warm-Up - 5 دقائق) <span style="color:#ef4444;">*</span></label>
-                                <div style="text-align: left; font-size: 10.5px; color: #64748b; font-family: monospace; margin-top: 2px;" id="cnt_warmup">0 / 250</div>
-                            </div>
-
-                            <script>
-                            function eessUpdateCharCount(input, maxLen, badgeId) {
-                                var len = input.value.length;
-                                var badge = document.getElementById(badgeId);
-                                if (badge) {
-                                    badge.innerText = len + ' / ' + maxLen;
-                                    if (len >= maxLen) {
-                                        badge.style.color = '#dc2626';
-                                    } else {
-                                        badge.style.color = '#64748b';
-                                    }
-                                }
-                            }
-                            </script>
-                        </div>
-
-                        <!-- Stage 3: Activities & Learning Resources (Capsules Selection - Max 5 Choices) -->
-                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-3" style="display: none;">
-                            <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثالثة: الأنشطة ومصادر التعلم</h4>
-
-                            <!-- Activities Floating Textarea -->
-                            <div style="position: relative; margin-bottom: 22px;">
-                                <textarea id="eess_activities" name="activities" class="sm-input eess-floating-textarea" style="height: 95px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" " required><?php echo esc_textarea($data['activities'] ?? ''); ?></textarea>
-                                <label for="eess_activities" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">
-                                    3. <?php echo esc_html($subj_fields['label3']); ?> <span style="color:#ef4444;">*</span>
-                                </label>
-                            </div>
-
-                            <!-- Learning Resources 15 Capsules Grid -->
-                            <div style="margin-bottom: 15px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <label class="sm-label" style="font-weight: 800; font-size: 12.5px; color: #334155;">مصادر وسائل التعلم والتقنيات (اختر 5 كحد أقصى) <span style="color:#ef4444;">*</span></label>
-                                    <span id="eess-resource-counter" style="font-size: 11px; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 2px 10px; border-radius: 50px;">0 / 5 مختارة</span>
+                        <!-- ==================== WORKFLOW 2: CREATE IN SYSTEM (4 STEPS) ==================== -->
+                        <div id="eess-prep-workflow-create" style="display: none;">
+                            <!-- Create Step 1: Basic Information -->
+                            <div class="eess-prep-create-stage" id="eess-prep-create-stage-1" style="display: block;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الأولى: البيانات الأساسية والهدف العام</h4>
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
+                                    <div style="position: relative;">
+                                        <input type="text" id="eess_lesson_title" name="lesson_title" value="<?php echo esc_attr($edit_prep->title ?? ''); ?>" class="sm-input eess-float-input" placeholder=" " style="height: 44px; font-size: 13px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;">
+                                        <label for="eess_lesson_title" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">عنوان الدرس الرئيسي <span style="color:#ef4444;">*</span></label>
+                                    </div>
+                                    <div>
+                                        <label class="sm-label" style="font-weight: 700; font-size: 12px; color: #334155; margin-bottom: 4px; display: block;">تاريخ الدرس <span style="color:#ef4444;">*</span></label>
+                                        <input type="date" id="eess_lesson_date" name="lesson_date" value="<?php echo esc_attr($edit_prep->lesson_date ?? current_time('Y-m-d')); ?>" class="sm-input" style="height: 42px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px;">
+                                    </div>
                                 </div>
 
-                                <?php
-                                $resource_options = array(
-                                    'الكتاب المدرسي', 'السبورة التفاعلية', 'العارض الضوئي (Projector)',
-                                    'أوراق عمل مطبوعة', 'بطاقات تعليمية', 'أجهزة اللوحية (Tablets)',
-                                    'فيديوهات تعليمية', 'نماذج ومجسمات ثلاثية الأبعاد', 'عرض تقديمي (PowerPoint)',
-                                    'مختبر العلوم / الحاسوب', 'أدوات ومعدات رياضية', 'منصة التيمز / التعلم الذكي',
-                                    'خرائط ورسوم بيانية', 'قصص ومراجع خارجية', 'ألعاب تعليمية تفاعلية'
-                                );
-                                $saved_resources = isset($data['resources']) && is_array($data['resources']) ? $data['resources'] : array();
-                                ?>
+                                <!-- Lesson Objective Field (150 - 350 chars) -->
+                                <div style="position: relative; margin-bottom: 8px;">
+                                    <textarea id="eess_objectives" name="objectives" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_objectives')" class="sm-input eess-float-input" style="height: 110px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['objectives'] ?? ''); ?></textarea>
+                                    <label for="eess_objectives" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">هدف الدرس (150 – 350 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                </div>
+                                <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 20px;" id="cnt_objectives">0 / 150 - 350 حرف (المتبقي 150 حرف على الأقل)</div>
+                            </div>
 
-                                <input type="hidden" name="selected_resources_json" id="eess_selected_resources_json" value="<?php echo esc_attr(json_encode($saved_resources)); ?>">
+                            <!-- Create Step 2: Physical Education Lesson Components -->
+                            <div class="eess-prep-create-stage" id="eess-prep-create-stage-2" style="display: none;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثانية: مكونات درس التربية البدنية</h4>
 
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 140px; overflow-y: auto; padding: 8px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc;">
-                                    <?php foreach ($resource_options as $res_item):
-                                        $is_selected = in_array($res_item, $saved_resources);
-                                    ?>
-                                        <div class="eess-resource-capsule <?php echo $is_selected ? 'selected' : ''; ?>"
-                                             onclick="eessToggleResourceCapsule(this, '<?php echo esc_js($res_item); ?>')"
-                                             style="padding: 6px 14px; border-radius: 50px; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: 1px solid <?php echo $is_selected ? '#881337' : '#cbd5e1'; ?>; background: <?php echo $is_selected ? '#881337' : '#ffffff'; ?>; color: <?php echo $is_selected ? '#ffffff' : '#475569'; ?>;">
-                                            <?php echo esc_html($res_item); ?>
-                                        </div>
-                                    <?php endforeach; ?>
+                                <!-- Warm-up (150 - 350 chars) -->
+                                <div style="position: relative; margin-bottom: 4px;">
+                                    <textarea id="eess_warmup" name="warmup" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_warmup')" class="sm-input eess-float-input" style="height: 85px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['warmup'] ?? ''); ?></textarea>
+                                    <label for="eess_warmup" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">1. الإحماء والتهيئة البدنية (150 – 350 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                </div>
+                                <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_warmup">0 / 150 - 350 حرف (المتبقي 150 حرف على الأقل)</div>
+
+                                <!-- Physical Preparation (150 - 400 chars) -->
+                                <div style="position: relative; margin-bottom: 4px;">
+                                    <textarea id="eess_physical_prep" name="physical_prep" maxlength="400" oninput="eessUpdateCharBounds(this, 150, 400, 'cnt_physical_prep')" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['physical_prep'] ?? ''); ?></textarea>
+                                    <label for="eess_physical_prep" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">2. الإعداد البدني العام والخاص (150 – 400 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                </div>
+                                <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_physical_prep">0 / 150 - 400 حرف (المتبقي 150 حرف على الأقل)</div>
+
+                                <!-- Skill Preparation (150 - 400 chars) -->
+                                <div style="position: relative; margin-bottom: 4px;">
+                                    <textarea id="eess_skill_prep" name="skill_prep" maxlength="400" oninput="eessUpdateCharBounds(this, 150, 400, 'cnt_skill_prep')" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['skill_prep'] ?? ''); ?></textarea>
+                                    <label for="eess_skill_prep" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">3. الإعداد المهاري والخططي (150 – 400 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                </div>
+                                <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_skill_prep">0 / 150 - 400 حرف (المتبقي 150 حرف على الأقل)</div>
+
+                                <!-- Conclusion (150 - 350 chars) -->
+                                <div style="position: relative; margin-bottom: 4px;">
+                                    <textarea id="eess_conclusion" name="conclusion" maxlength="350" oninput="eessUpdateCharBounds(this, 150, 350, 'cnt_conclusion')" class="sm-input eess-float-input" style="height: 85px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['conclusion'] ?? ''); ?></textarea>
+                                    <label for="eess_conclusion" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">4. الخاتمة والتهدئة (150 – 350 حرفاً) <span style="color:#ef4444;">*</span></label>
+                                </div>
+                                <div style="text-align: left; font-size: 11px; font-weight: 700; color: #dc2626; font-family: monospace; margin-bottom: 16px;" id="cnt_conclusion">0 / 150 - 350 حرف (المتبقي 150 حرف على الأقل)</div>
+                            </div>
+
+                            <!-- Create Step 3: Educational Connections -->
+                            <div class="eess-prep-create-stage" id="eess-prep-create-stage-3" style="display: none;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثالثة: الروابط والربط التربوي</h4>
+
+                                <!-- Connection to National Agenda -->
+                                <div style="position: relative; margin-bottom: 22px;">
+                                    <textarea id="eess_national_agenda" name="national_agenda" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['national_agenda'] ?? ''); ?></textarea>
+                                    <label for="eess_national_agenda" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #0f172a; border-radius: 4px; pointer-events: none;">الربط بالأجندة الوطنية ورؤية الدولة <span style="color:#ef4444;">*</span></label>
+                                </div>
+
+                                <!-- Connection to Other Subjects -->
+                                <div style="position: relative; margin-bottom: 18px;">
+                                    <textarea id="eess_cross_subject" name="cross_subject" class="sm-input eess-float-input" style="height: 90px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" "><?php echo esc_textarea($data['cross_subject'] ?? ''); ?></textarea>
+                                    <label for="eess_cross_subject" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #0f172a; border-radius: 4px; pointer-events: none;">الربط بالمواد والتخصصات الأخرى <span style="color:#ef4444;">*</span></label>
                                 </div>
                             </div>
 
-                            <!-- Evaluation Floating Textarea -->
-                            <div style="position: relative; margin-bottom: 15px;">
-                                <textarea id="eess_evaluation" name="evaluation" class="sm-input eess-floating-textarea" style="height: 80px; font-size: 12.5px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 18px 16px 10px 16px; width: 100%; box-sizing: border-box;" placeholder=" " required><?php echo esc_textarea($data['evaluation'] ?? ''); ?></textarea>
-                                <label for="eess_evaluation" style="position: absolute; right: 14px; top: -10px; background: #ffffff; padding: 0 6px; font-size: 11.5px; font-weight: 800; color: #881337; border-radius: 4px; pointer-events: none;">
-                                    4. <?php echo esc_html($subj_fields['label4']); ?> <span style="color:#ef4444;">*</span>
-                                </label>
+                            <!-- Create Step 4: Review & Submission -->
+                            <div class="eess-prep-create-stage" id="eess-prep-create-stage-4" style="display: none;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الرابعة: مراجعة تحضير الدرس والإرسال النهائي</h4>
+                                <div style="background: #f8fafc; padding: 20px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 12.5px; line-height: 1.6; margin-bottom: 20px;" id="eess-prep-create-review-summary">
+                                    <!-- Dynamic Create Summary -->
+                                </div>
                             </div>
                         </div>
 
                         <script>
+                            function eessUpdateCharBounds(input, minLen, maxLen, badgeId) {
+                                var len = input.value.length;
+                                var badge = document.getElementById(badgeId);
+                                if (badge) {
+                                    if (len < minLen) {
+                                        badge.style.color = '#dc2626';
+                                        badge.innerText = len + ' / ' + minLen + ' - ' + maxLen + ' حرف (المتبقي ' + (minLen - len) + ' حرف على الأقل)';
+                                    } else if (len > maxLen) {
+                                        badge.style.color = '#dc2626';
+                                        badge.innerText = len + ' / ' + minLen + ' - ' + maxLen + ' حرف (تجاوزت الحد الأقصى بـ ' + (len - maxLen) + ' حرف)';
+                                    } else {
+                                        badge.style.color = '#16a34a';
+                                        badge.innerText = len + ' / ' + minLen + ' - ' + maxLen + ' حرف ✓ (مكتمل ومستوفي)';
+                                    }
+                                }
+                            }
+
                             function eessValidatePrepFile(input) {
                                 var preview = document.getElementById('eess_prep_file_status_preview');
                                 if (input.files && input.files[0]) {
@@ -641,66 +654,30 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                 document.getElementById('eess-prep-method-select').style.display = 'none';
                                 document.getElementById('eess-prep-stepper-track').style.display = 'block';
 
-                                if (method === 'upload') {
-                                    document.getElementById('eess-prep-step-lbl-1').innerText = 'عنوان ومعلومات الوثيقة';
-                                    document.getElementById('eess-prep-step-lbl-2').innerText = 'رفع المستند';
-                                    document.getElementById('eess-prep-step-lbl-3').innerText = 'تأكيد وإرسال';
+                                const ind4 = document.getElementById('eess-prep-ind-4');
 
-                                    document.getElementById('eess-prep-create-fields').style.display = 'none';
-                                    document.getElementById('eess-prep-upload-fields').style.display = 'block';
+                                if (method === 'upload') {
+                                    document.getElementById('eess-prep-step-lbl-1').innerText = 'البيانات الأساسية';
+                                    document.getElementById('eess-prep-step-lbl-2').innerText = 'رفع المستند';
+                                    document.getElementById('eess-prep-step-lbl-3').innerText = 'المراجعة والإرسال';
+                                    if (ind4) ind4.style.display = 'none';
+
+                                    document.getElementById('eess-prep-workflow-upload').style.display = 'block';
+                                    document.getElementById('eess-prep-workflow-create').style.display = 'none';
                                 } else {
                                     document.getElementById('eess-prep-step-lbl-1').innerText = 'البيانات والأهداف';
-                                    document.getElementById('eess-prep-step-lbl-2').innerText = 'الأنشطة والتقويم';
-                                    document.getElementById('eess-prep-step-lbl-3').innerText = 'المراجعة والتقديم';
+                                    document.getElementById('eess-prep-step-lbl-2').innerText = 'مكونات الدرس';
+                                    document.getElementById('eess-prep-step-lbl-3').innerText = 'الربط التربوي';
+                                    document.getElementById('eess-prep-step-lbl-4').innerText = 'المراجعة والإرسال';
+                                    if (ind4) ind4.style.display = 'flex';
 
-                                    document.getElementById('eess-prep-create-fields').style.display = 'block';
-                                    document.getElementById('eess-prep-upload-fields').style.display = 'none';
+                                    document.getElementById('eess-prep-workflow-upload').style.display = 'none';
+                                    document.getElementById('eess-prep-workflow-create').style.display = 'block';
                                 }
 
                                 eessGoToPrepStage(1);
                             }
-
-                            function eessToggleResourceCapsule(element, resourceName) {
-                                const hiddenInput = document.getElementById('eess_selected_resources_json');
-                                let currentSelected = [];
-                                try {
-                                    currentSelected = JSON.parse(hiddenInput.value) || [];
-                                } catch(e) {
-                                    currentSelected = [];
-                                }
-
-                                const index = currentSelected.indexOf(resourceName);
-                                if (index > -1) {
-                                    currentSelected.splice(index, 1);
-                                    element.classList.remove('selected');
-                                    element.style.background = '#ffffff';
-                                    element.style.color = '#475569';
-                                    element.style.borderColor = '#cbd5e1';
-                                } else {
-                                    if (currentSelected.length >= 5) {
-                                        alert('يمكنك اختيار 5 وسائل تعليمية كحد أقصى للدرس الواحد.');
-                                        return;
-                                    }
-                                    currentSelected.push(resourceName);
-                                    element.classList.add('selected');
-                                    element.style.background = '#881337';
-                                    element.style.color = '#ffffff';
-                                    element.style.borderColor = '#881337';
-                                }
-
-                                hiddenInput.value = JSON.stringify(currentSelected);
-                                document.getElementById('eess-resource-counter').innerText = currentSelected.length + ' / 5 مختارة';
-                                eessTriggerPrepAutoSave();
-                            }
                         </script>
-
-                        <!-- Stage 3: Final Review & Confirmation -->
-                        <div class="eess-prep-wizard-stage" id="eess-prep-stage-3" style="display: none;">
-                            <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 800; color: #0f172a;">الخطوة الثالثة: مراجعة وثيقة التحضير والتقديم النهائي</h4>
-                            <div style="background: #f8fafc; padding: 20px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 12.5px; line-height: 1.6; margin-bottom: 20px;" id="eess-prep-review-live-summary">
-                                <!-- Filled live via JavaScript -->
-                            </div>
-                        </div>
 
                         <!-- Wizard Step Action Controls (RTL structure: Next/Submit on far-left, Previous on far-right) -->
                         <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 15px;">
@@ -1346,42 +1323,68 @@ function eessSubmitAssignPrepForm(e) {
 let eessActivePrepStage = 1;
 
 function eessGoToPrepStage(stageNum) {
-    if (stageNum < 1 || stageNum > 3) return;
-
     const method = document.getElementById('eess_prep_method') ? document.getElementById('eess_prep_method').value : 'create';
+    const totalStages = (method === 'upload') ? 3 : 4;
+
+    if (stageNum < 1 || stageNum > totalStages) return;
 
     // Validation before advancing
     if (stageNum > eessActivePrepStage) {
-        if (eessActivePrepStage === 1) {
-            if (method === 'upload') {
+        if (method === 'upload') {
+            if (eessActivePrepStage === 1) {
                 const upTitle = document.getElementById('eess_upload_lesson_title').value.trim();
-                const docFile = document.getElementById('eess_prep_document_file');
-                const hasExistingFile = document.getElementById('eess_prep_file_status_preview') && document.getElementById('eess_prep_file_status_preview').style.display !== 'none';
                 if (!upTitle) {
                     alert('يرجى إدخال عنوان وثيقة التحضير للمتابعة.');
                     return;
                 }
+            } else if (eessActivePrepStage === 2) {
+                const docFile = document.getElementById('eess_prep_document_file');
+                const hasExistingFile = document.getElementById('eess_prep_file_status_preview') && document.getElementById('eess_prep_file_status_preview').style.display !== 'none';
                 if ((!docFile || !docFile.files || docFile.files.length === 0) && !hasExistingFile) {
-                    alert('يرجى اختيار ملف التحضير الجاهز (PDF أو Word) قبل المتابعة.');
-                    return;
-                }
-                // Sync values for submission
-                document.getElementById('eess_lesson_title').value = upTitle;
-                document.getElementById('eess_lesson_date').value = document.getElementById('eess_upload_lesson_date').value;
-            } else {
-                const title = document.getElementById('eess_lesson_title').value.trim();
-                const objectives = document.getElementById('eess_objectives').value.trim();
-                if (!title || !objectives) {
-                    alert('يرجى إدخال عنوان الدرس والأهداف السلوكية قبل المتابعة (*).');
+                    alert('يرجى اختيار ملف التحضير الجاهز (PDF أو Word) وتأكيد رفعه قبل المتابعة.');
                     return;
                 }
             }
-        } else if (eessActivePrepStage === 2) {
-            if (method === 'create') {
-                const warmup = document.getElementById('eess_warmup') ? document.getElementById('eess_warmup').value.trim() : '';
-                const activities = document.getElementById('eess_activities') ? document.getElementById('eess_activities').value.trim() : '';
-                if (!warmup || !activities) {
-                    alert('الإحماء والأنشطة حقول إلزامية للتحضير (*).');
+        } else {
+            // Create Method Character Bounds Validation
+            if (eessActivePrepStage === 1) {
+                const title = document.getElementById('eess_lesson_title').value.trim();
+                const obj = document.getElementById('eess_objectives').value.trim();
+                if (!title) {
+                    alert('يرجى إدخال عنوان الدرس الرئيسي.');
+                    return;
+                }
+                if (obj.length < 150 || obj.length > 350) {
+                    alert('هدف الدرس يجب أن يكون بين 150 و 350 حرفاً (الحالي: ' + obj.length + ' حرفاً).');
+                    return;
+                }
+            } else if (eessActivePrepStage === 2) {
+                const warmup = document.getElementById('eess_warmup').value.trim();
+                const phys = document.getElementById('eess_physical_prep').value.trim();
+                const skill = document.getElementById('eess_skill_prep').value.trim();
+                const conc = document.getElementById('eess_conclusion').value.trim();
+
+                if (warmup.length < 150 || warmup.length > 350) {
+                    alert('الإحماء والتهيئة البدنية يجب أن تكون بين 150 و 350 حرفاً (الحالي: ' + warmup.length + ' حرفاً).');
+                    return;
+                }
+                if (phys.length < 150 || phys.length > 400) {
+                    alert('الإعداد البدني العام والخاص يجب أن يكون بين 150 و 400 حرفاً (الحالي: ' + phys.length + ' حرفاً).');
+                    return;
+                }
+                if (skill.length < 150 || skill.length > 400) {
+                    alert('الإعداد المهاري والخططي يجب أن يكون بين 150 و 400 حرفاً (الحالي: ' + skill.length + ' حرفاً).');
+                    return;
+                }
+                if (conc.length < 150 || conc.length > 350) {
+                    alert('الخاتمة والتهدئة يجب أن تكون بين 150 و 350 حرفاً (الحالي: ' + conc.length + ' حرفاً).');
+                    return;
+                }
+            } else if (eessActivePrepStage === 3) {
+                const natAgenda = document.getElementById('eess_national_agenda').value.trim();
+                const crossSubj = document.getElementById('eess_cross_subject').value.trim();
+                if (!natAgenda || !crossSubj) {
+                    alert('يرجى استكمال بيانات الربط بالأجندة الوطنية والربط بالمواد الأخرى (*).');
                     return;
                 }
             }
@@ -1390,24 +1393,39 @@ function eessGoToPrepStage(stageNum) {
 
     eessActivePrepStage = stageNum;
 
-    // Show active stage, hide others
-    document.querySelectorAll('.eess-prep-wizard-stage').forEach((el, idx) => {
-        el.style.display = (idx + 1 === stageNum) ? 'block' : 'none';
-    });
+    // Toggle stages based on workflow method
+    if (method === 'upload') {
+        document.querySelectorAll('.eess-prep-upload-stage').forEach((el, idx) => {
+            el.style.display = (idx + 1 === stageNum) ? 'block' : 'none';
+        });
+    } else {
+        document.querySelectorAll('.eess-prep-create-stage').forEach((el, idx) => {
+            el.style.display = (idx + 1 === stageNum) ? 'block' : 'none';
+        });
+    }
 
     // Update progress indicator styling
     document.querySelectorAll('.eess-prep-step-indicator').forEach((el, idx) => {
         const stepNum = idx + 1;
-        const span = el.querySelector('span');
+        const numSpan = document.getElementById('eess-prep-num-' + stepNum);
+        if (stepNum > totalStages) {
+            el.style.display = 'none';
+            return;
+        }
+        el.style.display = 'flex';
+
         if (stepNum === stageNum) {
             el.style.color = '#881337';
-            if (span) { span.style.background = '#881337'; span.style.color = 'white'; }
+            el.classList.add('active');
+            if (numSpan) { numSpan.style.background = '#881337'; numSpan.style.color = 'white'; numSpan.innerText = stepNum; }
         } else if (stepNum < stageNum) {
             el.style.color = '#15803d';
-            if (span) { span.style.background = '#dcfce7'; span.style.color = '#15803d'; span.innerText = '✓'; }
+            el.classList.remove('active');
+            if (numSpan) { numSpan.style.background = '#dcfce7'; numSpan.style.color = '#15803d'; numSpan.innerText = '✓'; }
         } else {
             el.style.color = '#94a3b8';
-            if (span) { span.style.background = '#e2e8f0'; span.style.color = '#475569'; span.innerText = stepNum; }
+            el.classList.remove('active');
+            if (numSpan) { numSpan.style.background = '#e2e8f0'; numSpan.style.color = '#475569'; numSpan.innerText = stepNum; }
         }
     });
 
@@ -1419,34 +1437,53 @@ function eessGoToPrepStage(stageNum) {
 
     if (prevBtn) prevBtn.style.display = (stageNum > 1) ? 'inline-flex' : 'none';
 
-    if (stageNum === 3) {
+    if (stageNum === totalStages) {
         if (nextBtn) nextBtn.style.display = 'none';
         if (submitBtn) submitBtn.style.display = 'inline-flex';
         if (draftBtn) draftBtn.style.display = 'inline-flex';
 
-        // Render live summary
-        const summaryEl = document.getElementById('eess-prep-review-live-summary');
-        if (summaryEl) {
-            const titleVal = document.getElementById('eess_lesson_title').value || document.getElementById('eess_upload_lesson_title').value;
-            const dateVal = document.getElementById('eess_lesson_date').value;
-            const subjVal = document.getElementById('eess_lesson_subject').value;
+        if (method === 'upload') {
+            const summaryEl = document.getElementById('eess-prep-upload-review-summary');
+            if (summaryEl) {
+                const titleVal = document.getElementById('eess_upload_lesson_title').value;
+                const dateVal = document.getElementById('eess_upload_lesson_date').value;
+                const subjVal = document.getElementById('eess_lesson_subject').value;
+                const docFile = document.getElementById('eess_prep_document_file');
+                const fileName = (docFile && docFile.files && docFile.files[0]) ? docFile.files[0].name : 'وثيقة التحضير المرفقة';
 
-            if (method === 'upload') {
                 summaryEl.innerHTML = `
-                    <div style="font-size:13px; font-weight:800; color:#0f172a; margin-bottom:10px;">ملخص إرسال تحضير درس جاهز (PDF/Word):</div>
-                    <div style="margin-bottom:6px;"><strong>عنوان التحضير:</strong> ${titleVal}</div>
-                    <div style="margin-bottom:6px;"><strong>المادة والتاريخ:</strong> ${subjVal} — ${dateVal}</div>
-                    <div style="color:#16a34a; font-weight:800; margin-top:10px;">✓ تم إرفاق المستند وجاهز للإرسال النهائي للمراجعة.</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0f172a; margin-bottom:12px; border-bottom:1px solid #cbd5e1; padding-bottom:8px;">ملخص إرسال تحضير درس جاهز (وثيقة مرفوعة):</div>
+                    <div style="margin-bottom:8px;">📌 <strong>عنوان التحضير:</strong> ${titleVal}</div>
+                    <div style="margin-bottom:8px;">📚 <strong>المادة والتاريخ:</strong> ${subjVal} — ${dateVal}</div>
+                    <div style="margin-bottom:8px;">📄 <strong>الملف المرفق:</strong> <span style="color:#0284c7; font-weight:800;">${fileName}</span></div>
+                    <div style="color:#16a34a; font-weight:800; margin-top:14px; background:#f0fdf4; padding:10px 14px; border-radius:8px; border:1px solid #bbf7d0;">✓ تم التحقق من المستند وجاهز للإرسال النهائي للمراجعة والاعتماد الرسميين.</div>
                 `;
-            } else {
+            }
+        } else {
+            const summaryEl = document.getElementById('eess-prep-create-review-summary');
+            if (summaryEl) {
+                const titleVal = document.getElementById('eess_lesson_title').value;
+                const dateVal = document.getElementById('eess_lesson_date').value;
+                const subjVal = document.getElementById('eess_lesson_subject').value;
+
                 summaryEl.innerHTML = `
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-bottom:1px solid #cbd5e1; padding-bottom:8px; margin-bottom:10px;">
-                        <div><strong>عنوان الدرس:</strong> ${titleVal}</div>
-                        <div><strong>المادة والتاريخ:</strong> ${subjVal} — ${dateVal}</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; border-bottom:1px solid #cbd5e1; padding-bottom:10px; margin-bottom:12px;">
+                        <div>📌 <strong>عنوان الدرس:</strong> ${titleVal}</div>
+                        <div>📚 <strong>المادة والتاريخ:</strong> ${subjVal} — ${dateVal}</div>
                     </div>
-                    <div style="margin-bottom:8px;"><strong>1. الأهداف السلوكية:</strong><p style="margin:4px 0 0 0; color:#475569;">${document.getElementById('eess_objectives').value.replace(/\n/g, '<br>')}</p></div>
-                    <div style="margin-bottom:8px;"><strong>2. التهيئة والأنشطة:</strong><p style="margin:4px 0 0 0; color:#475569;">${document.getElementById('eess_activities').value.replace(/\n/g, '<br>')}</p></div>
-                    <div><strong>3. التقويم والملاحظات:</strong><p style="margin:4px 0 0 0; color:#475569;">${document.getElementById('eess_evaluation').value.replace(/\n/g, '<br>')}</p></div>
+                    <div style="margin-bottom:10px;"><strong>🎯 1. هدف الدرس:</strong><p style="margin:4px 0 0 0; color:#334155; background:#fff; padding:8px; border-radius:6px; border:1px solid #e2e8f0;">${document.getElementById('eess_objectives').value.replace(/\n/g, '<br>')}</p></div>
+                    <div style="margin-bottom:10px;"><strong>🏃 2. مكونات الدرس البدني:</strong>
+                        <ul style="margin:4px 0 0 18px; color:#334155; font-size:12px; line-height:1.5;">
+                            <li><strong>الإحماء:</strong> ${document.getElementById('eess_warmup').value}</li>
+                            <li><strong>الإعداد البدني:</strong> ${document.getElementById('eess_physical_prep').value}</li>
+                            <li><strong>الإعداد المهاري:</strong> ${document.getElementById('eess_skill_prep').value}</li>
+                            <li><strong>الخاتمة والتهدئة:</strong> ${document.getElementById('eess_conclusion').value}</li>
+                        </ul>
+                    </div>
+                    <div><strong>🇦🇪 3. الروابط والربط التربوي:</strong>
+                        <p style="margin:4px 0 0 0; color:#334155; font-size:12px;">• <strong>الأجندة الوطنية:</strong> ${document.getElementById('eess_national_agenda').value}</p>
+                        <p style="margin:2px 0 0 0; color:#334155; font-size:12px;">• <strong>المواد الأخرى:</strong> ${document.getElementById('eess_cross_subject').value}</p>
+                    </div>
                 `;
             }
         }
