@@ -7880,9 +7880,18 @@ class SM_Public {
             require_once(ABSPATH . 'wp-admin/includes/image.php');
             require_once(ABSPATH . 'wp-admin/includes/media.php');
 
+            $file_info = wp_check_filetype_and_ext($_FILES['plan_document_file']['tmp_name'], $_FILES['plan_document_file']['name']);
+            $allowed_mimes = array('pdf' => 'application/pdf', 'doc' => 'application/msword', 'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+            if (!in_array($file_info['type'], $allowed_mimes) && !array_key_exists($file_info['ext'], $allowed_mimes)) {
+                wp_send_json_error('عذراً، صيغة ملف الخطة المرفوع غير مدعومة. يرجى اختيار ملف PDF أو Word فقط.');
+            }
+
             $attachment_id = media_handle_upload('plan_document_file', 0);
             if (!is_wp_error($attachment_id)) {
                 $uploaded_file_url = wp_get_attachment_url($attachment_id);
+            } else {
+                wp_send_json_error('فشل رفع ملف الخطة إلى السيرفر: ' . $attachment_id->get_error_message());
             }
         }
 
@@ -8145,9 +8154,18 @@ class SM_Public {
             require_once(ABSPATH . 'wp-admin/includes/image.php');
             require_once(ABSPATH . 'wp-admin/includes/media.php');
 
+            $file_info = wp_check_filetype_and_ext($_FILES['lesson_file']['tmp_name'], $_FILES['lesson_file']['name']);
+            $allowed_mimes = array('pdf' => 'application/pdf', 'doc' => 'application/msword', 'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+            if (!in_array($file_info['type'], $allowed_mimes) && !array_key_exists($file_info['ext'], $allowed_mimes)) {
+                wp_send_json_error('عذراً، نوع الملف المرفق غير مدعوم. يرجى اختيار ملف PDF أو Word فقط.');
+            }
+
             $attachment_id = media_handle_upload('lesson_file', 0);
             if (!is_wp_error($attachment_id)) {
                 $file_url = wp_get_attachment_url($attachment_id);
+            } else {
+                wp_send_json_error('فشل رفع الملف إلى السيرفر: ' . $attachment_id->get_error_message());
             }
         }
 
