@@ -1585,6 +1585,7 @@ const eessSubmissions = <?php
                 'grade' => $sub->grade_level,
                 'section' => $sub->class_section,
                 'date' => $sub->lesson_date,
+                'file_url' => $parsed_data['file_url'] ?? '',
                 'objectives' => $parsed_data['objectives'] ?? '',
                 'warmup' => $parsed_data['warmup'] ?? '',
                 'activities' => $parsed_data['activities'] ?? '',
@@ -1620,6 +1621,21 @@ function smOpenPrepViewer(id) {
             <div><strong>الصف الدراسي:</strong> ${data.grade} (${data.section})</div>
             <div><strong>تاريخ الدرس:</strong> ${data.date}</div>
         </div>
+    `;
+
+    if (data.file_url) {
+        html += `
+            <div style="background:#e0f2fe; border:1px solid #bae6fd; border-radius:10px; padding:14px; margin-bottom:15px; text-align:center;">
+                <div style="font-weight:800; color:#0369a1; font-size:13px; margin-bottom:8px;">📄 وثيقة التحضير المرفوعة للدرس:</div>
+                <a href="${data.file_url}" target="_blank" class="sm-btn" style="background:#0284c7; color:#fff !important; height:36px; padding:0 20px; font-size:12px; border-radius:9999px !important; text-decoration:none; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                    <span class="dashicons dashicons-visibility"></span>
+                    <span>معاينة وتحميل المستند المرفوع المعتمد</span>
+                </a>
+            </div>
+        `;
+    }
+
+    html += `
         <div style="margin-bottom: 12px; border-right: 3px solid var(--sm-primary-color); padding-right:10px;">
             <h4 style="margin:0 0 3px 0; color:var(--sm-primary-color); font-size:12px; font-weight:800;">${label1}</h4>
             <p style="margin:0; font-size:12px;">${data.objectives.replace(/\n/g, '<br>')}</p>
@@ -1756,47 +1772,56 @@ function typeOfActiveReport() {
 
 window.smQuickApprovePrep = function(prepId) {
     if (!prepId) return;
-    var btn = document.getElementById('btn-approve-' + prepId);
-    if (btn) btn.disabled = true;
 
-    var formData = new FormData();
-    formData.append('action', 'eess_quick_approve_prep');
-    formData.append('prep_id', prepId);
-    formData.append('sm_nonce', '<?php echo wp_create_nonce("eess_lesson_prep_action"); ?>');
+    var confirmMsg = 'هل أنت تأكد من التأكيد والموافقة على اعتماد تحضير الدرس المحدد؟';
+    var runApproval = function() {
+        var btn = document.getElementById('btn-approve-' + prepId);
+        if (btn) btn.disabled = true;
 
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
-    .then(r => r.json())
-    .then(res => {
-        if (res.success) {
-            if (typeof smShowNotification === 'function') {
-                smShowNotification('تم اعتماد خطة الدرس بنجاح');
-            } else {
-                alert('تم اعتماد خطة الدرس بنجاح');
-            }
-            var row = document.getElementById('prep-row-' + prepId);
-            if (row) {
-                var badgeCell = row.cells[7];
-                if (badgeCell) {
-                    badgeCell.innerHTML = '<span style="display:inline-block; padding:2px 8px; border-radius:50px; font-size:10px; font-weight:bold; background:#dcfce7; color:#15803d;">معتمد</span>';
+        var formData = new FormData();
+        formData.append('action', 'eess_quick_approve_prep');
+        formData.append('prep_id', prepId);
+        formData.append('sm_nonce', '<?php echo wp_create_nonce("eess_lesson_prep_action"); ?>');
+
+        fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                if (typeof smShowNotification === 'function') {
+                    smShowNotification('✓ تم اعتماد خطة الدرس بنجاح بالمرئيات المعتمدة.');
                 }
-            }
-            if (btn) btn.style.display = 'none';
+                var row = document.getElementById('prep-row-' + prepId);
+                if (row) {
+                    var badgeCell = row.cells[7];
+                    if (badgeCell) {
+                        badgeCell.innerHTML = '<span style="display:inline-block; padding:2px 8px; border-radius:50px; font-size:10px; font-weight:bold; background:#dcfce7; color:#15803d;">معتمد</span>';
+                    }
+                }
+                if (btn) btn.style.display = 'none';
 
-            // Decrement Pending Review counter in real time
-            var statCounter = document.getElementById('eess-pending-review-stat-counter');
-            if (statCounter) {
-                var cur = parseInt(statCounter.innerText) || 0;
-                statCounter.innerText = Math.max(0, cur - 1);
+                var statCounter = document.getElementById('eess-pending-review-stat-counter');
+                if (statCounter) {
+                    var cur = parseInt(statCounter.innerText) || 0;
+                    statCounter.innerText = Math.max(0, cur - 1);
+                }
+            } else {
+                alert('خطأ: ' + (res.data || 'فشل اعتماد التحضير.'));
+                if (btn) btn.disabled = false;
             }
-        } else {
-            alert('خطأ: ' + (res.data || 'فشل اعتماد التحضير.'));
+        })
+        .catch(err => {
+            alert('حدث خطأ في الاتصال بالخادم.');
             if (btn) btn.disabled = false;
-        }
-    })
-    .catch(err => {
-        alert('حدث خطأ في الاتصال بالخادم.');
-        if (btn) btn.disabled = false;
-    });
+        });
+    };
+
+    if (typeof window.smConfirmAction === 'function') {
+        window.smConfirmAction(confirmMsg).then(function(confirmed) {
+            if (confirmed) runApproval();
+        });
+    } else {
+        if (confirm(confirmMsg)) runApproval();
+    }
 };
 
 window.smOpenDeletePrepModal = function(prepId, title) {
