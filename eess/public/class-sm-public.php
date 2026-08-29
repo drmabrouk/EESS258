@@ -7786,7 +7786,7 @@ class SM_Public {
         check_ajax_referer('eess_lesson_prep_action', 'sm_nonce');
         $user_id = get_current_user_id();
         $roles = (array) wp_get_current_user()->roles;
-        $can_review = in_array('administrator', $roles) || in_array('sm_system_admin', $roles) || in_array('sm_principal', $roles) || in_array('sm_supervisor', $roles) || in_array('sm_coordinator', $roles) || in_array('sm_hod', $roles) || current_user_can('manage_options');
+        $can_review = in_array('administrator', $roles) || in_array('sm_system_admin', $roles) || in_array('sm_principal', $roles) || in_array('sm_supervisor', $roles) || in_array('sm_coordinator', $roles) || in_array('sm_hod', $roles) || in_array('sm_activities_supervisor', $roles) || current_user_can('manage_options');
 
         if (!$can_review) {
             wp_send_json_error('عذراً، لا تمتلك صلاحيات اعتماد خطط التحضير.');
@@ -7822,7 +7822,7 @@ class SM_Public {
         check_ajax_referer('eess_lesson_prep_action', 'sm_nonce');
         $user_id = get_current_user_id();
         $roles = (array) wp_get_current_user()->roles;
-        $can_review = in_array('administrator', $roles) || in_array('sm_system_admin', $roles) || in_array('sm_principal', $roles) || in_array('sm_supervisor', $roles) || in_array('sm_coordinator', $roles) || in_array('sm_hod', $roles) || current_user_can('manage_options');
+        $can_review = in_array('administrator', $roles) || in_array('sm_system_admin', $roles) || in_array('sm_principal', $roles) || in_array('sm_supervisor', $roles) || in_array('sm_coordinator', $roles) || in_array('sm_hod', $roles) || in_array('sm_activities_supervisor', $roles) || current_user_can('manage_options');
 
         $bulk_action = sanitize_text_field($_POST['bulk_action'] ?? '');
         $prep_ids = !empty($_POST['prep_ids']) ? array_map('intval', (array)$_POST['prep_ids']) : array();

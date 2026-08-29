@@ -645,24 +645,15 @@ $arabic_term_names = array(
                 <h4 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #0f172a; text-align: center;">مرحباً أ. <?php echo esc_html($user->display_name); ?> — إعداد خطة الفصل الدراسي</h4>
                 <p style="margin: 0 0 24px 0; font-size: 13px; color: #64748b; line-height: 1.6; text-align: center;">يرجى اختيار طريقة إعداد الخطة المناسبة لك للبدء:</p>
 
-                <!-- Method Selection Cards (Side-by-Side) -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 10px;">
+                <!-- Active File Upload Mode Only -->
+                <div style="display: flex; justify-content: center; margin-bottom: 10px;">
                     <!-- Option 1: Upload Ready-Made Plan -->
-                    <div id="eess-method-card-upload" onclick="eessChooseMethodAndProceed('upload')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 16px; padding: 22px 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                    <div id="eess-method-card-upload" onclick="eessChooseMethodAndProceed('upload')" style="background: #ffffff; border: 2px solid #0284c7; border-radius: 16px; padding: 22px 28px; cursor: pointer; transition: all 0.2s ease; text-align: center; max-width: 480px; width: 100%; box-shadow: 0 4px 12px rgba(2,132,199,0.08);">
                         <div style="width: 52px; height: 52px; background: #e0f2fe; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #0284c7; margin-bottom: 12px;">
                             <span class="dashicons dashicons-upload" style="font-size: 26px; width: 26px; height: 26px;"></span>
                         </div>
-                        <h4 style="margin: 0 0 6px 0; font-size: 14.5px; font-weight: 800; color: #0f172a;">رفع خطة جاهزة (PDF / Word)</h4>
+                        <h4 style="margin: 0 0 6px 0; font-size: 15px; font-weight: 800; color: #0f172a;">رفع خطة جاهزة (PDF / Word)</h4>
                         <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">رفع وثيقة خطة مجهزة ومكتملة سابقاً مباشرة للمراجعة والاعتماد.</p>
-                    </div>
-
-                    <!-- Option 2: Create Plan in System -->
-                    <div id="eess-method-card-create" onclick="eessChooseMethodAndProceed('create')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 16px; padding: 22px 18px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                        <div style="width: 52px; height: 52px; background: #fef2f2; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #881337; margin-bottom: 12px;">
-                            <span class="dashicons dashicons-calendar-alt" style="font-size: 26px; width: 26px; height: 26px;"></span>
-                        </div>
-                        <h4 style="margin: 0 0 6px 0; font-size: 14.5px; font-weight: 800; color: #881337;">إعداد خطة الفصل بالنظام</h4>
-                        <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">توزيع الدروس والوحدات التعليمية خطوة بخطوة لكل أسبوع تفصيلياً.</p>
                     </div>
                 </div>
 
