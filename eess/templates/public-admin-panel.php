@@ -912,6 +912,10 @@ $greeting = ($hour >= 5 && $hour < 12) ? 'صباح الخير' : 'مساء ال�
                     include SM_PLUGIN_DIR . 'templates/admin-term-plans.php';
                     break;
 
+                case 'assets':
+                    include SM_PLUGIN_DIR . 'templates/admin-asset-management.php';
+                    break;
+
                 case 'system-announcements':
                     include SM_PLUGIN_DIR . 'templates/admin-system-announcements.php';
                     break;

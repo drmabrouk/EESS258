@@ -299,6 +299,103 @@ class SM_Activator {
             KEY subject (subject),
             KEY input_type (input_type),
             KEY is_approved (is_approved)
+        ) $charset_collate;
+
+        CREATE TABLE {$wpdb->prefix}sm_asset_catalog (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            item_name varchar(255) NOT NULL,
+            category varchar(100) NOT NULL,
+            unit varchar(50) DEFAULT 'قطعة' NOT NULL,
+            description text,
+            is_active tinyint(1) DEFAULT 1 NOT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY (id)
+        ) $charset_collate;
+
+        CREATE TABLE {$wpdb->prefix}sm_asset_inventories (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            institution_id bigint(20) DEFAULT 0 NOT NULL,
+            school_name varchar(255) NOT NULL,
+            department varchar(100) DEFAULT 'التربية البدنية والصحية' NOT NULL,
+            academic_year varchar(50) DEFAULT '2027/2026' NOT NULL,
+            responsible_user_id bigint(20) NOT NULL,
+            status varchar(50) DEFAULT 'submitted' NOT NULL,
+            review_notes text,
+            reviewed_by bigint(20) DEFAULT NULL,
+            reviewed_at datetime DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY (id),
+            KEY school_name (school_name),
+            KEY status (status)
+        ) $charset_collate;
+
+        CREATE TABLE {$wpdb->prefix}sm_asset_inventory_items (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            inventory_id bigint(20) NOT NULL,
+            catalog_id bigint(20) DEFAULT 0 NOT NULL,
+            item_name varchar(255) NOT NULL,
+            category varchar(100) NOT NULL,
+            qty_total int(11) DEFAULT 0 NOT NULL,
+            qty_usable int(11) DEFAULT 0 NOT NULL,
+            qty_consumed int(11) DEFAULT 0 NOT NULL,
+            qty_damaged int(11) DEFAULT 0 NOT NULL,
+            qty_missing int(11) DEFAULT 0 NOT NULL,
+            qty_replacement int(11) DEFAULT 0 NOT NULL,
+            location varchar(150) DEFAULT 'مخزن التربية البدنية' NOT NULL,
+            condition_status varchar(50) DEFAULT 'good' NOT NULL,
+            item_notes text,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY (id),
+            KEY inventory_id (inventory_id)
+        ) $charset_collate;
+
+        CREATE TABLE {$wpdb->prefix}sm_asset_requests (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            institution_id bigint(20) DEFAULT 0 NOT NULL,
+            school_name varchar(255) NOT NULL,
+            department varchar(100) DEFAULT 'التربية البدنية والصحية' NOT NULL,
+            requester_user_id bigint(20) NOT NULL,
+            request_reason varchar(255) DEFAULT 'استبدال معدات تالفة' NOT NULL,
+            priority varchar(50) DEFAULT 'normal' NOT NULL,
+            status varchar(50) DEFAULT 'submitted' NOT NULL,
+            notes text,
+            review_notes text,
+            reviewed_by bigint(20) DEFAULT NULL,
+            reviewed_at datetime DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY (id),
+            KEY school_name (school_name),
+            KEY status (status)
+        ) $charset_collate;
+
+        CREATE TABLE {$wpdb->prefix}sm_asset_request_items (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            request_id bigint(20) NOT NULL,
+            catalog_id bigint(20) DEFAULT 0 NOT NULL,
+            item_name varchar(255) NOT NULL,
+            qty_usable int(11) DEFAULT 0 NOT NULL,
+            qty_damaged int(11) DEFAULT 0 NOT NULL,
+            qty_missing int(11) DEFAULT 0 NOT NULL,
+            qty_requested int(11) DEFAULT 1 NOT NULL,
+            item_notes text,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY (id),
+            KEY request_id (request_id)
+        ) $charset_collate;
+
+        CREATE TABLE {$wpdb->prefix}sm_asset_audit_logs (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            entity_type varchar(50) NOT NULL,
+            entity_id bigint(20) NOT NULL,
+            action varchar(100) NOT NULL,
+            user_id bigint(20) NOT NULL,
+            details text,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY (id),
+            KEY entity_type (entity_type),
+            KEY entity_id (entity_id)
         ) $charset_collate;";
 
         // System Announcements Table

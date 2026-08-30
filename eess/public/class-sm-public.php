@@ -6841,6 +6841,116 @@ class SM_Public {
         wp_send_json_success($scope);
     }
 
+    public function ajax_sm_save_asset_inventory() {
+        if (!is_user_logged_in()) wp_send_json_error('يجب تسجيل الدخول.');
+        check_ajax_referer('eess_admin_action', 'nonce');
+
+        $user_id    = get_current_user_id();
+        $catalog_id = intval($_POST['catalog_id'] ?? 0);
+        $qty_total  = max(1, intval($_POST['qty_total'] ?? 1));
+        $qty_usable = max(0, intval($_POST['qty_usable'] ?? $qty_total));
+        $qty_damaged = max(0, intval($_POST['qty_damaged'] ?? 0));
+        $qty_missing = max(0, intval($_POST['qty_missing'] ?? 0));
+        $location   = sanitize_text_field($_POST['location'] ?? 'مخزن التربية البدنية');
+
+        $school_name = get_user_meta($user_id, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+        $department  = get_user_meta($user_id, 'department', true) ?: 'التربية البدنية والصحية';
+
+        global $wpdb;
+
+        // Check if institutional inventory header exists or create
+        $inv_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}sm_asset_inventories WHERE school_name = %s LIMIT 1", $school_name));
+        if (!$inv_id) {
+            $wpdb->insert("{$wpdb->prefix}sm_asset_inventories", array(
+                'institution_id' => 1,
+                'school_name'    => $school_name,
+                'department'     => $department,
+                'academic_year'  => '2027/2026',
+                'responsible_user_id' => $user_id,
+                'status'         => 'approved',
+                'created_at'     => current_time('mysql'),
+                'updated_at'     => current_time('mysql')
+            ));
+            $inv_id = $wpdb->insert_id;
+        }
+
+        // Fetch catalog item details
+        $item_info = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sm_asset_catalog WHERE id = %d", $catalog_id));
+        $item_name = $item_info ? $item_info->item_name : 'معدة رياضية جديدة';
+        $category  = $item_info ? $item_info->category : 'معدات رياضية';
+
+        $inserted = $wpdb->insert("{$wpdb->prefix}sm_asset_inventory_items", array(
+            'inventory_id'   => $inv_id,
+            'catalog_id'     => $catalog_id,
+            'item_name'      => $item_name,
+            'category'       => $category,
+            'qty_total'      => $qty_total,
+            'qty_usable'     => $qty_usable,
+            'qty_consumed'   => 0,
+            'qty_damaged'    => $qty_damaged,
+            'qty_missing'    => $qty_missing,
+            'qty_replacement' => $qty_damaged + $qty_missing,
+            'location'       => $location,
+            'condition_status' => 'good',
+            'created_at'     => current_time('mysql')
+        ));
+
+        if ($inserted) {
+            SM_Logger::log('إضافة حصر عهدة', "تم إدراج عهدة جديدة ($item_name) لـ $school_name بواسطة المستخدم ID: $user_id");
+            wp_send_json_success(array('message' => 'تم حفظ وتحديث حصر العهدة بنجاح.'));
+        } else {
+            wp_send_json_error('تعذر حفظ حصر العهدة في قاعدة البيانات.');
+        }
+    }
+
+    public function ajax_sm_save_asset_request() {
+        if (!is_user_logged_in()) wp_send_json_error('يجب تسجيل الدخول.');
+        check_ajax_referer('eess_admin_action', 'nonce');
+
+        $user_id       = get_current_user_id();
+        $catalog_id    = intval($_POST['catalog_id'] ?? 0);
+        $qty_requested = max(1, intval($_POST['qty_requested'] ?? 1));
+        $reason        = sanitize_text_field($_POST['request_reason'] ?? 'استبدال معدات تالفة');
+
+        $school_name = get_user_meta($user_id, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+        $department  = get_user_meta($user_id, 'department', true) ?: 'التربية البدنية والصحية';
+
+        global $wpdb;
+        $inserted = $wpdb->insert("{$wpdb->prefix}sm_asset_requests", array(
+            'institution_id'   => 1,
+            'school_name'      => $school_name,
+            'department'       => $department,
+            'requester_user_id'=> $user_id,
+            'request_reason'   => $reason,
+            'priority'         => 'normal',
+            'status'           => 'submitted',
+            'created_at'       => current_time('mysql'),
+            'updated_at'       => current_time('mysql')
+        ));
+
+        if ($inserted) {
+            $req_id = $wpdb->insert_id;
+            $item_info = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sm_asset_catalog WHERE id = %d", $catalog_id));
+            $item_name = $item_info ? $item_info->item_name : 'معدة جديدة';
+
+            $wpdb->insert("{$wpdb->prefix}sm_asset_request_items", array(
+                'request_id'    => $req_id,
+                'catalog_id'    => $catalog_id,
+                'item_name'     => $item_name,
+                'qty_usable'    => 0,
+                'qty_damaged'   => 0,
+                'qty_missing'   => 0,
+                'qty_requested' => $qty_requested,
+                'created_at'    => current_time('mysql')
+            ));
+
+            SM_Logger::log('طلب توريد معدات', "تم تقديم طلب توريد ($item_name - الكمية: $qty_requested) لـ $school_name بواسطة المستخدم ID: $user_id");
+            wp_send_json_success(array('message' => 'تم إرسال طلب التوريد بنجاح للمراجعة والاعتماد.'));
+        } else {
+            wp_send_json_error('فشل حفظ طلب التوريد.');
+        }
+    }
+
     public function ajax_sm_mark_teacher_contacted() {
         if (!is_user_logged_in()) wp_send_json_error('يجب تسجيل الدخول.');
         check_ajax_referer('eess_admin_action', 'nonce');
