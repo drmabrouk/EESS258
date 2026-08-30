@@ -7306,7 +7306,7 @@ class SM_Public {
 
                     $pr = $preps_by_teacher[$t->ID] ?? null;
                     $st_text = '⚠️ لم يتم التسليم';
-                    $st_class = 'badge-danger';
+                    $st_class = 'pill-danger';
                     $sub_time = '---';
                     $delay_txt = '---';
 
@@ -7316,12 +7316,12 @@ class SM_Public {
 
                         if (strtotime($sub_created) <= strtotime($monday_deadline)) {
                             $on_time_count++;
-                            $st_class = 'badge-success';
+                            $st_class = 'pill-success';
                             $st_text = '✓ تم التسليم في الموعد';
                             $delay_txt = 'في الموعد المحدد';
                         } else {
                             $late_count++;
-                            $st_class = 'badge-warning';
+                            $st_class = 'pill-warning';
                             $st_text = '⏱️ تم التسليم متأخراً';
                             $diff_seconds = strtotime($sub_created) - strtotime($monday_deadline);
                             $diff_hours = round($diff_seconds / 3600, 1);
@@ -7336,7 +7336,7 @@ class SM_Public {
                     $rows_html .= '<td><strong>' . esc_html($t->display_name) . '</strong><br><small style="color:#64748b; font-family:monospace;">' . esc_html($emp_id) . '</small></td>';
                     $rows_html .= '<td>' . esc_html($t_school) . '</td>';
                     $rows_html .= '<td>' . esc_html($t_subj) . '</td>';
-                    $rows_html .= '<td><span class="status-badge ' . $st_class . '">' . $st_text . '</span></td>';
+                    $rows_html .= '<td><span class="status-pill ' . $st_class . '">' . $st_text . '</span></td>';
                     $rows_html .= '<td>' . $sub_time . '</td>';
                     $rows_html .= '<td>' . $delay_txt . '</td>';
                     $rows_html .= '</tr>';
@@ -8385,7 +8385,7 @@ class SM_Public {
                 'grade_level'     => $grade_level,
                 'class_section'   => $class_section,
                 'lesson_date'     => $lesson_date,
-                'submission_time' => current_time('H:i:s'),
+                'submission_time' => current_time('mysql'),
                 'status'          => $status,
                 'delay_seconds'   => $delay_seconds,
                 'lesson_data'     => json_encode($lesson_data),
