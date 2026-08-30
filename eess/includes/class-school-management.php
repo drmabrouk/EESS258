@@ -164,6 +164,7 @@ class School_Management {
 
         // Lesson Prep Quick Actions & Bulk Operations
         $this->loader->add_action('wp_ajax_eess_quick_approve_prep', $plugin_public, 'ajax_quick_approve_prep');
+        $this->loader->add_action('wp_ajax_eess_reject_lesson_prep', $plugin_public, 'ajax_reject_lesson_prep');
         $this->loader->add_action('wp_ajax_eess_bulk_lesson_action', $plugin_public, 'ajax_bulk_lesson_action');
 
         // Technical Support & Quick Parent Note AJAX Handlers

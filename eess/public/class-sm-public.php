@@ -691,8 +691,9 @@ class SM_Public {
                             <input type="text" name="lesson_title" required class="sm-input" placeholder="عنوان وثيقة التحضير..." style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
                         </div>
                         <div style="margin-bottom: 12px;">
-                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف التحضير (PDF / Word) <span style="color:#ef4444;">*</span></label>
-                            <input type="file" id="m_prep_file_input" name="lesson_file" accept=".pdf,.doc,.docx" required onchange="eessMobileHandleFileSelect(this, 'prep')" style="width: 100%; font-size: 12px;">
+                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف تحضير الدرس (صيغة PDF فقط) <span style="color:#ef4444;">*</span></label>
+                            <input type="file" id="m_prep_file_input" name="lesson_file" accept=".pdf" required onchange="eessMobileHandleFileSelect(this, 'prep')" style="width: 100%; font-size: 12px;">
+                            <div style="font-size: 10.5px; color: #64748b; margin-top: 3px;">تنبيه: يرجى رفع ملف تحضير الدرس بصيغة PDF المعتمدة فقط.</div>
                         </div>
                         <div id="m_prep_file_status" style="display: none; margin-top: 10px; margin-bottom: 12px; padding: 12px; border-radius: 10px; font-size: 12px;"></div>
                         <button type="submit" id="m_prep_submit_btn" disabled class="sm-btn" style="width: 100%; height: 42px; background: #0f172a; color: white !important; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: not-allowed; opacity: 0.5;">رفع وإرسال التحضير</button>
@@ -715,8 +716,9 @@ class SM_Public {
                             <input type="text" name="subject" required class="sm-input" placeholder="اسم المادة والخطة..." style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 12px;">
                         </div>
                         <div style="margin-bottom: 12px;">
-                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف الخطة الفصلية (PDF / Word) <span style="color:#ef4444;">*</span></label>
-                            <input type="file" id="m_plan_file_input" name="plan_document_file" accept=".pdf,.doc,.docx" required onchange="eessMobileHandleFileSelect(this, 'plan')" style="width: 100%; font-size: 12px;">
+                            <label style="font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">ملف الخطة الفصلية (صيغة PDF فقط) <span style="color:#ef4444;">*</span></label>
+                            <input type="file" id="m_plan_file_input" name="plan_document_file" accept=".pdf" required onchange="eessMobileHandleFileSelect(this, 'plan')" style="width: 100%; font-size: 12px;">
+                            <div style="font-size: 10.5px; color: #64748b; margin-top: 3px;">تنبيه: يرجى رفع ملف الخطة الفصلية بصيغة PDF المعتمدة فقط.</div>
                         </div>
                         <div id="m_plan_file_status" style="display: none; margin-top: 10px; margin-bottom: 12px; padding: 12px; border-radius: 10px; font-size: 12px;"></div>
                         <button type="submit" id="m_plan_submit_btn" disabled class="sm-btn" style="width: 100%; height: 42px; background: #0284c7; color: white !important; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: not-allowed; opacity: 0.5;">رفع وإرسال الخطة الفصلية</button>
@@ -784,15 +786,14 @@ class SM_Public {
 
                 var file = input.files[0];
                 var ext = file.name.split('.').pop().toLowerCase();
-                var allowedExts = ['pdf', 'doc', 'docx'];
 
-                if (!allowedExts.includes(ext)) {
+                if (ext !== 'pdf') {
                     statusBox.style.display = 'block';
                     statusBox.style.background = '#fef2f2';
                     statusBox.style.border = '1px solid #fca5a5';
                     statusBox.style.color = '#991b1b';
-                    statusBox.innerHTML = '<div style="font-weight: 800; margin-bottom: 2px;">✕ صياغة الملف غير مدعومة</div>' +
-                                          '<div style="font-size: 11px;">يرجى اختيار ملف بصلة PDF أو Word (.doc, .docx) فقط.</div>';
+                    statusBox.innerHTML = '<div style="font-weight: 800; margin-bottom: 2px;">✕ نوع الملف غير مسموح</div>' +
+                                          '<div style="font-size: 11px;">يجب رفع الملف بصيغة PDF فقط (.pdf). لن يتم قبول صيغ أخرى.</div>';
                     submitBtn.disabled = true;
                     submitBtn.style.opacity = '0.5';
                     submitBtn.style.cursor = 'not-allowed';
@@ -7815,6 +7816,55 @@ class SM_Public {
             wp_send_json_success(array('message' => 'تم اعتماد خطة التحضير بنجاح.', 'prep_id' => $prep_id));
         } else {
             wp_send_json_error('فشل في تغيير حالة الاعتماد بالمرئيات.');
+        }
+    }
+
+    public function ajax_reject_lesson_prep() {
+        check_ajax_referer('eess_lesson_prep_action', 'sm_nonce');
+        $user_id = get_current_user_id();
+        $roles = (array) wp_get_current_user()->roles;
+        $can_review = in_array('administrator', $roles) || in_array('sm_system_admin', $roles) || in_array('sm_principal', $roles) || in_array('sm_supervisor', $roles) || in_array('sm_coordinator', $roles) || in_array('sm_hod', $roles) || in_array('sm_activities_supervisor', $roles) || current_user_can('manage_options');
+
+        if (!$can_review) {
+            wp_send_json_error('عذراً، لا تمتلك صلاحيات رفض وتوجيه ملاحظات تحضير الدروس.');
+        }
+
+        $prep_id = intval($_POST['prep_id'] ?? 0);
+        $notes = sanitize_textarea_field($_POST['notes'] ?? '');
+
+        if ($prep_id <= 0 || empty($notes)) {
+            wp_send_json_error('يرجى تحديد التحضير وإدخال ملاحظات التوجيه المطلوبة.');
+        }
+
+        global $wpdb;
+        $updated = $wpdb->update(
+            "{$wpdb->prefix}sm_lesson_preps",
+            array(
+                'status' => 'revision_required',
+                'reviewed_by' => $user_id,
+                'reviewed_at' => current_time('mysql'),
+                'review_notes' => $notes
+            ),
+            array('id' => $prep_id)
+        );
+
+        if ($updated !== false) {
+            // Save comment to sm_lesson_comments
+            $wpdb->insert(
+                "{$wpdb->prefix}sm_lesson_comments",
+                array(
+                    'prep_id' => $prep_id,
+                    'user_id' => $user_id,
+                    'comment_text' => $notes,
+                    'created_at' => current_time('mysql')
+                )
+            );
+
+            $prep = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}sm_lesson_preps WHERE id = %d", $prep_id));
+            SM_Logger::log('رفض وتحويل تحضير درس للتعديل', "تم إحالة التحضير (ID: $prep_id) للتعديل بواسطة المستخدم ID: $user_id بملاحظات: $notes");
+            wp_send_json_success(array('message' => 'تم تسجيل الملاحظات وتحديث حالة الدرس للتعديل بنجاح.', 'prep_id' => $prep_id));
+        } else {
+            wp_send_json_error('تعذر حفظ حالة الرفض في قاعدة البيانات.');
         }
     }
 

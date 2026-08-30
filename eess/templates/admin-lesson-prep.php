@@ -1002,22 +1002,15 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                         </a>
                                     <?php endif; ?>
 
-                                    <!-- WhatsApp Direct Contact Button -->
-                                    <?php
-                                    $t_phone = get_user_meta($sub->teacher_id, 'phone_number', true) ?: (get_user_meta($sub->teacher_id, 'sm_phone', true) ?: (get_user_meta($sub->teacher_id, 'phone', true) ?: ''));
-                                    $clean_phone = preg_replace('/[^0-9]/', '', $t_phone);
-                                    if (empty($clean_phone) || strlen($clean_phone) < 8) $clean_phone = '971500000000';
-                                    $wa_msg = rawurlencode("السلام عليكم، كيف حالك؟\nتحية طيبة من نظام إدارة المدارس. نود التواصل معك بخصوص متابعتك التعليمية.");
-                                    $wa_url = "https://wa.me/" . $clean_phone . "?text=" . $wa_msg;
-                                    ?>
-                                    <a href="<?php echo esc_url($wa_url); ?>" target="_blank" onclick="eessMarkTeacherContacted(<?php echo $sub->teacher_id; ?>, 'prep', <?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-success" title="تواصل مباشر عبر واتساب مع المعلم">
-                                        <span class="dashicons dashicons-whatsapp"></span>
-                                    </a>
-
                                     <?php if ($can_review && ($sub->status === 'submitted' || $sub->status === 'late' || $sub->status === 'resubmitted')): ?>
                                         <!-- Approve Button -->
                                         <button id="btn-approve-<?php echo $sub->id; ?>" onclick="smQuickApprovePrep(<?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-success" title="اعتماد خطة الدرس فوراً">
                                             <span class="dashicons dashicons-yes-alt"></span>
+                                        </button>
+
+                                        <!-- Reject / Return Button -->
+                                        <button id="btn-reject-<?php echo $sub->id; ?>" onclick="eessOpenRejectPrepModal(<?php echo $sub->id; ?>, '<?php echo esc_js($sub->title); ?>')" class="sm-action-btn sm-action-btn-danger" title="رفض أو إعادة الدرس للمراجعة والتعديل">
+                                            <span class="dashicons dashicons-no-alt"></span>
                                         </button>
                                     <?php endif; ?>
 
@@ -1034,6 +1027,18 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                             <span class="dashicons dashicons-admin-page"></span>
                                         </button>
                                     <?php endif; ?>
+
+                                    <!-- WhatsApp Direct Contact Button (Positioned immediately to the left of Delete in RTL) -->
+                                    <?php
+                                    $t_phone = get_user_meta($sub->teacher_id, 'phone_number', true) ?: (get_user_meta($sub->teacher_id, 'sm_phone', true) ?: (get_user_meta($sub->teacher_id, 'phone', true) ?: ''));
+                                    $clean_phone = preg_replace('/[^0-9]/', '', $t_phone);
+                                    if (empty($clean_phone) || strlen($clean_phone) < 8) $clean_phone = '971500000000';
+                                    $wa_msg = rawurlencode("السلام عليكم، كيف حالك؟\nتحية طيبة من نظام إدارة المدارس. نود التواصل معك بخصوص متابعتك التعليمية.");
+                                    $wa_url = "https://wa.me/" . $clean_phone . "?text=" . $wa_msg;
+                                    ?>
+                                    <a href="<?php echo esc_url($wa_url); ?>" target="_blank" onclick="eessMarkTeacherContacted(<?php echo $sub->teacher_id; ?>, 'prep', <?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-success" title="تواصل مباشر عبر واتساب مع المعلم">
+                                        <span class="dashicons dashicons-whatsapp"></span>
+                                    </a>
 
                                     <!-- Delete Button (Far-Left in RTL) -->
                                     <button onclick="smOpenDeletePrepModal(<?php echo $sub->id; ?>, '<?php echo esc_js($sub->title); ?>')" class="sm-action-btn sm-action-btn-danger" title="حذف التحضير نهائياً">
@@ -1198,6 +1203,30 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
     </div>
     <?php endif; ?>
 
+</div>
+
+<!-- Rejection / Revision Notes Modal -->
+<div id="eess-reject-prep-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; border: 1px solid #fecdd3; box-shadow: 0 25px 50px -12px rgba(220,38,38,0.25); overflow: hidden;">
+        <div style="background: #dc2626; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-no-alt" style="font-size: 22px; width: 22px; height: 22px; color: #ffffff;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;" id="reject_prep_modal_title">طلب تعديل / رفض التحضير</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-reject-prep-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <form onsubmit="eessSubmitRejectPrep(event)" style="padding: 24px;">
+            <input type="hidden" id="reject_prep_id" value="0">
+            <div style="margin-bottom: 16px;">
+                <label style="font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">أسباب الرفض / ملاحظات التعديل التربوي المطلوبة <span style="color:#ef4444;">*</span></label>
+                <textarea id="reject_prep_notes" required rows="4" class="sm-input" placeholder="اكتب الملاحظات والتوجيهات المطلوبة ليتمكن المعلم من استكمالها..." style="width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 10px; font-size: 12.5px; box-sizing: border-box;"></textarea>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="submit" id="reject_prep_submit_btn" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; padding: 0 22px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer;">إرسال الملاحظات والرفض</button>
+                <button type="button" onclick="document.getElementById('eess-reject-prep-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 38px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Document Viewer Modal -->
@@ -1782,6 +1811,53 @@ function eessExportPrepReport() {
 function typeOfActiveReport() {
     const activeSection = document.querySelector('.eess-report-section[style*="display: block"]');
     return activeSection ? activeSection.id : 'lesson_prep';
+}
+
+function eessOpenRejectPrepModal(prepId, title) {
+    document.getElementById('reject_prep_id').value = prepId;
+    document.getElementById('reject_prep_notes').value = '';
+    document.getElementById('reject_prep_modal_title').innerText = 'طلب تعديل / رفض: ' + title;
+    document.getElementById('eess-reject-prep-modal').style.display = 'flex';
+}
+
+function eessSubmitRejectPrep(e) {
+    e.preventDefault();
+    var prepId = document.getElementById('reject_prep_id').value;
+    var notes = document.getElementById('reject_prep_notes').value;
+
+    if (!prepId || !notes) return;
+
+    var btn = document.getElementById('reject_prep_submit_btn');
+    btn.disabled = true;
+    btn.innerText = 'جاري الحفظ والرفض...';
+
+    var formData = new FormData();
+    formData.append('action', 'eess_reject_lesson_prep');
+    formData.append('prep_id', prepId);
+    formData.append('notes', notes);
+    formData.append('sm_nonce', '<?php echo wp_create_nonce("eess_lesson_prep_action"); ?>');
+
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerText = 'إرسال الملاحظات والرفض';
+        if (res.success) {
+            document.getElementById('eess-reject-prep-modal').style.display = 'none';
+            if (typeof smShowNotification === 'function') {
+                smShowNotification('✓ تم تسجيل الملاحظات وإعادة تحضير الدرس بنجاح.');
+            }
+            var row = document.getElementById('prep-row-' + prepId);
+            if (row) {
+                var badgeCell = row.cells[7];
+                if (badgeCell) {
+                    badgeCell.innerHTML = '<span style="display:inline-block; padding:2px 8px; border-radius:50px; font-size:10px; font-weight:bold; background:#ffedd5; color:#c2410c;">طلب تعديل</span>';
+                }
+            }
+        } else {
+            alert('خطأ: ' + (res.data || 'فشل تسجيل الرفض.'));
+        }
+    });
 }
 
 window.smQuickApprovePrep = function(prepId) {
