@@ -361,41 +361,68 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
         </div>
     </div>
 
-    <!-- Administrative Statistics Dashboard (Compact layout) -->
+    <!-- Administrative Compliance & Follow-up Statistics for Lesson Preparation -->
     <?php if ($can_review):
-        $today_date = current_time('Y-m-d');
-        $stats_total_required = count(get_users(array('role' => 'sm_teacher')));
-        $stats_submitted      = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE (lesson_date = %s OR DATE(created_at) = %s) AND status IN ('submitted', 'approved', 'revision_required', 'rejected', 'late')", $today_date, $today_date));
-        $stats_pending        = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE status = 'submitted'");
-        $stats_approved       = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE status = 'approved'");
-        $stats_rejected       = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE status = 'rejected'");
-        $stats_revision       = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE status = 'revision_required'");
-        $stats_late           = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE status = 'late'");
+        $all_teachers_prep = get_users(array('role' => 'sm_teacher'));
+        $pe_teachers_prep = array_filter($all_teachers_prep, function($t) {
+            $spec = get_user_meta($t->ID, 'sm_specialization', true) ?: (get_user_meta($t->ID, 'specialization', true) ?: (get_user_meta($t->ID, 'subject', true) ?: ''));
+            return (mb_strpos($spec, 'بدنية') !== false || mb_strpos($spec, 'رياضة') !== false || mb_strpos($spec, 'Health') !== false || mb_strpos($spec, 'Physical') !== false);
+        });
+        $target_prep_teachers = !empty($pe_teachers_prep) ? $pe_teachers_prep : $all_teachers_prep;
+        $prep_teacher_ids = array_map(function($t) { return $t->ID; }, $target_prep_teachers);
+        $total_prep_teachers = count($prep_teacher_ids);
 
-        $submission_pct = $stats_total_required > 0 ? round(($stats_submitted / $stats_total_required) * 100) : 0;
+        if (!empty($prep_teacher_ids)) {
+            $prep_placeholders = implode(',', array_fill(0, count($prep_teacher_ids), '%d'));
+            $stats_submitted = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE teacher_id IN ($prep_placeholders) AND status IN ('submitted', 'approved', 'revision_required', 'rejected', 'late')", ...$prep_teacher_ids));
+            $stats_approved  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE teacher_id IN ($prep_placeholders) AND status = 'approved'", ...$prep_teacher_ids));
+            $stats_revision  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE teacher_id IN ($prep_placeholders) AND status = 'revision_required'", ...$prep_teacher_ids));
+            $stats_rejected  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE teacher_id IN ($prep_placeholders) AND status = 'rejected'", ...$prep_teacher_ids));
+            $stats_late      = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_lesson_preps WHERE teacher_id IN ($prep_placeholders) AND status = 'late'", ...$prep_teacher_ids));
+        } else {
+            $stats_submitted = 0;
+            $stats_approved  = 0;
+            $stats_revision  = 0;
+            $stats_rejected  = 0;
+            $stats_late      = 0;
+        }
+
+        $stats_missing = max(0, $total_prep_teachers - $stats_submitted);
+        $prep_compliance_rate = $total_prep_teachers > 0 ? round(($stats_submitted / $total_prep_teachers) * 100) : 0;
     ?>
-    <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
-        <h3 style="margin: 0 0 12px 0; font-weight: 800; color: #1e293b; font-size: 13px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px;">إحصائيات الامتثال ومتابعة التحضير</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
-            <div onclick="eessShowComplianceStatDetails('required')" class="sm-stat-card" style="border-top: 3px solid #334155; text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">التحضيرات المطلوبة</div>
-                <div style="font-size: 18px; font-weight: 800; color: #334155;"><?php echo $stats_total_required; ?></div>
+    <div style="background: #ffffff; padding: 20px 24px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <span class="dashicons dashicons-chart-bar" style="color: #881337; font-size: 18px; width: 18px; height: 18px;"></span>
+                <span>إحصائيات الامتثال ومتابعة تحضير الدروس للأسبوع الحالي</span>
+            </h3>
+            <span style="font-size: 12px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 12px; border-radius: 9999px; border: 1px solid #bae6fd;">نسبة الالتزام الإجمالية: <?php echo $prep_compliance_rate; ?>%</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+            <div onclick="eessShowComplianceStatDetails('required')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #334155; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">إجمالي عدد المعلمين</div>
+                <div style="font-size: 18px; font-weight: 900; color: #0f172a;"><?php echo $total_prep_teachers; ?></div>
             </div>
-            <div onclick="eessShowComplianceStatDetails('submitted')" class="sm-stat-card" style="border-top: 3px solid #475569; text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">التحضيرات المقدمة</div>
-                <div style="font-size: 18px; font-weight: 800; color: #475569;"><?php echo $stats_submitted; ?></div>
+            <div onclick="eessShowComplianceStatDetails('submitted')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #0284c7; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="font-size: 11px; color: #0369a1; font-weight: 700; margin-bottom: 4px;">التحضيرات المقدمة</div>
+                <div style="font-size: 18px; font-weight: 900; color: #0284c7;"><?php echo $stats_submitted; ?></div>
             </div>
-            <div onclick="eessShowComplianceStatDetails('approved')" class="sm-stat-card" style="border-top: 3px solid #16a34a; text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">التحضيرات المعتمدة</div>
-                <div style="font-size: 18px; font-weight: 800; color: #16a34a;"><?php echo $stats_approved; ?></div>
+            <div onclick="eessShowComplianceStatDetails('approved')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #16a34a; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="font-size: 11px; color: #166534; font-weight: 700; margin-bottom: 4px;">معتمدة رسمياً</div>
+                <div style="font-size: 18px; font-weight: 900; color: #16a34a;"><?php echo $stats_approved; ?></div>
             </div>
-            <div onclick="eessShowComplianceStatDetails('revision_required')" class="sm-stat-card" style="border-top: 3px solid #ea580c; text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">تعديل مطلوب</div>
-                <div style="font-size: 18px; font-weight: 800; color: #ea580c;"><?php echo $stats_revision; ?></div>
+            <div onclick="eessShowComplianceStatDetails('revision_required')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #d97706; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="font-size: 11px; color: #b45309; font-weight: 700; margin-bottom: 4px;">طلب تعديل</div>
+                <div style="font-size: 18px; font-weight: 900; color: #d97706;"><?php echo $stats_revision; ?></div>
             </div>
-            <div onclick="eessShowComplianceStatDetails('late')" class="sm-stat-card" style="border-top: 3px solid #8b1e1e; text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 3px;">تسليم متأخر</div>
-                <div style="font-size: 18px; font-weight: 800; color: #8b1e1e;"><?php echo $stats_late; ?></div>
+            <div onclick="eessShowComplianceStatDetails('rejected')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #b91c1c; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="font-size: 11px; color: #991b1b; font-weight: 700; margin-bottom: 4px;">التحضيرات المرفوضة</div>
+                <div style="font-size: 18px; font-weight: 900; color: #b91c1c;"><?php echo $stats_rejected; ?></div>
+            </div>
+            <div onclick="eessShowComplianceStatDetails('missing')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #dc2626; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="font-size: 11px; color: #991b1b; font-weight: 700; margin-bottom: 4px;">غير تسليم / متأخر</div>
+                <div style="font-size: 18px; font-weight: 900; color: #dc2626;"><?php echo $stats_missing; ?></div>
             </div>
         </div>
     </div>
@@ -806,14 +833,13 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                     <thead>
                         <tr>
                             <th style="width: 30px; text-align: center;"><input type="checkbox" onclick="eessToggleAllPrepCheckboxes(this)" title="تحديد الكل"></th>
-                            <th>التاريخ</th>
                             <?php if ($can_review): ?>
                                 <th>المعلم</th>
                             <?php endif; ?>
                             <th>العنوان / المادة</th>
                             <th>الصف / الشعبة</th>
                             <th>النسخة</th>
-                            <th>التأخير</th>
+                            <th>التأخير وتاريخ التسليم</th>
                             <th>الحالة</th>
                             <th>الإجراءات</th>
                         </tr>
@@ -904,23 +930,6 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                         ?>
                         <tr style="font-size: 12px;" id="prep-row-<?php echo $sub->id; ?>">
                             <td style="text-align: center;"><input type="checkbox" class="eess-prep-cb" value="<?php echo $sub->id; ?>"></td>
-                            <td style="font-weight: 700;">
-                                <?php echo date_i18n('Y-m-d', strtotime($sub->lesson_date)); ?>
-                                <?php
-                                $weekday_names = array(
-                                    'Sunday' => 'الأحد',
-                                    'Monday' => 'الاثنين',
-                                    'Tuesday' => 'الثلاثاء',
-                                    'Wednesday' => 'الأربعاء',
-                                    'Thursday' => 'الخميس',
-                                    'Friday' => 'الجمعة',
-                                    'Saturday' => 'السبت'
-                                );
-                                $eng_day = date('l', strtotime($sub->lesson_date));
-                                $day_name = $weekday_names[$eng_day] ?? $eng_day;
-                                ?>
-                                <div style="font-size: 10px; color: #64748b; font-weight: normal; margin-top: 3px;"><?php echo esc_html($day_name); ?></div>
-                            </td>
                             <?php if ($can_review): ?>
                                 <td>
                                     <a href="javascript:void(0)" onclick="window.eessOpenUnifiedUserModal('edit_user', <?php echo $sub->teacher_id; ?>)" style="font-weight: 800; color: #0f172a; text-decoration: none;" onmouseover="this.style.color='#0284c7'; this.style.textDecoration='underline';" onmouseout="this.style.color='#0f172a'; this.style.textDecoration='none';">
@@ -955,11 +964,20 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             </td>
                             <td><span style="font-weight:bold; color: #64748b;"><?php echo $sub->version; ?></span></td>
                             <td>
-                                <?php if ($sub->delay_seconds > 0): ?>
-                                    <span style="color: #dc2626; font-weight: 700; font-size: 10px;">⚠️ متأخر: <?php echo $delay_desc; ?></span>
-                                <?php else: ?>
-                                    <span style="color: #16a34a; font-weight: 700; font-size: 10px;">✓ في الموعد</span>
-                                <?php endif; ?>
+                                <div style="margin-bottom: 4px;">
+                                    <?php if ($sub->delay_seconds > 0): ?>
+                                        <span style="color: #dc2626; font-weight: 700; font-size: 10px;">⚠️ متأخر: <?php echo $delay_desc; ?></span>
+                                    <?php else: ?>
+                                        <span style="color: #16a34a; font-weight: 700; font-size: 10px;">✓ في الموعد</span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php
+                                $sub_dt = $sub->submission_time ?: $sub->created_at;
+                                $formatted_prep_date_time = date_i18n('j M Y • h:i A', strtotime($sub_dt));
+                                ?>
+                                <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; font-family: monospace;">
+                                    📅 <?php echo esc_html($formatted_prep_date_time); ?>
+                                </span>
                             </td>
                             <td>
                                 <?php
