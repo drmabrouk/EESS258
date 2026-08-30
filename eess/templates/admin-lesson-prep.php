@@ -317,6 +317,12 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
             <?php endif; ?>
 
             <?php if ($can_review): ?>
+            <!-- School-Specific Report Action -->
+            <button type="button" onclick="document.getElementById('eess-school-prep-report-modal').style.display='flex'" class="sm-btn" style="background: #0284c7; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(2,132,199,0.2);">
+                <span class="dashicons dashicons-building" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
+                <span>تقرير مدرسة محددة</span>
+            </button>
+
             <!-- Administrative Non-Submission Report Action (Red Token) -->
             <button type="button" onclick="window.open('<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=non_submission_lesson_prep'); ?>', '_blank')" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
                 <span class="dashicons dashicons-dismiss" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
@@ -1259,6 +1265,48 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
         </div>
     </div>
 </div>
+
+<!-- School-Specific Lesson Prep Report Modal -->
+<div id="eess-school-prep-report-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
+        <div style="background: #0284c7; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-building" style="font-size: 22px; width: 22px; height: 22px; color: #ffffff;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">تقرير مدرسة محددة — تحضير الدروس</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-school-prep-report-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 24px;">
+            <div style="margin-bottom: 18px;">
+                <label style="font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">اختر المدرسة / المؤسسة التعليمية المستهدفة <span style="color:#ef4444;">*</span></label>
+                <select id="eess_target_school_prep" class="sm-input" style="height: 42px; width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 13px; font-weight: 700;">
+                    <?php
+                    $all_schools_list = class_exists('EESS_Org_Helper') ? EESS_Org_Helper::get_all_schools() : array();
+                    if (!empty($all_schools_list)):
+                        foreach ($all_schools_list as $sch): ?>
+                            <option value="<?php echo esc_attr($sch->name); ?>"><?php echo esc_html($sch->name); ?></option>
+                        <?php endforeach;
+                    else: ?>
+                        <option value="المدرسة الرئيسية">المدرسة الرئيسية</option>
+                    <?php endif; ?>
+                </select>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="eessGenerateSchoolPrepReport()" class="sm-btn" style="background: #0284c7; color: #ffffff !important; height: 40px; padding: 0 22px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer;">🖨️ طباعة التقرير الرسمي A4</button>
+                <button type="button" onclick="document.getElementById('eess-school-prep-report-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 40px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function eessGenerateSchoolPrepReport() {
+    var schName = document.getElementById('eess_target_school_prep').value;
+    if (!schName) return;
+    document.getElementById('eess-school-prep-report-modal').style.display = 'none';
+    window.open('<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=school_lesson_prep_report&school_name='); ?>' + encodeURIComponent(schName), '_blank');
+}
+</script>
 
 <?php include_once SM_PLUGIN_DIR . 'templates/partials/unified-user-modal.php'; ?>
 

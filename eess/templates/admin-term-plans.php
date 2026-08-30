@@ -88,6 +88,12 @@ $arabic_term_names = array(
 
 
             <?php if ($is_admin || $is_activities_sup || $is_reviewer): ?>
+            <!-- School-Specific Plan Report Button -->
+            <button type="button" onclick="document.getElementById('eess-school-plan-report-modal').style.display='flex'" class="sm-btn" style="background: #0284c7; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(2,132,199,0.2);">
+                <span class="dashicons dashicons-building" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
+                <span>تقرير مدرسة محددة</span>
+            </button>
+
             <!-- Non-Submission Administrative Report Button (Red Token) -->
             <button type="button" onclick="document.getElementById('eess-non-submission-plan-modal').style.display='flex'" class="sm-btn" style="background: #dc2626; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
                 <span class="dashicons dashicons-dismiss" style="font-size: 16px; width: 16px; height: 16px; color: #fff;"></span>
@@ -853,6 +859,57 @@ function eessTogglePlansTableSort() {
         </form>
     </div>
 </div>
+
+<!-- School-Specific Term Plan Report Modal -->
+<div id="eess-school-plan-report-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
+        <div style="background: #0284c7; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-building" style="font-size: 22px; width: 22px; height: 22px; color: #ffffff;"></span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">تقرير مدرسة محددة — الخطط الفصلية</h3>
+            </div>
+            <button type="button" onclick="document.getElementById('eess-school-plan-report-modal').style.display='none'" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 24px;">
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">اختر المدرسة / المؤسسة التعليمية المستهدفة <span style="color:#ef4444;">*</span></label>
+                <select id="eess_target_school_plan" class="sm-input" style="height: 42px; width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 13px; font-weight: 700;">
+                    <?php
+                    $all_schools_list = class_exists('EESS_Org_Helper') ? EESS_Org_Helper::get_all_schools() : array();
+                    if (!empty($all_schools_list)):
+                        foreach ($all_schools_list as $sch): ?>
+                            <option value="<?php echo esc_attr($sch->name); ?>"><?php echo esc_html($sch->name); ?></option>
+                        <?php endforeach;
+                    else: ?>
+                        <option value="المدرسة الرئيسية">المدرسة الرئيسية</option>
+                    <?php endif; ?>
+                </select>
+            </div>
+            <div style="margin-bottom: 18px;">
+                <label style="font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">الفصل الدراسي المستهدف</label>
+                <select id="eess_target_term_plan" class="sm-input" style="height: 42px; width: 100%; border-radius: 10px; border: 1px solid #cbd5e1; padding: 0 12px; font-size: 13px; font-weight: 700;">
+                    <option value="1">الفصل الدراسي الأول (Term 1)</option>
+                    <option value="2">الفصل الدراسي الثاني (Term 2)</option>
+                    <option value="3">الفصل الدراسي الثالث (Term 3)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="eessGenerateSchoolPlanReport()" class="sm-btn" style="background: #0284c7; color: #ffffff !important; height: 40px; padding: 0 22px; font-weight: 800; border-radius: 9999px !important; border: none; cursor: pointer;">🖨️ طباعة التقرير الرسمي A4</button>
+                <button type="button" onclick="document.getElementById('eess-school-plan-report-modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 40px; padding: 0 18px; border-radius: 9999px !important; border: 1px solid #cbd5e1; color: #475569; cursor: pointer;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function eessGenerateSchoolPlanReport() {
+    var schName = document.getElementById('eess_target_school_plan').value;
+    var termNum = document.getElementById('eess_target_term_plan').value;
+    if (!schName) return;
+    document.getElementById('eess-school-plan-report-modal').style.display = 'none';
+    window.open('<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=school_term_plans_report&school_name='); ?>' + encodeURIComponent(schName) + '&term_number=' + termNum, '_blank');
+}
+</script>
 
 <?php include_once SM_PLUGIN_DIR . 'templates/partials/unified-user-modal.php'; ?>
 
