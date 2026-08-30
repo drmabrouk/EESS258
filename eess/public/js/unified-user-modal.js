@@ -19,15 +19,21 @@ window.eessOpenUnifiedUserModal = function(mode, userId) {
     var form = document.getElementById('eess-unified-user-form');
     if (form) form.reset();
 
-    // Reset all input values explicitly to prevent cross-user state bleed
-    ['u_first_name', 'u_last_name', 'u_employee_id', 'u_username', 'u_user_email', 'u_phone_number', 'u_civil_id', 'u_dob', 'u_nationality', 'u_official_title'].forEach(function(id) {
+    // Reset all input values explicitly
+    ['u_first_name', 'u_last_name', 'u_employee_id', 'u_username', 'u_user_email', 'u_phone_number', 'u_civil_id', 'u_dob', 'u_nationality', 'u_assigned_sections', 'u_user_pass', 'u_user_pass_confirm', 'u_sec_username_display'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
     });
 
-    ['u_user_role', 'u_institution_id', 'u_school_id', 'u_department', 'u_specialization'].forEach(function(id) {
+    ['u_user_role', 'u_institution_id', 'u_department', 'u_specialization', 'u_emirate'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.selectedIndex = 0;
+    });
+
+    // Reset Grade Capsules
+    document.querySelectorAll('input[name="assigned_grades[]"]').forEach(function(cb) {
+        cb.checked = false;
+        eessToggleGradeCapsule(cb);
     });
 
     document.getElementById('u_user_id').value = userId;
@@ -54,24 +60,15 @@ window.eessOpenUnifiedUserModal = function(mode, userId) {
         }
     }
 
-    // Passwords & Change Password Toggle
-    var passRow = document.getElementById('u_password_row');
-    var passToggleBtn = document.getElementById('u_change_pass_toggle_container');
     var passInput = document.getElementById('u_user_pass');
     var passConfInput = document.getElementById('u_user_pass_confirm');
 
     if (eessIsEditMode) {
-        if (passRow) passRow.style.display = 'none';
-        if (passToggleBtn) passToggleBtn.style.display = 'block';
         if (passInput) passInput.required = false;
         if (passConfInput) passConfInput.required = false;
-        document.getElementById('u_username').readOnly = true;
     } else {
-        if (passRow) passRow.style.display = 'grid';
-        if (passToggleBtn) passToggleBtn.style.display = 'none';
         if (passInput) passInput.required = true;
         if (passConfInput) passConfInput.required = true;
-        document.getElementById('u_username').readOnly = false;
     }
 
     // Clear Avatar Preview
@@ -100,13 +97,14 @@ window.eessGoToStep = function(step) {
     if (step > eessCurrentStep) {
         if (eessCurrentStep === 1 && !eessValidateStep1()) return;
         if (eessCurrentStep === 2 && !eessValidateStep2()) return;
+        if (eessCurrentStep === 3 && !eessValidateStep3()) return;
     }
 
     eessCurrentStep = step;
     if (eessCurrentStep < 1) eessCurrentStep = 1;
-    if (eessCurrentStep > 4) eessCurrentStep = 4;
+    if (eessCurrentStep > 5) eessCurrentStep = 5;
 
-    for (var i = 1; i <= 4; i++) {
+    for (var i = 1; i <= 5; i++) {
         var container = document.getElementById('u_step_' + i + '_container');
         var indicator = document.getElementById('u_indicator_step' + i);
 
@@ -130,11 +128,19 @@ window.eessGoToStep = function(step) {
     var btnSave = document.getElementById('u_btn_save');
 
     if (btnPrev) btnPrev.style.display = (eessCurrentStep > 1) ? 'inline-block' : 'none';
-    if (btnNext) btnNext.style.display = (eessCurrentStep < 4) ? 'inline-block' : 'none';
-    if (btnSave) btnSave.style.display = (eessCurrentStep === 4) ? 'inline-block' : 'none';
+    if (btnNext) btnNext.style.display = (eessCurrentStep < 5) ? 'inline-block' : 'none';
+    if (btnSave) btnSave.style.display = (eessCurrentStep === 5) ? 'inline-block' : 'none';
 
     if (eessCurrentStep === 4) {
         eessRenderStepSummary();
+    }
+
+    if (eessCurrentStep === 5) {
+        var empIdVal = document.getElementById('u_employee_id').value;
+        var usernameDisplay = document.getElementById('u_sec_username_display');
+        if (usernameDisplay) {
+            usernameDisplay.value = empIdVal ? empIdVal : 'سيتم توليده تلقائياً من الرقم الوظيفي';
+        }
     }
 };
 
@@ -180,10 +186,10 @@ window.eessRenderStepSummary = function() {
         checkedGrades.push(g.value);
     });
 
-    if (document.getElementById('rev_u_fullname')) document.getElementById('rev_u_fullname').innerText = fn + ' ' + ln;
+    if (document.getElementById('rev_u_fullname')) document.getElementById('rev_u_fullname').innerText = (fn + ' ' + ln).trim() || '-';
     if (document.getElementById('rev_u_nat_dob')) document.getElementById('rev_u_nat_dob').innerText = nat + ' (' + dob + ')';
-    if (document.getElementById('rev_u_email')) document.getElementById('rev_u_email').innerText = email;
-    if (document.getElementById('rev_u_phone')) document.getElementById('rev_u_phone').innerText = phone;
+    if (document.getElementById('rev_u_email')) document.getElementById('rev_u_email').innerText = email || '-';
+    if (document.getElementById('rev_u_phone')) document.getElementById('rev_u_phone').innerText = phone || '-';
     if (document.getElementById('rev_u_location')) document.getElementById('rev_u_location').innerText = country + ' - ' + emirate;
     if (document.getElementById('rev_u_role_id')) document.getElementById('rev_u_role_id').innerText = roleTxt + ' (ID: ' + empId + ')';
 
@@ -194,14 +200,7 @@ window.eessRenderStepSummary = function() {
         if (document.getElementById('rev_u_inst_container')) document.getElementById('rev_u_inst_container').style.display = 'block';
         if (document.getElementById('rev_u_grades_container')) document.getElementById('rev_u_grades_container').style.display = 'block';
         if (document.getElementById('rev_u_inst_subj')) document.getElementById('rev_u_inst_subj').innerText = instTxt + ' (' + specTxt + ')';
-        if (document.getElementById('rev_u_grades')) document.getElementById('rev_u_grades').innerText = checkedGrades.length > 0 ? checkedGrades.join('، ') : 'لا يوجد صوف محددة';
-    }
-};
-
-window.eessToggleChangePassword = function() {
-    var passRow = document.getElementById('u_password_row');
-    if (passRow) {
-        passRow.style.display = (passRow.style.display === 'none' || passRow.style.display === '') ? 'grid' : 'none';
+        if (document.getElementById('rev_u_grades')) document.getElementById('rev_u_grades').innerText = checkedGrades.length > 0 ? checkedGrades.join('، ') : 'لا يوجد صفوف محددة';
     }
 };
 
@@ -379,38 +378,8 @@ window.eessOnRoleChanged = function() {
     }
 };
 
-window.eessOnScopeChanged = function() {
-    var scope = document.getElementById('u_access_scope').value;
-    var schoolSelect = document.getElementById('u_school_id');
-
-    if (scope === 'institution') {
-        if (schoolSelect) schoolSelect.required = false;
-    } else {
-        if (schoolSelect) schoolSelect.required = true;
-    }
-};
-
 window.eessOnInstitutionChanged = function() {
-    var instId = document.getElementById('u_institution_id').value;
-    var schoolSelect = document.getElementById('u_school_id');
-
-    if (!schoolSelect) return;
-
-    for (var i = 0; i < schoolSelect.options.length; i++) {
-        var opt = schoolSelect.options[i];
-        if (!opt.value) continue;
-
-        var optInst = opt.getAttribute('data-institution');
-        if (!instId || optInst === instId) {
-            opt.style.display = 'block';
-        } else {
-            opt.style.display = 'none';
-        }
-    }
-};
-
-window.eessOnSchoolChanged = function() {
-    // Dynamic school updates
+    // Institution selection handler
 };
 
 window.eessLoadUserData = function(userId) {
@@ -452,7 +421,6 @@ window.eessLoadUserData = function(userId) {
             var roleSelect = document.getElementById('u_user_role');
             if (roleSelect) {
                 roleSelect.value = normalizedRole;
-                // Role lock: Non-admin users cannot alter their own or others' roles/positions
                 var isSystemAdminUser = (typeof eessIsAdmin !== 'undefined' && eessIsAdmin) || (u.can_edit_roles === true);
                 if (!isSystemAdminUser) {
                     roleSelect.disabled = true;
@@ -482,7 +450,6 @@ window.eessLoadUserData = function(userId) {
                 document.getElementById('u_photo_preview').src = u.photo_url;
             }
 
-            eessOnInstitutionChanged();
             eessOnRoleChanged();
         }
     })
@@ -522,7 +489,6 @@ window.eessSubmitUnifiedUserForm = function() {
             }
             eessCloseUnifiedUserModal();
 
-            // Client-side DOM update without full page reload if on Profile or Users List
             if (res.data && res.data.user_data) {
                 var u = res.data.user_data;
                 var fnEl = document.querySelector('.wp-tab-content h2');
