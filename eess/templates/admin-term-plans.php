@@ -178,56 +178,6 @@ $arabic_term_names = array(
         </div>
         <?php endif; ?>
 
-        <?php if ($is_teacher || $is_coordinator): ?>
-        <!-- 3 Independent Annual Progress Cards Grid (Teachers & Coordinators Only) -->
-        <div style="background: #ffffff; padding: 20px 24px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <span style="font-size: 15px; font-weight: 800; color: #0f172a;">مؤشرات إنجاز الفصول الدراسية المستقلة (العام الأكاديمي <?php echo esc_html($active_academic_year); ?>)</span>
-                    <span style="font-size: 12px; color: #64748b; margin-right: 8px;">(<?php echo $completed_terms_count; ?> من 3 فصول مكتملة)</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: #881337; background: #fef2f2; padding: 4px 12px; border-radius: 9999px; border: 1px solid #fecdd3;">
-                    <span>إجمالي الإنجاز السنوي: <?php echo $annual_completion_pct; ?>%</span>
-                </div>
-            </div>
-
-            <!-- 3 Completely Independent Term Progress Cards -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                <?php for ($t = 1; $t <= 3; $t++):
-                    $p = $plans_by_term[$t] ?? null;
-                    $pct = $p ? intval($p->completion_pct) : 0;
-                    $st = $p ? $p->status : 'not_started';
-
-                    $badge_bg = '#f1f5f9'; $badge_col = '#64748b'; $st_txt = 'لم تبدأ بعد';
-                    if ($st === 'draft') { $badge_bg = '#fef3c7'; $badge_col = '#b45309'; $st_txt = 'مسودة / قيد الإعداد'; }
-                    elseif ($st === 'submitted') { $badge_bg = '#e0f2fe'; $badge_col = '#0369a1'; $st_txt = 'مرفوعة للمراجعة'; }
-                    elseif ($st === 'approved') { $badge_bg = '#dcfce7'; $badge_col = '#15803d'; $st_txt = '✓ معتمدة رسمياً'; }
-                    elseif ($st === 'returned') { $badge_bg = '#fee2e2'; $badge_col = '#b91c1c'; $st_txt = 'طلب تعديل'; }
-                ?>
-                    <div onclick="eessOpenPlanSetupWizard(<?php echo $t; ?>)" style="background: #ffffff; padding: 18px; border-radius: 16px; border: 1.5px solid <?php echo $p ? '#cbd5e1' : '#f1f5f9'; ?>; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.02);" onmouseover="this.style.borderColor='#881337'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='<?php echo $p ? '#cbd5e1' : '#f1f5f9'; ?>'; this.style.transform='translateY(0)';">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 800; font-size: 14px; color: #0f172a;"><?php echo $arabic_term_names[$t]; ?></span>
-                            <span style="font-size: 11px; padding: 3px 10px; border-radius: 9999px; background: <?php echo $badge_bg; ?>; color: <?php echo $badge_col; ?>; font-weight: 800;">
-                                <?php echo $st_txt; ?>
-                            </span>
-                        </div>
-
-                        <!-- Progress Bar -->
-                        <div style="background: #f1f5f9; height: 8px; border-radius: 9999px; overflow: hidden;">
-                            <div style="background: <?php echo $pct >= 100 ? '#16a34a' : '#881337'; ?>; height: 100%; width: <?php echo $pct; ?>%; transition: width 0.3s ease;"></div>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #64748b;">
-                            <span>نسبة الإنجاز: <strong style="color: #0f172a; font-size: 13px;"><?php echo $pct; ?>%</strong></span>
-                            <span style="color: #881337; font-weight: 800; font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px;">
-                                <span><?php echo $p ? 'متابعة / تعديل ➔' : '+ بدء التخطيط'; ?></span>
-                            </span>
-                        </div>
-                    </div>
-                <?php endfor; ?>
-            </div>
-        </div>
-        <?php endif; ?>
 
     <!-- TEACHER TAB: SUBMITTED PLANS HISTORY (Teachers & Coordinators Only) -->
     <?php
@@ -289,7 +239,7 @@ function eessTogglePlansTableSort() {
                         <tr style="background: #212121; color: #ffffff;">
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; border-radius: 0 10px 0 0;">المادة والمعلم والتسكين</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff;">الفصل الدراسي والتاريخ</th>
-                            <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center;">نسبة الإنجاز</th>
+                            <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center;">طريقة التسليم</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center;">الحالة</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center; border-radius: 10px 0 0 0;">الإجراءات السريعة</th>
                         </tr>
@@ -512,33 +462,33 @@ function eessTogglePlansTableSort() {
                                         </div>
                                     </td>
 
-                                    <!-- Arabic Term Name & Submission Date Pastel Capsule -->
+                                    <!-- Arabic Term Name & Submission Date Pastel Capsule (Abbreviated AM/PM) -->
                                     <td style="padding: 12px 16px;">
                                         <div style="font-size: 13px; font-weight: 800; color: #334155; margin-bottom: 4px;"><?php echo esc_html($term_arabic); ?></div>
                                         <?php
                                         $sub_dt = $sp->updated_at ?: $sp->created_at;
-                                        $formatted_date_time = date_i18n('j M Y • h:i A', strtotime($sub_dt));
+                                        $raw_formatted = date_i18n('j M Y • h:i A', strtotime($sub_dt));
+                                        $formatted_date_time = str_replace(array('AM', 'PM', 'صباحًا', 'مساءً'), array('ص', 'م', 'ص', 'م'), $raw_formatted);
                                         ?>
                                         <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; font-family: monospace;">
                                             📅 <?php echo esc_html($formatted_date_time); ?>
                                         </span>
                                     </td>
 
-                                    <!-- Completion Percentage Capsule -->
+                                    <!-- Submission Method Pastel Capsule -->
                                     <td style="padding: 12px 16px; text-align: center;">
                                         <?php
-                                        $p_val = intval($sp->completion_pct);
-                                        $p_bg = '#fee2e2'; $p_col = '#b91c1c'; $p_border = '#fecdd3'; // < 50%
-                                        if ($p_val >= 100) {
-                                            $p_bg = '#dcfce7'; $p_col = '#15803d'; $p_border = '#bbf7d0'; // 100% Green
-                                        } elseif ($p_val >= 80) {
-                                            $p_bg = '#dbeafe'; $p_col = '#1d4ed8'; $p_border = '#bfdbfe'; // 80-99% Blue
-                                        } elseif ($p_val >= 50) {
-                                            $p_bg = '#fef3c7'; $p_col = '#b45309'; $p_border = '#fde68a'; // 50-79% Warning
+                                        $method_key = $sp->planning_method ?? 'create';
+                                        $m_label = 'كمبيوتر'; $m_bg = '#e0f2fe'; $m_col = '#0369a1'; $m_icon = 'dashicons-desktop';
+                                        if (strpos(strtolower($method_key), 'mobile') !== false) {
+                                            $m_label = 'موبايل'; $m_bg = '#dcfce7'; $m_col = '#15803d'; $m_icon = 'dashicons-smartphone';
+                                        } elseif (strpos(strtolower($method_key), 'ipad') !== false || strpos(strtolower($method_key), 'tablet') !== false) {
+                                            $m_label = 'آيباد'; $m_bg = '#fef3c7'; $m_col = '#b45309'; $m_icon = 'dashicons-tablet';
                                         }
                                         ?>
-                                        <span style="display: inline-flex; padding: 3px 10px; border-radius: 9999px; background: <?php echo $p_bg; ?>; color: <?php echo $p_col; ?>; border: 1px solid <?php echo $p_border; ?>; font-weight: 900; font-size: 12px;">
-                                            <?php echo $p_val; ?>%
+                                        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; background: <?php echo $m_bg; ?>; color: <?php echo $m_col; ?>; font-weight: 800; font-size: 11px;">
+                                            <span class="dashicons <?php echo $m_icon; ?>" style="font-size: 13px; width: 13px; height: 13px;"></span>
+                                            <span><?php echo $m_label; ?></span>
                                         </span>
                                     </td>
 
@@ -568,18 +518,18 @@ function eessTogglePlansTableSort() {
                                                 </a>
                                             <?php endif; ?>
 
+                                            <!-- Edit Submission Button -->
+                                            <button type="button" onclick="eessOpenPlanSetupWizard(<?php echo intval($sp->term_number); ?>)" title="تعديل بيانات ورسائل الخطة المرفوعة" class="sm-action-btn sm-action-btn-warning">
+                                                <span class="dashicons dashicons-edit"></span>
+                                            </button>
+
                                             <!-- Approve Button (Positive Green) -->
                                             <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" class="sm-action-btn sm-action-btn-success">
                                                 <span class="dashicons dashicons-yes-alt"></span>
                                             </button>
 
-                                            <!-- Modification Request Button (Warning Orange) -->
-                                            <button type="button" onclick="eessOpenModificationNotesModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name); ?>')" title="طلب تعديلات وملاحظات" class="sm-action-btn sm-action-btn-warning">
-                                                <span class="dashicons dashicons-edit"></span>
-                                            </button>
-
-                                            <!-- Reject Button (Danger Red) -->
-                                            <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'rejected')" title="رفض الخطة" class="sm-action-btn sm-action-btn-danger">
+                                            <!-- Reject Button with Reason Notes Modal (Danger Red) -->
+                                            <button type="button" onclick="eessOpenModificationNotesModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name); ?>', 'rejected')" title="رفض الخطة وتدوين الملاحظات" class="sm-action-btn sm-action-btn-danger">
                                                 <span class="dashicons dashicons-no-alt"></span>
                                             </button>
 
@@ -1168,10 +1118,12 @@ function eessCheckAnnualPlanPrintComplete(completedCount) {
     }
 }
 
-function eessOpenModificationNotesModal(planId, teacherName) {
+var eessActiveRejectionTargetStatus = 'rejected';
+function eessOpenModificationNotesModal(planId, teacherName, status) {
     currentInspectedPlanId = planId;
-    document.getElementById('tp_inspect_title').innerText = 'طلب تعديل وملاحظات على خطة: ' + teacherName;
-    document.getElementById('tp_inspect_body').innerHTML = '<p style="color:#64748b; font-size:12.5px;">يرجى كتابة ملاحظات التعديل المطلوبة أدناه ثم الضغط على "إعادة للتعديل مع الملاحظات".</p>';
+    eessActiveRejectionTargetStatus = status || 'rejected';
+    document.getElementById('tp_inspect_title').innerText = 'رفض الخطة وتدوين الملاحظات: ' + teacherName;
+    document.getElementById('tp_inspect_body').innerHTML = '<p style="color:#64748b; font-size:12.5px; margin-bottom:10px;">يرجى كتابة سبب وسبب الرفض والملاحظات المطلوبة ليتم توثيقها بالمنصة.</p>';
     document.getElementById('tp_inspect_modal').style.display = 'flex';
 }
 
