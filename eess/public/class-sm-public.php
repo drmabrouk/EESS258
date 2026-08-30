@@ -7909,6 +7909,10 @@ class SM_Public {
         }
 
         global $wpdb;
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}sm_lesson_preps ADD COLUMN IF NOT EXISTS reviewed_by bigint(20) DEFAULT NULL");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}sm_lesson_preps ADD COLUMN IF NOT EXISTS reviewed_at datetime DEFAULT NULL");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}sm_lesson_preps ADD COLUMN IF NOT EXISTS review_notes text DEFAULT NULL");
+
         $updated = $wpdb->update(
             "{$wpdb->prefix}sm_lesson_preps",
             array(
