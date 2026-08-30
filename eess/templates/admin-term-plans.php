@@ -541,18 +541,6 @@ $arabic_term_names = array(
                                                 </a>
                                             <?php endif; ?>
 
-                                            <!-- WhatsApp Direct Contact Button -->
-                                            <?php
-                                            $tp_phone = get_user_meta($sp->teacher_id, 'phone_number', true) ?: (get_user_meta($sp->teacher_id, 'sm_phone', true) ?: (get_user_meta($sp->teacher_id, 'phone', true) ?: ''));
-                                            $clean_tp_phone = preg_replace('/[^0-9]/', '', $tp_phone);
-                                            if (empty($clean_tp_phone) || strlen($clean_tp_phone) < 8) $clean_tp_phone = '971500000000';
-                                            $wa_plan_msg = rawurlencode("السلام عليكم، كيف حالك؟\nتحية طيبة من نظام إدارة المدارس. نود التواصل معك بخصوص متابعتك التعليمية.");
-                                            $wa_plan_url = "https://wa.me/" . $clean_tp_phone . "?text=" . $wa_plan_msg;
-                                            ?>
-                                            <a href="<?php echo esc_url($wa_plan_url); ?>" target="_blank" onclick="eessMarkTeacherContacted(<?php echo $sp->teacher_id; ?>, 'plan', <?php echo $sp->id; ?>)" class="sm-action-btn sm-action-btn-success" title="تواصل مباشر عبر واتساب مع المعلم">
-                                                <span class="dashicons dashicons-whatsapp"></span>
-                                            </a>
-
                                             <!-- Approve Button (Positive Green) -->
                                             <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" class="sm-action-btn sm-action-btn-success">
                                                 <span class="dashicons dashicons-yes-alt"></span>
@@ -574,6 +562,18 @@ $arabic_term_names = array(
                                                 <span class="dashicons dashicons-admin-page"></span>
                                             </button>
                                             <?php endif; ?>
+
+                                            <!-- WhatsApp Direct Contact Button (Positioned immediately to the left of Delete in RTL) -->
+                                            <?php
+                                            $tp_phone = get_user_meta($sp->teacher_id, 'phone_number', true) ?: (get_user_meta($sp->teacher_id, 'sm_phone', true) ?: (get_user_meta($sp->teacher_id, 'phone', true) ?: ''));
+                                            $clean_tp_phone = preg_replace('/[^0-9]/', '', $tp_phone);
+                                            if (empty($clean_tp_phone) || strlen($clean_tp_phone) < 8) $clean_tp_phone = '971500000000';
+                                            $wa_plan_msg = rawurlencode("السلام عليكم، كيف حالك؟\nتحية طيبة من نظام إدارة المدارس. نود التواصل معك بخصوص متابعتك التعليمية.");
+                                            $wa_plan_url = "https://wa.me/" . $clean_tp_phone . "?text=" . $wa_plan_msg;
+                                            ?>
+                                            <a href="<?php echo esc_url($wa_plan_url); ?>" target="_blank" onclick="eessMarkTeacherContacted(<?php echo $sp->teacher_id; ?>, 'plan', <?php echo $sp->id; ?>)" class="sm-action-btn sm-action-btn-success" title="تواصل مباشر عبر واتساب مع المعلم">
+                                                <span class="dashicons dashicons-whatsapp"></span>
+                                            </a>
 
                                             <!-- Delete Button (Far-Left in RTL) -->
                                             <button type="button" onclick="eessPromptDeletePlanModal(<?php echo $sp->id; ?>, '<?php echo esc_js($sp->teacher_name . ' - ' . $sp->subject); ?>')" title="حذف الخطة نهائياً" class="sm-action-btn sm-action-btn-danger">
