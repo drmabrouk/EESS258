@@ -288,6 +288,17 @@ class EESS_Org_Helper {
         return $wpdb->get_results("SELECT i.*, u.display_name as manager_display_name FROM {$wpdb->prefix}eess_institutions i LEFT JOIN {$wpdb->users} u ON i.manager_id = u.ID ORDER BY i.name ASC");
     }
 
+    public static function get_institution_by_id($id) {
+        global $wpdb;
+        self::ensure_institutions_columns_exist();
+        return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}eess_institutions WHERE id = %d LIMIT 1", intval($id)));
+    }
+
+    public static function get_school_by_id($id) {
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}eess_schools WHERE id = %d LIMIT 1", intval($id)));
+    }
+
     public static function add_institution($data) {
         global $wpdb;
         self::ensure_institutions_columns_exist();
