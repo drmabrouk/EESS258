@@ -86,21 +86,6 @@ $arabic_term_names = array(
             </button>
             <?php endif; ?>
 
-            <!-- Annual Plan Printing Dropdown -->
-            <div style="position: relative; display: inline-block;">
-                <button type="button" onclick="const d = document.getElementById('eess-print-annual-dropdown'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; event.stopPropagation();" class="sm-btn" style="background: #1e293b; color: #ffffff !important; height: 38px; border-radius: 9999px !important; padding: 0 18px; font-weight: 800; font-size: 12.5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                    <span class="dashicons dashicons-printer" style="font-size: 15px; width: 15px; height: 15px; color: #fff;"></span>
-                    <span>طباعة وتصدير الخطة</span>
-                    <span class="dashicons dashicons-arrow-down-alt2" style="font-size: 10px; width: 10px; height: 10px; color: #fff;"></span>
-                </button>
-
-                <div id="eess-print-annual-dropdown" style="display: none; position: absolute; left: 0; top: 115%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; width: 240px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 99999; padding: 6px 0; text-align: right;">
-                    <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&term_number=1&teacher_id=' . $user_id); ?>" target="_blank" style="display: block; padding: 10px 16px; color: #334155; font-size: 12px; font-weight: 700; text-decoration: none; border-bottom: 1px solid #f1f5f9;">📄 تحميل خطة الفصل الدراسي الأول</a>
-                    <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&term_number=2&teacher_id=' . $user_id); ?>" target="_blank" style="display: block; padding: 10px 16px; color: #334155; font-size: 12px; font-weight: 700; text-decoration: none; border-bottom: 1px solid #f1f5f9;">📄 تحميل خطة الفصل الدراسي الثاني</a>
-                    <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=term_plan&term_number=3&teacher_id=' . $user_id); ?>" target="_blank" style="display: block; padding: 10px 16px; color: #334155; font-size: 12px; font-weight: 700; text-decoration: none; border-bottom: 1px solid #f1f5f9;">📄 تحميل خطة الفصل الدراسي الثالث</a>
-                    <a href="javascript:void(0)" onclick="eessCheckAnnualPlanPrintComplete(<?php echo $completed_terms_count; ?>)" style="display: block; padding: 10px 16px; color: #881337; font-size: 12px; font-weight: 800; text-decoration: none;">📘 تحميل الخطة السنوية الشاملة</a>
-                </div>
-            </div>
 
             <?php if ($is_admin || $is_activities_sup || $is_reviewer): ?>
             <!-- Non-Submission Administrative Report Button (Red Token) -->
@@ -162,7 +147,7 @@ $arabic_term_names = array(
 
             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
                 <div onclick="eessShowTermPlanStatDetails('required')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #334155; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">إجمالي المستهدف</div>
+                    <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">إجمالي عدد المعلمين</div>
                     <div style="font-size: 18px; font-weight: 900; color: #0f172a;"><?php echo $plan_stats_total_req; ?></div>
                 </div>
                 <div onclick="eessShowTermPlanStatDetails('submitted')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #0284c7; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -185,8 +170,8 @@ $arabic_term_names = array(
         </div>
         <?php endif; ?>
 
-        <?php if ($is_teacher): ?>
-        <!-- 3 Independent Annual Progress Cards Grid (Teachers Only) -->
+        <?php if ($is_teacher || $is_coordinator): ?>
+        <!-- 3 Independent Annual Progress Cards Grid (Teachers & Coordinators Only) -->
         <div style="background: #ffffff; padding: 20px 24px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <div>
@@ -260,6 +245,25 @@ $arabic_term_names = array(
             </div>
 
             <script>
+var eessPlanSortAsc = false;
+function eessTogglePlansTableSort() {
+    eessPlanSortAsc = !eessPlanSortAsc;
+    var lbl = document.getElementById('eess-sort-plans-lbl');
+    if (lbl) lbl.innerText = eessPlanSortAsc ? 'الأقدم أولاً' : 'الأحدث أولاً';
+
+    var tbody = document.querySelector('#eess-reviewer-plans-table tbody');
+    if (!tbody) return;
+    var rows = Array.from(tbody.querySelectorAll('tr.reviewer-plan-row'));
+
+    rows.sort(function(a, b) {
+        var tA = parseInt(a.getAttribute('data-timestamp') || '0');
+        var tB = parseInt(b.getAttribute('data-timestamp') || '0');
+        return eessPlanSortAsc ? (tA - tB) : (tB - tA);
+    });
+
+    rows.forEach(function(r) { tbody.appendChild(r); });
+}
+
             function eessFilterTeacherPlansTable() {
                 var q = document.getElementById('eess-teacher-plan-search').value.trim().toLowerCase();
                 var rows = document.querySelectorAll('#eess-teacher-plans-table tbody tr');
@@ -411,12 +415,19 @@ $arabic_term_names = array(
                         </span>
                     </div>
 
-                    <!-- Professional Live Search Input -->
-                    <div style="position: relative; width: 240px;">
-                        <input type="text" id="eess-reviewer-plans-search" onkeyup="eessFilterReviewerPlansTable()" placeholder="ابحث باسم المدرس، المادة، أو الصف..." style="width: 100%; height: 38px; padding: 0 36px 0 14px; border: 1px solid #cbd5e1; border-radius: 9999px !important; font-size: 12.5px; outline: none; background: #f8fafc;">
-                        <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; display: flex; align-items: center;">
-                            <span class="dashicons dashicons-search" style="font-size: 15px; width: 15px; height: 15px;"></span>
-                        </span>
+                    <!-- Sorting Control & Live Search Input -->
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" onclick="eessTogglePlansTableSort()" title="تبديل الترتيب (من الأحدث للأقدم / العكس)" class="sm-btn" style="height: 38px; padding: 0 12px; border-radius: 9999px !important; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            <span class="dashicons dashicons-sort" style="font-size: 15px; width: 15px; height: 15px;"></span>
+                            <span id="eess-sort-plans-lbl">الأحدث أولاً</span>
+                        </button>
+
+                        <div style="position: relative; width: 220px;">
+                            <input type="text" id="eess-reviewer-plans-search" onkeyup="eessFilterReviewerPlansTable()" placeholder="ابحث باسم المدرس، المادة، أو الصف..." style="width: 100%; height: 38px; padding: 0 36px 0 14px; border: 1px solid #cbd5e1; border-radius: 9999px !important; font-size: 12.5px; outline: none; background: #f8fafc;">
+                            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; display: flex; align-items: center;">
+                                <span class="dashicons dashicons-search" style="font-size: 15px; width: 15px; height: 15px;"></span>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -452,8 +463,9 @@ $arabic_term_names = array(
                                 elseif ($sp->status === 'rejected') { $s_bg = '#fef2f2'; $s_col = '#991b1b'; $s_lbl = 'مرفوضة'; }
 
                                 $term_arabic = $arabic_term_names[intval($sp->term_number)] ?? ('الفصل ' . intval($sp->term_number));
+                                $sp_timestamp = strtotime($sp->updated_at ?: $sp->created_at);
                             ?>
-                                <tr style="border-bottom: 1px solid #f1f5f9;" class="reviewer-plan-row">
+                                <tr style="border-bottom: 1px solid #f1f5f9;" class="reviewer-plan-row" data-timestamp="<?php echo $sp_timestamp; ?>">
                                     <!-- Index Number Column -->
                                     <td style="padding: 12px 12px; text-align: center; font-size: 12px; font-weight: 800; color: #64748b;">
                                         <?php echo ($sp_idx + 1); ?>
@@ -492,9 +504,16 @@ $arabic_term_names = array(
                                         </div>
                                     </td>
 
-                                    <!-- Arabic Term Name -->
-                                    <td style="padding: 12px 16px; font-size: 13px; font-weight: 800; color: #334155;">
-                                        <?php echo esc_html($term_arabic); ?>
+                                    <!-- Arabic Term Name & Submission Date Pastel Capsule -->
+                                    <td style="padding: 12px 16px;">
+                                        <div style="font-size: 13px; font-weight: 800; color: #334155; margin-bottom: 4px;"><?php echo esc_html($term_arabic); ?></div>
+                                        <?php
+                                        $sub_dt = $sp->updated_at ?: $sp->created_at;
+                                        $formatted_date_time = date_i18n('j M Y • h:i A', strtotime($sub_dt));
+                                        ?>
+                                        <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; font-family: monospace;">
+                                            📅 <?php echo esc_html($formatted_date_time); ?>
+                                        </span>
                                     </td>
 
                                     <!-- Completion Percentage Capsule -->
