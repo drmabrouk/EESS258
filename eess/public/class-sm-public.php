@@ -8051,6 +8051,15 @@ class SM_Public {
         $u = new WP_User($user_id);
         $u->set_role($user_role);
 
+        // Derive school name from institution lookup for system-wide synchronization
+        $school_name = 'المدرسة الرئيسية';
+        if ($institution_id > 0 && class_exists('EESS_Org_Helper')) {
+            $inst_obj = EESS_Org_Helper::get_institution_by_id($institution_id);
+            if ($inst_obj && !empty($inst_obj->name)) {
+                $school_name = $inst_obj->name;
+            }
+        }
+
         // Synchronize Metadata Across WP Metas and EESS Tables
         update_user_meta($user_id, 'first_name', $first_name);
         update_user_meta($user_id, 'last_name', $last_name);
@@ -8062,6 +8071,7 @@ class SM_Public {
         update_user_meta($user_id, 'eess_employee_number', $clean_emp_id);
         update_user_meta($user_id, 'sm_user_status', $user_status);
         update_user_meta($user_id, 'eess_civil_id', $civil_id);
+        update_user_meta($user_id, 'eess_emirate', $emirate);
         if (!empty($dob)) {
             update_user_meta($user_id, 'dob', $dob);
             update_user_meta($user_id, 'sm_dob', $dob);
@@ -8074,17 +8084,14 @@ class SM_Public {
         update_user_meta($user_id, 'eess_institution_id', $institution_id);
         update_user_meta($user_id, 'eess_school_id', $school_id);
         update_user_meta($user_id, 'sm_school_id', $school_id);
+        update_user_meta($user_id, 'eess_school_name', $school_name);
+        update_user_meta($user_id, 'sm_school_name', $school_name);
         update_user_meta($user_id, 'department', $department);
         update_user_meta($user_id, 'sm_department', $department);
         update_user_meta($user_id, 'specialization', $specialization);
         update_user_meta($user_id, 'sm_specialization', $specialization);
-        update_user_meta($user_id, 'official_title', $official_title);
-        update_user_meta($user_id, 'nationality', $nationality);
-        update_user_meta($user_id, 'sm_nationality', $nationality);
-        update_user_meta($user_id, 'dob', $dob);
-        update_user_meta($user_id, 'sm_dob', $dob);
-        update_user_meta($user_id, 'institution', $institution_name);
-        update_user_meta($user_id, 'sm_institution', $institution_name);
+        update_user_meta($user_id, 'eess_assigned_grades', json_encode($grades, JSON_UNESCAPED_UNICODE));
+        update_user_meta($user_id, 'eess_assigned_sections', $sections);
 
         // Handle Profile Photo Upload if present
         if (!empty($_FILES['profile_photo']['name'])) {
