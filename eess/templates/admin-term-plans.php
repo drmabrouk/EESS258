@@ -113,24 +113,28 @@ $arabic_term_names = array(
 
         <?php if ($is_reviewer):
             $all_teachers = get_users(array('role' => 'sm_teacher'));
-            if ($is_activities_sup) {
-                $all_teachers = array_filter($all_teachers, function($t) {
-                    $spec = get_user_meta($t->ID, 'sm_specialization', true) ?: (get_user_meta($t->ID, 'specialization', true) ?: (get_user_meta($t->ID, 'subject', true) ?: ''));
-                    return (mb_strpos($spec, 'بدنية') !== false || mb_strpos($spec, 'رياضة') !== false || mb_strpos($spec, 'Health') !== false || mb_strpos($spec, 'Physical') !== false);
-                });
-            }
-            $target_teacher_ids = array_map(function($t) { return $t->ID; }, $all_teachers);
-            $plan_stats_total_req = count($target_teacher_ids) * 3;
+            // Filter strictly by PE & Health specialization scope
+            $pe_teachers = array_filter($all_teachers, function($t) {
+                $spec = get_user_meta($t->ID, 'sm_specialization', true) ?: (get_user_meta($t->ID, 'specialization', true) ?: (get_user_meta($t->ID, 'subject', true) ?: ''));
+                return (mb_strpos($spec, 'بدنية') !== false || mb_strpos($spec, 'رياضة') !== false || mb_strpos($spec, 'Health') !== false || mb_strpos($spec, 'Physical') !== false);
+            });
+            // If no PE filter matched, fallback to all active teachers
+            $target_teachers = !empty($pe_teachers) ? $pe_teachers : $all_teachers;
+            $target_teacher_ids = array_map(function($t) { return $t->ID; }, $target_teachers);
+            $total_eligible_teachers = count($target_teacher_ids);
+            $plan_stats_total_req = $total_eligible_teachers * 3;
 
             if (!empty($target_teacher_ids)) {
                 $id_placeholders = implode(',', array_fill(0, count($target_teacher_ids), '%d'));
-                $plan_stats_submitted = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status IN ('submitted', 'approved')", ...$target_teacher_ids));
+                $plan_stats_submitted = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status IN ('submitted', 'approved', 'returned', 'rejected')", ...$target_teacher_ids));
                 $plan_stats_approved  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status = 'approved'", ...$target_teacher_ids));
                 $plan_stats_returned  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status = 'returned'", ...$target_teacher_ids));
+                $plan_stats_rejected  = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}sm_term_plans WHERE teacher_id IN ($id_placeholders) AND status = 'rejected'", ...$target_teacher_ids));
             } else {
                 $plan_stats_submitted = 0;
-                $plan_stats_approved = 0;
-                $plan_stats_returned = 0;
+                $plan_stats_approved  = 0;
+                $plan_stats_returned  = 0;
+                $plan_stats_rejected  = 0;
             }
             $plan_stats_missing   = max(0, $plan_stats_total_req - $plan_stats_submitted);
             $plan_compliance_rate = $plan_stats_total_req > 0 ? round(($plan_stats_submitted / $plan_stats_total_req) * 100) : 0;
@@ -145,10 +149,10 @@ $arabic_term_names = array(
                 <span style="font-size: 12px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 12px; border-radius: 9999px; border: 1px solid #bae6fd;">نسبة الالتزام الإجمالية: <?php echo $plan_compliance_rate; ?>%</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
                 <div onclick="eessShowTermPlanStatDetails('required')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #334155; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                     <div style="font-size: 11px; color: #64748b; font-weight: 700; margin-bottom: 4px;">إجمالي عدد المعلمين</div>
-                    <div style="font-size: 18px; font-weight: 900; color: #0f172a;"><?php echo $plan_stats_total_req; ?></div>
+                    <div style="font-size: 18px; font-weight: 900; color: #0f172a;"><?php echo $total_eligible_teachers; ?></div>
                 </div>
                 <div onclick="eessShowTermPlanStatDetails('submitted')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #0284c7; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                     <div style="font-size: 11px; color: #0369a1; font-weight: 700; margin-bottom: 4px;">الخطط المرفوعة</div>
@@ -161,6 +165,10 @@ $arabic_term_names = array(
                 <div onclick="eessShowTermPlanStatDetails('returned')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #d97706; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                     <div style="font-size: 11px; color: #b45309; font-weight: 700; margin-bottom: 4px;">طلب تعديل</div>
                     <div style="font-size: 18px; font-weight: 900; color: #d97706;"><?php echo $plan_stats_returned; ?></div>
+                </div>
+                <div onclick="eessShowTermPlanStatDetails('rejected')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #b91c1c; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="font-size: 11px; color: #991b1b; font-weight: 700; margin-bottom: 4px;">الخطط المرفوضة</div>
+                    <div style="font-size: 18px; font-weight: 900; color: #b91c1c;"><?php echo $plan_stats_rejected; ?></div>
                 </div>
                 <div onclick="eessShowTermPlanStatDetails('missing')" style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; border-top: 3px solid #dc2626; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                     <div style="font-size: 11px; color: #991b1b; font-weight: 700; margin-bottom: 4px;">غير تسليم / متأخر</div>
