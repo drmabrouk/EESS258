@@ -899,6 +899,8 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                     if ($minutes > 0) $delay_parts[] = $minutes . ' دقيقة';
                                     $delay_desc = implode(' و', $delay_parts);
                                 }
+                                $parsed_sub_data = !empty($sub->lesson_data) ? json_decode($sub->lesson_data, true) : array();
+                                $sub_file_url = $parsed_sub_data['file_url'] ?? '';
                         ?>
                         <tr style="font-size: 12px;" id="prep-row-<?php echo $sub->id; ?>">
                             <td style="text-align: center;"><input type="checkbox" class="eess-prep-cb" value="<?php echo $sub->id; ?>"></td>
@@ -978,15 +980,27 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             </td>
                             <td>
                                 <div class="sm-action-btn-group">
-                                    <!-- View Button -->
-                                    <button onclick="smOpenPrepViewer(<?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-neutral" title="عرض تفاصيل التحضير الكاملة">
-                                        <span class="dashicons dashicons-visibility"></span>
-                                    </button>
+                                    <?php if (!empty($sub_file_url)): ?>
+                                        <!-- View Uploaded File Button -->
+                                        <a href="<?php echo esc_url($sub_file_url); ?>" target="_blank" title="معاينة ملف التحضير المرفوع" class="sm-action-btn sm-action-btn-neutral">
+                                            <span class="dashicons dashicons-visibility"></span>
+                                        </a>
 
-                                    <!-- Print PDF Button -->
-                                    <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=lesson_prep&prep_id=' . $sub->id); ?>" target="_blank" class="sm-action-btn sm-action-btn-neutral" title="طباعة أو تصدير وثيقة PDF المعتمدة">
-                                        <span class="dashicons dashicons-printer"></span>
-                                    </a>
+                                        <!-- Download Uploaded File Button -->
+                                        <a href="<?php echo esc_url($sub_file_url); ?>" download title="تحميل ملف التحضير المرفوع الأصلي" class="sm-action-btn sm-action-btn-primary">
+                                            <span class="dashicons dashicons-download"></span>
+                                        </a>
+                                    <?php else: ?>
+                                        <!-- System Lesson Preview Button -->
+                                        <button onclick="smOpenPrepViewer(<?php echo $sub->id; ?>)" class="sm-action-btn sm-action-btn-neutral" title="عرض تفاصيل التحضير الكاملة">
+                                            <span class="dashicons dashicons-visibility"></span>
+                                        </button>
+
+                                        <!-- Print PDF Button -->
+                                        <a href="<?php echo admin_url('admin-ajax.php?action=sm_print&print_type=lesson_prep&prep_id=' . $sub->id); ?>" target="_blank" class="sm-action-btn sm-action-btn-neutral" title="طباعة أو تصدير وثيقة PDF المعتمدة">
+                                            <span class="dashicons dashicons-printer"></span>
+                                        </a>
+                                    <?php endif; ?>
 
                                     <!-- WhatsApp Direct Contact Button -->
                                     <?php

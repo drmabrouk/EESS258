@@ -7083,7 +7083,7 @@ class SM_Public {
             // Lock down print access so only the owner, coordinators, supervisors, or administrators can view it
             $current_user_id = get_current_user_id();
             $user_roles = (array) wp_get_current_user()->roles;
-            $is_privileged = in_array('administrator', $user_roles) || in_array('sm_system_admin', $user_roles) || in_array('sm_principal', $user_roles) || in_array('sm_supervisor', $user_roles) || in_array('sm_coordinator', $user_roles) || in_array('sm_hod', $user_roles);
+            $is_privileged = in_array('administrator', $user_roles) || in_array('sm_system_admin', $user_roles) || in_array('sm_principal', $user_roles) || in_array('sm_supervisor', $user_roles) || in_array('sm_coordinator', $user_roles) || in_array('sm_hod', $user_roles) || in_array('sm_activities_supervisor', $user_roles);
 
             if ($prep->teacher_id != $current_user_id && !$is_privileged) {
                 wp_die('عفواً، لا تملك الصلاحيات الكافية لاستعراض أو طباعة هذا التحضير.');
