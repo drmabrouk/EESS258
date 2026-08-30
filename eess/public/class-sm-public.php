@@ -7871,12 +7871,15 @@ class SM_Public {
             $employee_id = $user->user_login;
         }
         $employee_id = trim(preg_replace('/^(EMP|EMP-|_)+/i', '', $employee_id));
-        $user_status  = get_user_meta($user_id, 'sm_user_status', true) ?: 'active';
-        $civil_id     = get_user_meta($user_id, 'eess_civil_id', true);
-        $dob          = get_user_meta($user_id, 'dob', true) ?: get_user_meta($user_id, 'sm_dob', true);
-        $nationality  = get_user_meta($user_id, 'nationality', true) ?: get_user_meta($user_id, 'sm_nationality', true);
-        $emirate      = get_user_meta($user_id, 'eess_emirate', true) ?: '';
-        $access_scope = get_user_meta($user_id, 'eess_access_scope', true) ?: 'school';
+        $user_status   = get_user_meta($user_id, 'sm_user_status', true) ?: 'active';
+        $civil_id      = get_user_meta($user_id, 'eess_civil_id', true);
+        $dob           = get_user_meta($user_id, 'dob', true) ?: get_user_meta($user_id, 'sm_dob', true);
+        $nationality   = get_user_meta($user_id, 'nationality', true) ?: get_user_meta($user_id, 'sm_nationality', true);
+        $gender        = get_user_meta($user_id, 'gender', true) ?: get_user_meta($user_id, 'eess_gender', true);
+        $address       = get_user_meta($user_id, 'address', true) ?: get_user_meta($user_id, 'eess_address', true);
+        $building_info = get_user_meta($user_id, 'eess_building_info', true);
+        $emirate       = get_user_meta($user_id, 'eess_emirate', true) ?: '';
+        $access_scope  = get_user_meta($user_id, 'eess_access_scope', true) ?: 'school';
 
         $institution_id = get_user_meta($user_id, 'eess_institution_id', true) ?: get_user_meta($user_id, 'eess_school_id', true);
         $school_id      = get_user_meta($user_id, 'eess_school_id', true) ?: get_user_meta($user_id, 'sm_school_id', true);
@@ -7889,6 +7892,7 @@ class SM_Public {
         }
         if (empty($school_name)) $school_name = 'المدرسة الرئيسية';
         $department     = get_user_meta($user_id, 'department', true) ?: get_user_meta($user_id, 'sm_department', true);
+        $admin_section  = get_user_meta($user_id, 'eess_admin_section', true);
         $specialization = get_user_meta($user_id, 'specialization', true) ?: get_user_meta($user_id, 'sm_specialization', true);
         $assigned_sections = get_user_meta($user_id, 'eess_assigned_sections', true) ?: '';
 
@@ -7915,6 +7919,9 @@ class SM_Public {
             'civil_id'          => $civil_id,
             'dob'               => $dob,
             'nationality'       => $nationality,
+            'gender'            => $gender,
+            'address'           => $address,
+            'building_info'     => $building_info,
             'emirate'           => $emirate,
             'role'              => $role,
             'access_scope'      => $access_scope,
@@ -7922,6 +7929,7 @@ class SM_Public {
             'school_id'         => $school_id,
             'school_name'       => $school_name,
             'department'        => $department,
+            'admin_section'     => $admin_section,
             'specialization'    => $specialization,
             'assigned_grades'   => $assigned_grades,
             'assigned_sections' => $assigned_sections,
@@ -7986,8 +7994,12 @@ class SM_Public {
         $specialization = sanitize_text_field($_POST['specialization'] ?? '');
         $nationality    = sanitize_text_field($_POST['nationality'] ?? '');
         $dob            = sanitize_text_field($_POST['dob'] ?? '');
+        $gender         = sanitize_text_field($_POST['gender'] ?? '');
+        $address        = sanitize_text_field($_POST['address'] ?? '');
+        $building_info  = sanitize_text_field($_POST['building_info'] ?? '');
         $emirate        = sanitize_text_field($_POST['emirate'] ?? '');
         $country_res    = sanitize_text_field($_POST['country_residence'] ?? 'الإمارات العربية المتحدة');
+        $admin_section  = sanitize_text_field($_POST['admin_section'] ?? '');
         $sections       = sanitize_text_field($_POST['assigned_sections'] ?? '');
         $grades         = isset($_POST['assigned_grades']) ? array_map('sanitize_text_field', (array)$_POST['assigned_grades']) : array();
 
@@ -8081,6 +8093,11 @@ class SM_Public {
         update_user_meta($user_id, 'sm_user_status', $user_status);
         update_user_meta($user_id, 'eess_civil_id', $civil_id);
         update_user_meta($user_id, 'eess_emirate', $emirate);
+        update_user_meta($user_id, 'gender', $gender);
+        update_user_meta($user_id, 'eess_gender', $gender);
+        update_user_meta($user_id, 'address', $address);
+        update_user_meta($user_id, 'eess_address', $address);
+        update_user_meta($user_id, 'eess_building_info', $building_info);
         if (!empty($dob)) {
             update_user_meta($user_id, 'dob', $dob);
             update_user_meta($user_id, 'sm_dob', $dob);
@@ -8097,6 +8114,7 @@ class SM_Public {
         update_user_meta($user_id, 'sm_school_name', $school_name);
         update_user_meta($user_id, 'department', $department);
         update_user_meta($user_id, 'sm_department', $department);
+        update_user_meta($user_id, 'eess_admin_section', $admin_section);
         update_user_meta($user_id, 'specialization', $specialization);
         update_user_meta($user_id, 'sm_specialization', $specialization);
         update_user_meta($user_id, 'eess_assigned_grades', json_encode($grades, JSON_UNESCAPED_UNICODE));

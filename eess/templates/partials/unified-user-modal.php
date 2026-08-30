@@ -26,7 +26,7 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
             <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; width: 100%; gap: 6px;">
                 <div id="u_indicator_step1" class="u-step-indicator active" style="background: #881337; color: white; padding: 5px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <span style="background: rgba(255,255,255,0.2); width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">1</span>
-                    <span>الشخصية</span>
+                    <span>البيانات الشخصية</span>
                 </div>
                 <div id="u_indicator_step2" class="u-step-indicator" style="background: #f1f5f9; color: #64748b; padding: 5px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; border: 1px solid #cbd5e1;">
                     <span style="background: #cbd5e1; color: #334155; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">2</span>
@@ -34,11 +34,11 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                 </div>
                 <div id="u_indicator_step3" class="u-step-indicator" style="background: #f1f5f9; color: #64748b; padding: 5px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; border: 1px solid #cbd5e1;">
                     <span style="background: #cbd5e1; color: #334155; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">3</span>
-                    <span>التسكين الأكاديمي</span>
+                    <span>التسكين المهني والأكاديمي</span>
                 </div>
                 <div id="u_indicator_step4" class="u-step-indicator" style="background: #f1f5f9; color: #64748b; padding: 5px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; border: 1px solid #cbd5e1;">
                     <span style="background: #cbd5e1; color: #334155; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">4</span>
-                    <span>المراجعة والتأكيد</span>
+                    <span>المراجعة والتحقق</span>
                 </div>
                 <div id="u_indicator_step5" class="u-step-indicator" style="background: #f1f5f9; color: #64748b; padding: 5px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; border: 1px solid #cbd5e1;">
                     <span style="background: #cbd5e1; color: #334155; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">5</span>
@@ -77,18 +77,27 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                     </div>
 
                     <div class="eess-float-group">
+                        <input type="date" name="dob" id="u_dob" class="sm-input eess-float-input" required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 12.5px;" oninput="eessValidateField(this)">
+                        <label for="u_dob" class="eess-float-label">تاريخ الميلاد <span style="color:#ef4444;">*</span></label>
+                        <span class="eess-field-error" id="err_u_dob" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى تحديد تاريخ الميلاد.</span>
+                    </div>
+
+                    <div class="eess-float-group">
                         <input type="text" name="nationality" id="u_nationality" class="sm-input eess-float-input" placeholder=" " required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;" oninput="eessValidateField(this)">
                         <label for="u_nationality" class="eess-float-label">الجنسية <span style="color:#ef4444;">*</span></label>
                         <span class="eess-field-error" id="err_u_nationality" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى تحديد الجنسية.</span>
                     </div>
 
                     <div class="eess-float-group">
-                        <input type="date" name="dob" id="u_dob" class="sm-input eess-float-input" required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 12.5px;" oninput="eessValidateField(this)">
-                        <label for="u_dob" class="eess-float-label">تاريخ الميلاد <span style="color:#ef4444;">*</span></label>
-                        <span class="eess-field-error" id="err_u_dob" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى تحديد تاريخ الميلاد.</span>
+                        <select name="gender" id="u_gender" class="sm-select eess-float-input" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
+                            <option value="">-- اختر الجنس --</option>
+                            <option value="male">ذكر (Male)</option>
+                            <option value="female">أنثى (Female)</option>
+                        </select>
+                        <label for="u_gender" class="eess-float-label">الجنس</label>
                     </div>
 
-                    <div class="eess-float-group" style="grid-column: span 2;">
+                    <div class="eess-float-group">
                         <input type="text" name="civil_id" id="u_civil_id" class="sm-input eess-float-input" placeholder=" " style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
                         <label for="u_civil_id" class="eess-float-label">الرقم المدني / الهوية الوطنية</label>
                     </div>
@@ -98,6 +107,12 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
             <!-- STEP 2: CONTACT & RESIDENCE -->
             <div id="u_step_2_container" style="display: none;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px; margin-top: 10px;">
+                    <div class="eess-float-group" style="grid-column: span 2;">
+                        <input type="email" name="user_email" id="u_user_email" class="sm-input eess-float-input" placeholder=" " required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; direction: ltr; text-align: right;" onblur="eessCheckUniqueness('email')" oninput="eessValidateField(this)">
+                        <label for="u_user_email" class="eess-float-label">البريد الإلكتروني الرسمي <span style="color:#ef4444;">*</span></label>
+                        <span class="eess-field-error" id="err_u_user_email" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى إدخال بريد إلكتروني صحيح.</span>
+                    </div>
+
                     <div id="u_phone_wrapper" style="grid-column: span 2;">
                         <div style="display: flex; gap: 8px; direction: ltr;">
                             <select name="country_code" id="u_country_code" class="sm-select" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 12.5px; width: 140px; font-weight: bold;">
@@ -117,9 +132,13 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                     </div>
 
                     <div class="eess-float-group" style="grid-column: span 2;">
-                        <input type="email" name="user_email" id="u_user_email" class="sm-input eess-float-input" placeholder=" " required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; direction: ltr; text-align: right;" onblur="eessCheckUniqueness('email')" oninput="eessValidateField(this)">
-                        <label for="u_user_email" class="eess-float-label">البريد الإلكتروني الرسمي <span style="color:#ef4444;">*</span></label>
-                        <span class="eess-field-error" id="err_u_user_email" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى إدخال بريد إلكتروني صحيح.</span>
+                        <input type="text" name="address" id="u_address" class="sm-input eess-float-input" placeholder=" " style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
+                        <label for="u_address" class="eess-float-label">عنوان السكن / الشارع</label>
+                    </div>
+
+                    <div class="eess-float-group" style="grid-column: span 2;">
+                        <input type="text" name="building_info" id="u_building_info" class="sm-input eess-float-input" placeholder=" " style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
+                        <label for="u_building_info" class="eess-float-label">بيانات البناية / المجمع السكني / الشقة</label>
                     </div>
 
                     <div class="eess-float-group">
@@ -150,6 +169,13 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                     <h4 style="margin: 0 0 14px 0; font-size: 13.5px; font-weight: 800; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">التسكين المهني والأكاديمي</h4>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px; margin-top: 10px;">
+                        <div id="u_empid_wrapper" class="eess-float-group">
+                            <input type="text" name="employee_id" id="u_employee_id" class="sm-input eess-float-input" placeholder=" " required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; font-weight: bold; direction: ltr; text-align: right;" oninput="eessSyncUsername(this)" onblur="eessCheckUniqueness('employee_id')">
+                            <label for="u_employee_id" class="eess-float-label">الرقم الوظيفي (Employee ID) <span style="color:#ef4444;">*</span></label>
+                            <input type="hidden" name="username" id="u_username">
+                            <span class="eess-field-error" id="err_u_employee_id" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى إدخال الرقم الوظيفي.</span>
+                        </div>
+
                         <div class="eess-float-group">
                             <select name="user_role" id="u_user_role" class="sm-select eess-float-input" onchange="eessOnRoleChanged()" required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; font-weight: bold;">
                                 <option value="">-- اختر الرتبة --</option>
@@ -165,13 +191,6 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                             <span class="eess-field-error" id="err_u_user_role" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى تحديد الرتبة الوظيفية.</span>
                         </div>
 
-                        <div id="u_empid_wrapper" class="eess-float-group">
-                            <input type="text" name="employee_id" id="u_employee_id" class="sm-input eess-float-input" placeholder=" " required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; font-weight: bold; direction: ltr; text-align: right;" oninput="eessSyncUsername(this)" onblur="eessCheckUniqueness('employee_id')">
-                            <label for="u_employee_id" class="eess-float-label">الرقم الوظيفي (Employee ID) <span style="color:#ef4444;">*</span></label>
-                            <input type="hidden" name="username" id="u_username">
-                            <span class="eess-field-error" id="err_u_employee_id" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى إدخال الرقم الوظيفي.</span>
-                        </div>
-
                         <div id="u_inst_wrapper" class="eess-float-group">
                             <select name="institution_id" id="u_institution_id" class="sm-select eess-float-input" onchange="eessOnInstitutionChanged()" required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
                                 <option value="">-- اختر المؤسسة التابعة --</option>
@@ -183,6 +202,16 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                             <span class="eess-field-error" id="err_u_institution_id" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى اختيار المؤسسة.</span>
                         </div>
 
+                        <div id="u_school_wrapper" class="eess-float-group">
+                            <select name="school_id" id="u_school_id" class="sm-select eess-float-input" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
+                                <option value="">-- اختر المدرسة بالكامل --</option>
+                                <?php foreach ($all_schools as $sch): ?>
+                                    <option value="<?php echo esc_attr($sch->id); ?>" data-institution="<?php echo esc_attr($sch->institution_id ?? ''); ?>"><?php echo esc_html($sch->name); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label for="u_school_id" class="eess-float-label">اسم المدرسة بالكامل</label>
+                        </div>
+
                         <div id="u_department_wrapper" class="eess-float-group">
                             <select name="department" id="u_department" class="sm-select eess-float-input" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
                                 <option value="">-- اختر القسم --</option>
@@ -192,10 +221,15 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                             </select>
                             <label for="u_department" class="eess-float-label">القسم / الإدارة</label>
                         </div>
+
+                        <div id="u_admin_sec_wrapper" class="eess-float-group">
+                            <input type="text" name="admin_section" id="u_admin_section" class="sm-input eess-float-input" placeholder=" " style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
+                            <label for="u_admin_section" class="eess-float-label">الشعبة الإدارية / المسمى الإداري</label>
+                        </div>
                     </div>
 
                     <div id="u_grades_wrapper" style="margin-bottom: 16px;">
-                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">الصفوف الدراسية المسندة (اختياري - كبسولات متعددة):</label>
+                        <label class="sm-label" style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">الصفوف الدراسية المسندة (كبسولات متعددة):</label>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; background: #ffffff; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1;">
                             <?php for ($g = 1; $g <= 12; $g++): ?>
                                 <label class="u-grade-capsule-label" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 12px; font-weight: 700; color: #334155; cursor: pointer; user-select: none;">
@@ -229,17 +263,19 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
             <!-- STEP 4: DATA REVIEW & VERIFICATION -->
             <div id="u_step_4_container" style="display: none;">
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 20px;">
-                    <h4 style="margin: 0 0 14px 0; font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">مراجعة والتحقق الشامل من بيانات الموظف</h4>
+                    <h4 style="margin: 0 0 14px 0; font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">مراجعة والتحقق الشامل من كافة بيانات الموظف</h4>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 13px; color: #334155;">
                         <div><strong>الاسم الكامل:</strong> <span id="rev_u_fullname">-</span></div>
                         <div><strong>الجنسية وتاريخ الميلاد:</strong> <span id="rev_u_nat_dob">-</span></div>
+                        <div><strong>الجنس والنوع:</strong> <span id="rev_u_gender">-</span></div>
                         <div><strong>البريد الإلكتروني:</strong> <span id="rev_u_email" style="font-family: monospace;">-</span></div>
                         <div><strong>رقم الجوال الأساسي:</strong> <span id="rev_u_phone" style="font-family: monospace;">-</span></div>
                         <div><strong>دولة الإقامة والإمارة:</strong> <span id="rev_u_location">-</span></div>
+                        <div><strong>العنوان والبناية:</strong> <span id="rev_u_address_info">-</span></div>
                         <div><strong>الرتبة والرقم الوظيفي:</strong> <span id="rev_u_role_id" style="color: #881337; font-weight: 800;">-</span></div>
                         <div id="rev_u_inst_container"><strong>المؤسسة والتخصص:</strong> <span id="rev_u_inst_subj" style="color: #0284c7; font-weight: 800;">-</span></div>
-                        <div id="rev_u_grades_container"><strong>الصفوف المسندة:</strong> <span id="rev_u_grades">-</span></div>
+                        <div id="rev_u_grades_container"><strong>الصفوف والشعب المسندة:</strong> <span id="rev_u_grades">-</span></div>
                     </div>
                 </div>
             </div>
@@ -247,13 +283,21 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
             <!-- STEP 5: ACCOUNT SECURITY & PASSWORDS -->
             <div id="u_step_5_container" style="display: none;">
                 <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 20px;">
-                    <h4 style="margin: 0 0 14px 0; font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">أمان وكلمة مرور الحساب</h4>
-                    <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">يرجى مراجعة بيانات الاعتماد وتعيين كلمة مرور آمنة ومطابقة للموظف:</p>
+                    <h4 style="margin: 0 0 14px 0; font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">أمان وكلمة مرور الحساب وحالة الوصول</h4>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
-                        <div class="eess-float-group" style="grid-column: span 2;">
+                        <div class="eess-float-group">
                             <input type="text" id="u_sec_username_display" readonly class="sm-input eess-float-input" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; background: #f8fafc; font-weight: bold; direction: ltr; text-align: right;">
                             <label class="eess-float-label">اسم المستخدم (مطابق للرقم الوظيفي)</label>
+                        </div>
+
+                        <div class="eess-float-group">
+                            <select name="user_status" id="u_user_status" class="sm-select eess-float-input" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; font-weight: bold;">
+                                <option value="active">نشط بالكامل (Active)</option>
+                                <option value="suspended">موقوف مؤقتاً (Suspended)</option>
+                                <option value="pending">قيد الانتظار (Pending Approval)</option>
+                            </select>
+                            <label for="u_user_status" class="eess-float-label">حالة الحساب والوصول <span style="color:#ef4444;">*</span></label>
                         </div>
 
                         <div class="eess-float-group">
