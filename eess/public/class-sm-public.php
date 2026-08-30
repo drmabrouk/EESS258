@@ -7408,8 +7408,13 @@ class SM_Public {
             $raw_deadline = $acad_struct['term_dates'][$term_key]['deadline'] ?? '';
             $configured_deadline = !empty($raw_deadline) ? date('Y-m-d H:i:s', strtotime($raw_deadline)) : date('Y-m-d 23:59:59');
 
-            // Fetch all active teachers
-            $teachers = get_users(array('role' => 'sm_teacher', 'orderby' => 'display_name', 'order' => 'ASC'));
+            // Fetch all active teachers strictly filtered by PE & Health specialization scope
+            $all_teachers_raw = get_users(array('role' => 'sm_teacher', 'orderby' => 'display_name', 'order' => 'ASC'));
+            $pe_teachers = array_filter($all_teachers_raw, function($t) {
+                $spec = get_user_meta($t->ID, 'sm_specialization', true) ?: (get_user_meta($t->ID, 'specialization', true) ?: (get_user_meta($t->ID, 'subject', true) ?: ''));
+                return (mb_strpos($spec, 'بدنية') !== false || mb_strpos($spec, 'رياضة') !== false || mb_strpos($spec, 'Health') !== false || mb_strpos($spec, 'Physical') !== false);
+            });
+            $teachers = !empty($pe_teachers) ? array_values($pe_teachers) : $all_teachers_raw;
 
             // Sort teachers consecutively by school name
             usort($teachers, function($a, $b) {
@@ -7909,10 +7914,6 @@ class SM_Public {
         }
 
         global $wpdb;
-        $wpdb->query("ALTER TABLE {$wpdb->prefix}sm_lesson_preps ADD COLUMN IF NOT EXISTS reviewed_by bigint(20) DEFAULT NULL");
-        $wpdb->query("ALTER TABLE {$wpdb->prefix}sm_lesson_preps ADD COLUMN IF NOT EXISTS reviewed_at datetime DEFAULT NULL");
-        $wpdb->query("ALTER TABLE {$wpdb->prefix}sm_lesson_preps ADD COLUMN IF NOT EXISTS review_notes text DEFAULT NULL");
-
         $updated = $wpdb->update(
             "{$wpdb->prefix}sm_lesson_preps",
             array(
