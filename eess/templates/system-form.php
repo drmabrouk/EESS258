@@ -1,18 +1,18 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 <div class="sm-violation-modal-container" dir="rtl" style="font-family: 'Cairo', sans-serif !important; background: #ffffff; color: #0f172a; border-radius: 20px; padding: 0; box-sizing: border-box; width: 100%;">
 
-    <!-- Modal Header -->
-    <div style="background: #0f172a; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b;">
+    <!-- Modal Header (Edge-to-Edge Attached) -->
+    <div style="background: #0f172a; color: #ffffff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; margin: 0; width: 100%; box-sizing: border-box; border-top-left-radius: 20px; border-top-right-radius: 20px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 36px; height: 36px; background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #f87171;">
-                <span class="dashicons dashicons-shield-alt" style="font-size: 20px; width: 20px; height: 20px;"></span>
+            <div style="width: 36px; height: 36px; background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.4); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #f87171; flex-shrink: 0;">
+                <span class="dashicons dashicons-shield-alt" style="font-size: 20px; width: 20px; height: 20px; line-height: 20px;"></span>
             </div>
             <div>
                 <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff; font-family: 'Cairo', sans-serif !important;">تسجيل مخالفة جديدة</h3>
                 <p style="margin: 2px 0 0 0; font-size: 11px; color: #94a3b8; font-weight: 600; font-family: 'Cairo', sans-serif !important;">رصد وتوثيق المخالفات السلوكية للطلاب فردياً وجماعياً</p>
             </div>
         </div>
-        <button type="button" onclick="smCloseViolationModal()" style="background: rgba(255, 255, 255, 0.1); border: none; color: #cbd5e1; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.3)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#cbd5e1';">&times;</button>
+        <button type="button" onclick="smCloseViolationModal()" style="background: rgba(255, 255, 255, 0.12); border: none; color: #cbd5e1; width: 32px; height: 32px; min-width: 32px; min-height: 32px; max-width: 32px; max-height: 32px; border-radius: 50% !important; aspect-ratio: 1 / 1; font-size: 18px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; line-height: 1; padding: 0; box-sizing: border-box;" onmouseover="this.style.background='rgba(239,68,68,0.3)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.12)'; this.style.color='#cbd5e1';">&times;</button>
     </div>
 
     <!-- Wizard Step Progress Header Bar -->
