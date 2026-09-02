@@ -225,7 +225,7 @@
 
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: inline-block; max-width: 380px; width: 100%; margin-bottom: 20px;">
                 <div style="font-size: 12px; font-weight: 700; color: #64748b; font-family: 'Cairo', sans-serif !important;">
-                    سيتم إغلاق النافذة وتحديث السجلات تلقائياً خلال <strong id="sm-close-timer" style="color: #dc2626; font-size: 15px;">10</strong> ثوان...
+                    سيتم إغلاق النافذة وتحديث السجلات تلقائياً خلال <strong id="sm-close-timer" style="color: #dc2626; font-size: 15px;">3</strong> ثوان...
                 </div>
             </div>
 
@@ -646,8 +646,8 @@ function renderSelectedStudents() {
                     }
                     document.dispatchEvent(new CustomEvent('smViolationRecorded', { detail: res }));
 
-                    // Start 10-second Auto Close Timer
-                    let secondsLeft = 10;
+                    // Start 3-second Auto Close Timer
+                    let secondsLeft = 3;
                     const timerEl = document.getElementById('sm-close-timer');
                     if (timerEl) timerEl.innerText = secondsLeft;
 

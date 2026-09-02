@@ -306,10 +306,5 @@ $school_phone = get_user_meta($first_plan->teacher_id, 'eess_school_phone', true
         </div>
     <?php endforeach; ?>
 
-    <!-- Mandatory Global EESS System Footer -->
-    <div style="margin-top: 25px; padding-top: 10px; border-top: 1px solid #cbd5e1; text-align: center; font-size: 9px; color: #64748b; font-weight: 700; font-family: 'Cairo', sans-serif;" dir="ltr">
-        Powered by Educational Electronic Systems Solutions (EESS) — eess.online
-    </div>
-
 </body>
 </html>
