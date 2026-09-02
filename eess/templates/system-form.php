@@ -43,7 +43,7 @@
         <div id="sm-vstep-1" style="display: block;">
             <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
                 <span class="dashicons dashicons-info" style="color: #2563eb; font-size: 18px; width: 18px; height: 18px;"></span>
-                <span style="font-size: 12px; font-weight: 700; color: #1e40af; line-height: 1.5;">ابحث عن الطالب بالاسم أو الكود، أو استخدم الماسح الضوئي لإضافة الطلاب. يمكنك اختيار حتى 15 طالباً للمخالفات الجماعية.</span>
+                <span style="font-size: 12px; font-weight: 700; color: #1e40af; line-height: 1.5;">ابحث عن الطالب بالاسم أو الكود، أو استخدم الماسح الضوئي لإضافة الطلاب. يمكنك اختيار حتى 30 طالباً للمخالفات الجماعية.</span>
             </div>
 
             <!-- Search Field & Scanner Button Row -->
@@ -86,7 +86,7 @@
 
             <!-- Step 1 Actions -->
             <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 14px;">
-                <button type="button" onclick="smCloseViolationModal()" class="sm-btn" style="height: 40px; padding: 0 18px; font-size: 12.5px; font-weight: 700; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer;">إلغاء</button>
+                <button type="button" onclick="smCloseViolationModal()" class="sm-btn" style="height: 40px; padding: 0 18px; font-size: 12.5px; font-weight: 800; background: #f1f5f9; color: #1e293b !important; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">إلغاء</button>
 
                 <button type="button" id="btn-to-step-2" onclick="smSetViolationStep(2)" class="sm-btn" style="height: 40px; padding: 0 22px; font-weight: 800; font-size: 13px; background: #dc2626; color: white !important; border: none; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.25);" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
                     <span>التالي: إدخال بيانات المخالفة</span>
@@ -225,7 +225,7 @@
 
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: inline-block; max-width: 380px; width: 100%; margin-bottom: 20px;">
                 <div style="font-size: 12px; font-weight: 700; color: #64748b; font-family: 'Cairo', sans-serif !important;">
-                    سيتم إغلاق النافذة وتحديث السجلات تلقائياً خلال <strong id="sm-close-timer" style="color: #dc2626; font-size: 15px;">3</strong> ثوان...
+                    سيتم إغلاق النافذة وتحديث السجلات تلقائياً خلال <strong id="sm-close-timer" style="color: #dc2626; font-size: 15px;">10</strong> ثوان...
                 </div>
             </div>
 
@@ -383,9 +383,9 @@ window.selectStudent = function(s) {
         return;
     }
 
-    // Limit up to 15 students
-    if (window.selectedStudents.length >= 15) {
-        alert('يمكن اختيار حتى 15 طالباً فقط في العملية الواحدة.');
+    // Limit up to 30 students
+    if (window.selectedStudents.length >= 30) {
+        alert('يمكن اختيار حتى 30 طالباً فقط في العملية الواحدة.');
         return;
     }
 
@@ -646,8 +646,8 @@ function renderSelectedStudents() {
                     }
                     document.dispatchEvent(new CustomEvent('smViolationRecorded', { detail: res }));
 
-                    // Start 3-second Auto Close Timer
-                    let secondsLeft = 3;
+                    // Start 10-second Auto Close Timer
+                    let secondsLeft = 10;
                     const timerEl = document.getElementById('sm-close-timer');
                     if (timerEl) timerEl.innerText = secondsLeft;
 

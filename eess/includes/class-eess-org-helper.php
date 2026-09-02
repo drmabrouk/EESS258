@@ -264,6 +264,7 @@ class EESS_Org_Helper {
         $table = "{$wpdb->prefix}eess_institutions";
 
         $cols = array(
+            'parent_id' => "BIGINT(20) DEFAULT NULL",
             'type' => "VARCHAR(100) DEFAULT 'مدرسة' NOT NULL",
             'logo_url' => "VARCHAR(255) DEFAULT '' NOT NULL",
             'country' => "VARCHAR(100) DEFAULT 'الإمارات العربية المتحدة' NOT NULL",
@@ -306,6 +307,7 @@ class EESS_Org_Helper {
             $data = array('name' => $data);
         }
         $insert = array(
+            'parent_id'     => !empty($data['parent_id']) ? intval($data['parent_id']) : null,
             'name'          => sanitize_text_field($data['name'] ?? ''),
             'type'          => sanitize_text_field($data['type'] ?? 'مدرسة'),
             'logo_url'      => esc_url_raw($data['logo_url'] ?? ''),
@@ -327,6 +329,7 @@ class EESS_Org_Helper {
             $data = array('name' => $data);
         }
         $update = array(
+            'parent_id'     => !empty($data['parent_id']) ? intval($data['parent_id']) : null,
             'name'          => sanitize_text_field($data['name'] ?? ''),
             'type'          => sanitize_text_field($data['type'] ?? 'مدرسة'),
             'logo_url'      => esc_url_raw($data['logo_url'] ?? ''),
