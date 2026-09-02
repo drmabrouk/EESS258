@@ -411,26 +411,6 @@ class SM_Settings {
                     'sm_hr' => true,
                 )
             ),
-            'assets' => array(
-                'label' => 'إدارة العهد والمعدات',
-                'dashicon' => 'dashicons-store',
-                'tab' => 'assets',
-                'default' => array(
-                    'sm_system_admin' => true,
-                    'sm_principal' => true,
-                    'sm_supervisor' => true,
-                    'sm_coordinator' => true,
-                    'sm_hod' => true,
-                    'sm_teacher' => true,
-                    'sm_student' => false,
-                    'sm_parent' => false,
-                    'sm_discipline_supervisor' => false,
-                    'sm_activities_supervisor' => true,
-                    'sm_transportation_supervisor' => true,
-                    'sm_bus_supervisor' => false,
-                    'sm_hr' => false,
-                )
-            ),
             'lesson-plans' => array(
                 'label' => 'تحضير الدروس',
                 'dashicon' => 'dashicons-welcome-write-blog',
@@ -465,6 +445,26 @@ class SM_Settings {
                     'sm_discipline_supervisor' => true,
                     'sm_activities_supervisor' => true,
                     'sm_transportation_supervisor' => false,
+                    'sm_bus_supervisor' => false,
+                    'sm_hr' => false,
+                )
+            ),
+            'assets' => array(
+                'label' => 'إدارة العهد والمعدات',
+                'dashicon' => 'dashicons-store',
+                'tab' => 'assets',
+                'default' => array(
+                    'sm_system_admin' => true,
+                    'sm_principal' => true,
+                    'sm_supervisor' => true,
+                    'sm_coordinator' => true,
+                    'sm_hod' => true,
+                    'sm_teacher' => true,
+                    'sm_student' => false,
+                    'sm_parent' => false,
+                    'sm_discipline_supervisor' => false,
+                    'sm_activities_supervisor' => true,
+                    'sm_transportation_supervisor' => true,
                     'sm_bus_supervisor' => false,
                     'sm_hr' => false,
                 )
