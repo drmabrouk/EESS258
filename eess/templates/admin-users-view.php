@@ -215,11 +215,10 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                     <tr>
                         <th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-users" onclick="toggleAllUsersCheckbox(this)"></th>
                         <th>المستخدم</th>
-                        <th>البريد الإلكتروني</th>
-                        <th>المسمى الوظيفي / الرتبة</th>
-                        <th>حالة الحساب</th>
-                        <th>كلمة المرور</th>
-                        <th style="text-align: left;">الإجراءات الإدارية</th>
+                        <th>البريد الإلكتروني وكلمة المرور</th>
+                        <th>المسمى الوظيفي والتخصص</th>
+                        <th>مكان العمل</th>
+                        <th style="text-align: center;">الإجراءات الإدارية</th>
                     </tr>
                 </thead>
                 <tbody id="users-table-body">
@@ -237,35 +236,25 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                         // Hierarchical Security Check
                         if ($u_level > $current_level && !current_user_can('administrator')) continue;
 
-                        $u_spec = get_user_meta($u->ID, 'sm_specialization', true) ?: '';
-                        $u_emp = get_user_meta($u->ID, 'eess_employee_number', true) ?: '';
-                        $u_inst = get_user_meta($u->ID, 'eess_school_name', true) ?: '';
+                        $u_spec = get_user_meta($u->ID, 'sm_specialization', true) ?: (get_user_meta($u->ID, 'specialization', true) ?: '');
+                        $u_emp = get_user_meta($u->ID, 'eess_employee_number', true) ?: (get_user_meta($u->ID, 'sm_employee_id', true) ?: '');
+                        $u_nat = get_user_meta($u->ID, 'nationality', true) ?: (get_user_meta($u->ID, 'sm_nationality', true) ?: 'غير محدد');
+                        $u_inst = get_user_meta($u->ID, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
                         $u_school_id = get_user_meta($u->ID, 'eess_school_id', true) ?: '';
                         if (empty($u_school_id) && !empty($u_inst)) {
                             global $wpdb;
                             $u_school_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}eess_schools WHERE name = %s", $u_inst)) ?: '';
                         }
-                        $u_dept = get_user_meta($u->ID, 'eess_department', true) ?: '';
+                        $u_dept = get_user_meta($u->ID, 'eess_department', true) ?: (get_user_meta($u->ID, 'department', true) ?: '');
                         $u_status = get_user_meta($u->ID, 'sm_account_status', true) ?: 'active';
-                        $u_reg_status = get_user_meta($u->ID, 'eess_approval_status', true) ?: 'approved';
-                        $u_notes = get_user_meta($u->ID, 'eess_admin_notes', true) ?: '';
-
+                        $u_temp_pass = get_user_meta($u->ID, 'sm_temp_pass', true) ?: '********';
                         $u_registered_raw = $u->user_registered;
 
-                        $u_data = array(
-                            "id" => $u->ID,
-                            "name" => $u->display_name,
-                            "email" => $u->user_email,
-                            "login" => $u->user_login,
-                            "role" => $u_role,
-                            "photo" => get_user_meta($u->ID, 'eess_profile_photo', true),
-                            "specialization" => $u_spec,
-                            "employee_number" => $u_emp,
-                            "institution" => $u_school_id,
-                            "department" => $u_dept,
-                            "status" => $u_status,
-                            "notes" => $u_notes
-                        );
+                        // Capsule badge styling
+                        $st_lbl = ($u_status === 'restricted' || $u_status === 'suspended') ? 'موقوف' : 'نشط';
+                        $st_bg = ($u_status === 'restricted' || $u_status === 'suspended') ? '#fee2e2' : '#dcfce7';
+                        $st_col = ($u_status === 'restricted' || $u_status === 'suspended') ? '#991b1b' : '#15803d';
+                        $st_border = ($u_status === 'restricted' || $u_status === 'suspended') ? '#fca5a5' : '#bbf7d0';
                     ?>
                         <tr class="system-user-row"
                             data-id="<?php echo $u->ID; ?>"
@@ -283,57 +272,77 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <td style="text-align: center;">
                                 <input type="checkbox" class="user-checkbox" value="<?php echo $u->ID; ?>" <?php if($u->ID == get_current_user_id()) echo 'disabled'; ?>>
                             </td>
+
+                            <!-- User Column (Full Name + 3 Small Pastel Capsules) -->
                             <td>
                                 <div style="display:flex; align-items:center; gap:10px;">
-                                    <?php echo get_avatar($u->ID, 32, '', '', array('style' => 'border-radius:50%; width: 32px; height: 32px; object-fit: cover;')); ?>
+                                    <?php echo get_avatar($u->ID, 36, '', '', array('style' => 'border-radius:50%; width: 36px; height: 36px; object-fit: cover; flex-shrink:0; border: 1px solid #cbd5e1;')); ?>
                                     <div>
-                                        <div style="font-weight: 700; font-size: 13px; color: #1e293b;"><?php echo esc_html($u->display_name); ?></div>
-                                        <div style="font-size:10px; color:#64748b;">@<?php echo esc_html($u->user_login); ?></div>
+                                        <div style="font-weight: 800; font-size: 13.5px; color: #0f172a; margin-bottom: 3px;"><?php echo esc_html($u->display_name); ?></div>
+                                        <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10px; font-weight: 800; font-family: monospace;">@<?php echo esc_html($u->user_login); ?></span>
+                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; font-weight: 800;"><?php echo esc_html($u_nat); ?></span>
+                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: <?php echo $st_bg; ?>; color: <?php echo $st_col; ?>; border: 1px solid <?php echo $st_border; ?>; font-size: 10px; font-weight: 800;"><?php echo $st_lbl; ?></span>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
-                            <td style="font-size: 12px;"><?php echo esc_html($u->user_email); ?></td>
+
+                            <!-- Email + Password Capsule Column -->
                             <td>
-                                <div style="font-weight:700; font-size: 12px; color: #334155;">
+                                <div style="font-weight: 700; font-size: 12px; color: #1e293b; margin-bottom: 4px; font-family: monospace;"><?php echo esc_html($u->user_email); ?></div>
+                                <div style="display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 9999px; padding: 2px 10px; font-size: 10.5px; font-family: monospace;">
+                                    <span id="pass-text-<?php echo $u->ID; ?>" data-pass="<?php echo esc_attr($u_temp_pass); ?>" data-masked="1">••••••••</span>
+                                    <?php if ($current_level >= 4): ?>
+                                        <button type="button" onclick="eessTogglePasswordMask(<?php echo $u->ID; ?>)" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; color: #64748b; font-size: 11px; display: inline-flex; align-items: center;" title="إظهار / إخفاء كلمة المرور">
+                                            <span class="dashicons dashicons-visibility" id="pass-icon-<?php echo $u->ID; ?>" style="font-size: 13px; width: 13px; height: 13px;"></span>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+
+                            <!-- Role & Specialization Column -->
+                            <td>
+                                <div style="font-weight: 800; font-size: 12.5px; color: #334155;">
                                     <?php echo $role_map[$u_role] ?? $u_role; ?>
                                 </div>
                                 <?php if (!empty($u_spec)): ?>
-                                    <div style="font-size:11px; color:var(--sm-primary-color); font-weight:700;">التخصص: <?php echo esc_html($u_spec); ?></div>
+                                    <div style="font-size: 11px; color: #881337; font-weight: 800; margin-top: 2px;">التخصص: <?php echo esc_html($u_spec); ?></div>
                                 <?php endif; ?>
                             </td>
+
+                            <!-- Workplace Column -->
                             <td>
-                                <?php if ($u_status === 'restricted'): ?>
-                                    <span style="display:inline-block; padding: 2px 8px; font-size: 10px; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 4px; font-weight: bold;">محظور / مقيد</span>
-                                <?php else: ?>
-                                    <span style="display:inline-block; padding: 2px 8px; font-size: 10px; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; border-radius: 4px; font-weight: bold;">نشط</span>
+                                <div style="font-weight: 800; font-size: 12px; color: #0284c7; margin-bottom: 2px;"><?php echo esc_html($u_inst); ?></div>
+                                <?php if (!empty($u_dept)): ?>
+                                    <div style="font-size: 10.5px; color: #64748b; font-weight: 600;"><?php echo esc_html($u_dept); ?></div>
                                 <?php endif; ?>
                             </td>
-                            <td>
-                                <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-family:monospace; font-size: 11px;"><?php echo get_user_meta($u->ID, 'sm_temp_pass', true) ?: '********'; ?></code>
-                            </td>
+
+                            <!-- Actions Column (Circular Buttons, WhatsApp adjacent to Delete on far-left) -->
                             <td style="text-align: center;">
-                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                <div class="sm-action-btn-group">
+                                    <button type="button" onclick="eessOpenUnifiedUserModal('edit_user', <?php echo $u->ID; ?>)" title="تعديل ملف وتعيينات الموظف" class="sm-action-btn sm-action-btn-warning">
+                                        <span class="dashicons dashicons-edit"></span>
+                                    </button>
+
                                     <?php
                                     $u_phone = get_user_meta($u->ID, 'sm_phone', true) ?: (get_user_meta($u->ID, 'phone_number', true) ?: (get_user_meta($u->ID, 'guardian_phone', true) ?: ''));
                                     $formatted_u_phone = SM_Settings::format_uae_phone($u_phone);
                                     if (!empty($formatted_u_phone)):
                                         $wa_text = rawurlencode("السلام عليكم ورحمة الله وبركاته، الأخ/ت العزيز/ة " . $u->display_name);
                                     ?>
-                                        <a href="https://wa.me/<?php echo $formatted_u_phone; ?>?text=<?php echo $wa_text; ?>" target="_blank" title="تواصل عبر واتساب" style="width: 36px; height: 36px; border-radius: 50% !important; flex-shrink: 0; background: #dcfce7; color: #16a34a; border: 1px solid #86efac; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                            <span class="dashicons dashicons-whatsapp" style="font-size: 18px; width: 18px; height: 18px; margin: 0;"></span>
+                                        <a href="https://wa.me/<?php echo $formatted_u_phone; ?>?text=<?php echo $wa_text; ?>" target="_blank" title="تواصل مباشر عبر واتساب مع الموظف" class="sm-action-btn sm-action-btn-success">
+                                            <span class="dashicons dashicons-whatsapp"></span>
                                         </a>
                                     <?php endif; ?>
-
-                                    <button type="button" onclick="eessOpenUnifiedUserModal('edit_user', <?php echo $u->ID; ?>)" title="تعديل المستخدم" style="width: 36px; height: 36px; border-radius: 50% !important; flex-shrink: 0; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                        <span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
-                                    </button>
 
                                     <?php if ($u->ID != get_current_user_id()): ?>
                                         <form method="post" style="display:inline;" onsubmit="return confirm('حذف هذا المستخدم نهائياً؟')">
                                             <?php wp_nonce_field('sm_user_action', 'sm_nonce'); ?>
                                             <input type="hidden" name="delete_user_id" value="<?php echo $u->ID; ?>">
-                                            <button type="submit" name="sm_delete_user" title="حذف المستخدم" style="width: 36px; height: 36px; border-radius: 50% !important; flex-shrink: 0; background: #fee2e2; color: #dc2626; border: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-                                                <span class="dashicons dashicons-trash" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                            <button type="submit" name="sm_delete_user" title="حذف المستخدم نهائياً" class="sm-action-btn sm-action-btn-danger">
+                                                <span class="dashicons dashicons-trash"></span>
                                             </button>
                                         </form>
                                     <?php endif; ?>
@@ -430,6 +439,23 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
 <!-- UNIFIED MODAL REPLACES ALL LEGACY USER MODALS -->
 
 <script>
+function eessTogglePasswordMask(userId) {
+    var el = document.getElementById('pass-text-' + userId);
+    var icon = document.getElementById('pass-icon-' + userId);
+    if (!el) return;
+
+    var isMasked = el.getAttribute('data-masked') === '1';
+    if (isMasked) {
+        el.innerText = el.getAttribute('data-pass');
+        el.setAttribute('data-masked', '0');
+        if (icon) icon.className = 'dashicons dashicons-hidden';
+    } else {
+        el.innerText = '••••••••';
+        el.setAttribute('data-masked', '1');
+        if (icon) icon.className = 'dashicons dashicons-visibility';
+    }
+}
+
 // Switch Tabs Client-side
 function switchUsersTab(tabId, btn) {
     document.querySelectorAll('.users-tab-panel').forEach(p => p.style.display = 'none');

@@ -4796,24 +4796,87 @@ class SM_Public {
         $output = fopen('php://output', 'w');
         fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM for Excel
 
-        fputcsv($output, array('اسم المستخدم', 'البريد الإلكتروني', 'الاسم الكامل', 'الدور / الرتبة', 'رقم الهاتف', 'كلمة المرور', 'رابط الصورة الشخصية', 'المادة التخصصية'));
+        fputcsv($output, array(
+            'اسم المستخدم',
+            'البريد الإلكتروني',
+            'الاسم الكامل',
+            'الاسم الأول',
+            'اسم العائلة',
+            'الدور / الرتبة',
+            'الرقم الوظيفي',
+            'الجنسية',
+            'تاريخ الميلاد',
+            'الجنس',
+            'رقم الهاتف',
+            'الرقم المدني / الهوية',
+            'العنوان السكني',
+            'البناية / السكن',
+            'دولة الإقامة',
+            'الإمارة',
+            'معرف المؤسسة',
+            'اسم المدرسة بالكامل',
+            'القسم',
+            'الشعبة الإدارية',
+            'التخصص والمادة',
+            'الصفوف المسندة',
+            'الشعب المسندة',
+            'حالة الحساب',
+            'كلمة المرور / الهاش'
+        ));
 
         foreach ($all_users as $u) {
-            $role = reset($u->roles);
-            $phone = get_user_meta($u->ID, 'sm_phone', true);
-            $password = get_user_meta($u->ID, 'sm_temp_pass', true) ?: '';
-            $photo = get_user_meta($u->ID, 'eess_profile_photo', true) ?: '';
-            $specialization = get_user_meta($u->ID, 'sm_specialization', true) ?: '';
+            $role = !empty($u->roles) ? reset($u->roles) : 'sm_teacher';
+            $first_name = get_user_meta($u->ID, 'first_name', true) ?: '';
+            $last_name = get_user_meta($u->ID, 'last_name', true) ?: '';
+            $emp_num = get_user_meta($u->ID, 'eess_employee_number', true) ?: (get_user_meta($u->ID, 'sm_employee_id', true) ?: '');
+            $nat = get_user_meta($u->ID, 'nationality', true) ?: (get_user_meta($u->ID, 'sm_nationality', true) ?: '');
+            $dob = get_user_meta($u->ID, 'dob', true) ?: (get_user_meta($u->ID, 'sm_dob', true) ?: '');
+            $gender = get_user_meta($u->ID, 'gender', true) ?: (get_user_meta($u->ID, 'eess_gender', true) ?: '');
+            $phone = get_user_meta($u->ID, 'sm_phone', true) ?: (get_user_meta($u->ID, 'phone_number', true) ?: '');
+            $civil_id = get_user_meta($u->ID, 'eess_civil_id', true) ?: '';
+            $address = get_user_meta($u->ID, 'address', true) ?: (get_user_meta($u->ID, 'eess_address', true) ?: '');
+            $bldg = get_user_meta($u->ID, 'eess_building_info', true) ?: '';
+            $country_res = 'الإمارات العربية المتحدة';
+            $emirate = get_user_meta($u->ID, 'eess_emirate', true) ?: '';
+            $inst_id = get_user_meta($u->ID, 'eess_institution_id', true) ?: (get_user_meta($u->ID, 'eess_school_id', true) ?: '1');
+            $school_name = get_user_meta($u->ID, 'eess_school_name', true) ?: 'المدرسة الرئيسية';
+            $dept = get_user_meta($u->ID, 'department', true) ?: (get_user_meta($u->ID, 'sm_department', true) ?: '');
+            $admin_sec = get_user_meta($u->ID, 'eess_admin_section', true) ?: '';
+            $spec = get_user_meta($u->ID, 'sm_specialization', true) ?: (get_user_meta($u->ID, 'specialization', true) ?: '');
+            $grades = get_user_meta($u->ID, 'eess_assigned_grades', true);
+            $grades_str = is_array($grades) ? implode('، ', $grades) : ($grades ?: '');
+            $sections_str = get_user_meta($u->ID, 'eess_assigned_sections', true) ?: '';
+            $status = get_user_meta($u->ID, 'sm_account_status', true) ?: 'active';
+
+            $temp_pass = get_user_meta($u->ID, 'sm_temp_pass', true);
+            $pass_val = !empty($temp_pass) ? $temp_pass : $u->user_pass;
 
             fputcsv($output, array(
                 $u->user_login,
                 $u->user_email,
                 $u->display_name,
+                $first_name,
+                $last_name,
                 $role,
+                $emp_num,
+                $nat,
+                $dob,
+                $gender,
                 $phone,
-                $password,
-                $photo,
-                $specialization
+                $civil_id,
+                $address,
+                $bldg,
+                $country_res,
+                $emirate,
+                $inst_id,
+                $school_name,
+                $dept,
+                $admin_sec,
+                $spec,
+                $grades_str,
+                $sections_str,
+                $status,
+                $pass_val
             ));
         }
         fclose($output);
@@ -5679,58 +5742,145 @@ class SM_Public {
                 $handle = fopen($_FILES['csv_file']['tmp_name'], "r");
                 $header = fgetcsv($handle); // skip header
                 $count = 0;
+                global $wpdb;
+
                 while (($data = fgetcsv($handle)) !== FALSE) {
                     if (count($data) >= 3) {
-                        $username = sanitize_user($data[0]);
-                        $email = !empty($data[1]) ? sanitize_email($data[1]) : $username . '@school-system.local';
-                        $display_name = sanitize_text_field($data[2]);
-                        $role = isset($data[3]) ? sanitize_text_field($data[3]) : 'sm_teacher';
-                        $phone = isset($data[4]) ? sanitize_text_field($data[4]) : '';
-                        $password = !empty($data[5]) ? $data[5] : wp_generate_password();
-                        $photo_url = isset($data[6]) ? esc_url_raw($data[6]) : '';
-                        $specialization = isset($data[7]) ? sanitize_text_field($data[7]) : '';
+                        $username       = sanitize_user($data[0] ?? '');
+                        $email          = !empty($data[1]) ? sanitize_email($data[1]) : ($username . '@school-system.local');
+                        $display_name   = sanitize_text_field($data[2] ?? '');
+                        $first_name     = sanitize_text_field($data[3] ?? '');
+                        $last_name      = sanitize_text_field($data[4] ?? '');
+                        $role           = sanitize_text_field($data[5] ?? 'sm_teacher');
+                        $emp_num        = sanitize_text_field($data[6] ?? '');
+                        $nationality    = sanitize_text_field($data[7] ?? '');
+                        $dob            = sanitize_text_field($data[8] ?? '');
+                        $gender         = sanitize_text_field($data[9] ?? '');
+                        $phone          = sanitize_text_field($data[10] ?? '');
+                        $civil_id       = sanitize_text_field($data[11] ?? '');
+                        $address        = sanitize_text_field($data[12] ?? '');
+                        $building_info  = sanitize_text_field($data[13] ?? '');
+                        $country_res    = sanitize_text_field($data[14] ?? 'الإمارات العربية المتحدة');
+                        $emirate        = sanitize_text_field($data[15] ?? '');
+                        $inst_id        = intval($data[16] ?? 1);
+                        $school_name    = sanitize_text_field($data[17] ?? 'المدرسة الرئيسية');
+                        $department     = sanitize_text_field($data[18] ?? '');
+                        $admin_sec      = sanitize_text_field($data[19] ?? '');
+                        $specialization = sanitize_text_field($data[20] ?? '');
+                        $assigned_grades= sanitize_text_field($data[21] ?? '');
+                        $assigned_secs  = sanitize_text_field($data[22] ?? '');
+                        $account_status = sanitize_text_field($data[23] ?? 'active');
+                        $pass_val       = trim($data[24] ?? '');
 
-                        // If user exists, update them; otherwise, insert them!
+                        if (empty($display_name)) {
+                            $display_name = trim($first_name . ' ' . $last_name) ?: $username;
+                        }
+
+                        // Check if existing user by login, email, or employee number
                         $user = get_user_by('login', $username);
+                        if (!$user && !empty($email)) {
+                            $user = get_user_by('email', $email);
+                        }
+                        if (!$user && !empty($emp_num)) {
+                            $found_users = get_users(array('meta_key' => 'eess_employee_number', 'meta_value' => $emp_num, 'number' => 1));
+                            if (!empty($found_users)) $user = reset($found_users);
+                        }
+
                         if ($user) {
                             $user_id = $user->ID;
                             wp_update_user(array(
-                                'ID' => $user_id,
-                                'user_email' => $email,
+                                'ID'           => $user_id,
+                                'user_email'   => $email,
                                 'display_name' => $display_name,
-                                'user_pass' => $password
+                                'first_name'   => $first_name,
+                                'last_name'    => $last_name
                             ));
                             $u_obj = new WP_User($user_id);
-                            $u_obj->set_role($role);
+                            if (!empty($role)) $u_obj->set_role($role);
                         } else {
+                            $dummy_pass = !empty($pass_val) ? $pass_val : wp_generate_password();
                             $user_id = wp_insert_user(array(
-                                'user_login' => $username,
-                                'user_email' => $email,
+                                'user_login'   => $username,
+                                'user_email'   => $email,
                                 'display_name' => $display_name,
-                                'user_pass' => $password,
-                                'role' => $role
+                                'first_name'   => $first_name,
+                                'last_name'    => $last_name,
+                                'user_pass'    => $dummy_pass,
+                                'role'         => $role
                             ));
                         }
 
                         if (!is_wp_error($user_id)) {
                             $count++;
-                            update_user_meta($user_id, 'sm_temp_pass', $password);
+
+                            // Handle Password Hash vs Plaintext safely (Requirement 7)
+                            if (!empty($pass_val)) {
+                                $is_hash = (strpos($pass_val, '$P$') === 0 || strpos($pass_val, '$wp$') === 0 || strpos($pass_val, '$2y$') === 0 || strpos($pass_val, '$2a$') === 0 || strpos($pass_val, '$2b$') === 0);
+                                if ($is_hash) {
+                                    // Direct SQL update to avoid double-hashing existing password hash
+                                    $wpdb->update($wpdb->users, array('user_pass' => $pass_val), array('ID' => $user_id));
+                                } else {
+                                    wp_set_password($pass_val, $user_id);
+                                    update_user_meta($user_id, 'sm_temp_pass', $pass_val);
+                                }
+                            }
+
+                            if (!empty($emp_num)) {
+                                update_user_meta($user_id, 'eess_employee_number', $emp_num);
+                                update_user_meta($user_id, 'sm_employee_id', $emp_num);
+                                update_user_meta($user_id, 'employee_id', $emp_num);
+                            }
                             if (!empty($phone)) {
                                 update_user_meta($user_id, 'sm_phone', $phone);
-                            }
-                            if (!empty($photo_url)) {
-                                update_user_meta($user_id, 'eess_profile_photo', $photo_url);
+                                update_user_meta($user_id, 'phone_number', $phone);
                             }
                             if (!empty($specialization)) {
                                 update_user_meta($user_id, 'sm_specialization', $specialization);
+                                update_user_meta($user_id, 'specialization', $specialization);
                             }
+                            if (!empty($nationality)) {
+                                update_user_meta($user_id, 'nationality', $nationality);
+                                update_user_meta($user_id, 'sm_nationality', $nationality);
+                            }
+                            if (!empty($dob)) {
+                                update_user_meta($user_id, 'dob', $dob);
+                                update_user_meta($user_id, 'sm_dob', $dob);
+                            }
+                            if (!empty($gender)) {
+                                update_user_meta($user_id, 'gender', $gender);
+                                update_user_meta($user_id, 'eess_gender', $gender);
+                            }
+                            if (!empty($civil_id)) update_user_meta($user_id, 'eess_civil_id', $civil_id);
+                            if (!empty($address)) {
+                                update_user_meta($user_id, 'address', $address);
+                                update_user_meta($user_id, 'eess_address', $address);
+                            }
+                            if (!empty($building_info)) update_user_meta($user_id, 'eess_building_info', $building_info);
+                            if (!empty($emirate)) update_user_meta($user_id, 'eess_emirate', $emirate);
+                            if ($inst_id > 0) update_user_meta($user_id, 'eess_institution_id', $inst_id);
+                            if (!empty($school_name)) {
+                                update_user_meta($user_id, 'eess_school_name', $school_name);
+                                update_user_meta($user_id, 'sm_school_name', $school_name);
+                            }
+                            if (!empty($department)) {
+                                update_user_meta($user_id, 'department', $department);
+                                update_user_meta($user_id, 'sm_department', $department);
+                            }
+                            if (!empty($admin_sec)) update_user_meta($user_id, 'eess_admin_section', $admin_sec);
+                            if (!empty($assigned_grades)) {
+                                $grades_arr = array_map('trim', explode('،', $assigned_grades));
+                                update_user_meta($user_id, 'eess_assigned_grades', json_encode($grades_arr, JSON_UNESCAPED_UNICODE));
+                            }
+                            if (!empty($assigned_secs)) update_user_meta($user_id, 'eess_assigned_sections', $assigned_secs);
+                            if (!empty($account_status)) update_user_meta($user_id, 'sm_account_status', $account_status);
+
                             clean_user_cache($user_id);
                         }
                     }
                 }
                 fclose($handle);
                 wp_cache_flush();
-                SM_Logger::log('استيراد مستخدمين (جماعي)', "تم استيراد ($count) مستخدم بنجاح من ملف CSV.");
+                SM_Logger::log('استيراد مستخدمين (جماعي)', "تم استيراد/تحديث ($count) مستخدم بنجاح من ملف CSV الشامل.");
                 wp_redirect(add_query_arg('sm_admin_msg', 'csv_imported', $_SERVER['REQUEST_URI']));
                 exit;
             }
@@ -7386,6 +7536,11 @@ class SM_Public {
                         <?php echo $rows_html; ?>
                     </tbody>
                 </table>
+
+                <!-- Mandatory Global EESS System Footer -->
+                <div style="margin-top: 25px; padding-top: 10px; border-top: 1px solid #cbd5e1; text-align: center; font-size: 9px; color: #64748b; font-weight: 700; font-family: 'Cairo', sans-serif;" dir="ltr">
+                    Powered by Educational Electronic Systems Solutions (EESS) — eess.online
+                </div>
             </body>
             </html>
             <?php
@@ -7575,6 +7730,11 @@ class SM_Public {
                         <?php echo $rows_html; ?>
                     </tbody>
                 </table>
+
+                <!-- Mandatory Global EESS System Footer -->
+                <div style="margin-top: 25px; padding-top: 10px; border-top: 1px solid #cbd5e1; text-align: center; font-size: 9px; color: #64748b; font-weight: 700; font-family: 'Cairo', sans-serif;" dir="ltr">
+                    Powered by Educational Electronic Systems Solutions (EESS) — eess.online
+                </div>
             </body>
             </html>
             <?php
@@ -7785,6 +7945,11 @@ class SM_Public {
                         <?php echo $rows_html; ?>
                     </tbody>
                 </table>
+
+                <!-- Mandatory Global EESS System Footer -->
+                <div style="margin-top: 25px; padding-top: 10px; border-top: 1px solid #cbd5e1; text-align: center; font-size: 9px; color: #64748b; font-weight: 700; font-family: 'Cairo', sans-serif;" dir="ltr">
+                    Powered by Educational Electronic Systems Solutions (EESS) — eess.online
+                </div>
             </body>
             </html>
             <?php
