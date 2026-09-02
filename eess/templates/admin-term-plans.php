@@ -405,7 +405,7 @@ function eessTogglePlansTableSort() {
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff;">المدرس والرقم الوظيفي</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff;">المدرسة والمادة والتسكين</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff;">الفصل الدراسي</th>
-                            <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center;">نسبة الإنجاز</th>
+                            <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center;">الجهاز</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center;">الحالة</th>
                             <th style="padding: 12px 16px; font-size: 12.5px; font-weight: 800; color: #ffffff; text-align: center; border-radius: 10px 0 0 0;">الإجراءات السريعة</th>
                         </tr>
@@ -443,6 +443,13 @@ function eessTogglePlansTableSort() {
                                         <div style="margin-top: 4px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                                             <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10.5px; font-weight: 800; font-family: monospace;">
                                                 <?php echo esc_html($emp_code); ?>
+                                            </span>
+                                            <?php
+                                            $app_year = intval(get_user_meta($sp->teacher_id, 'eess_appointment_year', true) ?: get_user_meta($sp->teacher_id, 'sm_appointment_year', true));
+                                            $exp_years = $app_year > 0 ? (intval(date('Y')) - $app_year) : 0;
+                                            ?>
+                                            <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10.5px; font-weight: 800;">
+                                                خبرة: <?php echo $exp_years > 0 ? ($exp_years . ' سنوات') : 'جديد'; ?>
                                             </span>
                                             <?php
                                             $is_contacted_plan = get_user_meta($sp->teacher_id, 'eess_contacted_plan_' . $sp->id, true);
@@ -524,10 +531,6 @@ function eessTogglePlansTableSort() {
                                                 </a>
                                             <?php endif; ?>
 
-                                            <!-- Edit Submission Button -->
-                                            <button type="button" onclick="eessOpenPlanSetupWizard(<?php echo intval($sp->term_number); ?>)" title="تعديل بيانات ورسائل الخطة المرفوعة" class="sm-action-btn sm-action-btn-warning">
-                                                <span class="dashicons dashicons-edit"></span>
-                                            </button>
 
                                             <!-- Approve Button (Positive Green) -->
                                             <button type="button" onclick="eessDirectReviewPlan(<?php echo $sp->id; ?>, 'approved')" title="اعتماد الخطة رسمياً" class="sm-action-btn sm-action-btn-success">
