@@ -466,8 +466,6 @@ window.eessLoadUserData = function(userId) {
             if (document.getElementById('u_address') && u.address) document.getElementById('u_address').value = u.address;
             if (document.getElementById('u_building_info') && u.building_info) document.getElementById('u_building_info').value = u.building_info;
             if (document.getElementById('u_emirate') && u.emirate) document.getElementById('u_emirate').value = u.emirate;
-            if (document.getElementById('u_appointment_year')) document.getElementById('u_appointment_year').value = u.appointment_year || new Date().getFullYear();
-            if (document.getElementById('u_job_rank')) document.getElementById('u_job_rank').value = u.job_rank || 'teacher';
 
             var normalizedRole = u.role || 'sm_teacher';
             if (normalizedRole === 'teachers') normalizedRole = 'sm_teacher';

@@ -278,28 +278,11 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                 <div style="display:flex; align-items:center; gap:10px;">
                                     <?php echo get_avatar($u->ID, 36, '', '', array('style' => 'border-radius:50%; width: 36px; height: 36px; object-fit: cover; flex-shrink:0; border: 1px solid #cbd5e1;')); ?>
                                     <div>
-<<<< jules-2469291711566325231-6682a58b
                                         <div style="font-weight: 800; font-size: 13.5px; color: #0f172a; margin-bottom: 3px;"><?php echo esc_html($u->display_name); ?></div>
                                         <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
                                             <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10px; font-weight: 800; font-family: monospace;">@<?php echo esc_html($u->user_login); ?></span>
                                             <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; font-weight: 800;"><?php echo esc_html($u_nat); ?></span>
                                             <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: <?php echo $st_bg; ?>; color: <?php echo $st_col; ?>; border: 1px solid <?php echo $st_border; ?>; font-size: 10px; font-weight: 800;"><?php echo $st_lbl; ?></span>
-=======
-                                        <div style="font-weight: 700; font-size: 13px; color: #1e293b;"><?php echo esc_html($u->display_name); ?></div>
-                                        <div style="font-size:10px; color:#64748b;">@<?php echo esc_html($u->user_login); ?></div>
-                                        <?php
-                                        $emp_code = get_user_meta($u->ID, 'eess_employee_number', true) ?: (get_user_meta($u->ID, 'sm_employee_id', true) ?: $u->user_login);
-                                        $app_year = intval(get_user_meta($u->ID, 'eess_appointment_year', true) ?: get_user_meta($u->ID, 'sm_appointment_year', true));
-                                        $exp_years = $app_year > 0 ? (intval(date('Y')) - $app_year) : 0;
-                                        ?>
-                                        <div style="margin-top: 3px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
-                                            <span style="display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10px; font-weight: 800; font-family: monospace;">
-                                                <?php echo esc_html($emp_code); ?>
-                                            </span>
-                                            <span style="display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10px; font-weight: 800;">
-                                                خبرة: <?php echo $exp_years > 0 ? ($exp_years . ' سنوات') : 'جديد'; ?>
-                                            </span>
->>>> main
                                         </div>
                                     </div>
                                 </div>

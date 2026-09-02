@@ -1610,9 +1610,13 @@ $greeting = ($hour >= 5 && $hour < 12) ? 'صباح الخير' : 'مساء ال�
 </div>
 
 <!-- GLOBAL VIOLATION MODAL -->
-<div id="sm-global-violation-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); z-index: 999999; align-items: center; justify-content: center; padding: 15px;">
-    <div class="sm-modal-content" style="max-width: 860px; width: 95%; background: #ffffff; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; border: 1px solid #e2e8f0; max-height: 90vh; display: flex; flex-direction: column; margin: auto;">
-        <div id="sm-violation-modal-body" style="overflow-y: auto; padding: 0; margin: 0; width: 100%;">
+<div id="sm-global-violation-modal" class="sm-modal-overlay">
+    <div class="sm-modal-content" style="max-width: 800px;">
+        <div class="sm-modal-header">
+            <h3>تسجيل مخالفة جديدة</h3>
+            <button class="sm-modal-close" onclick="smCloseViolationModal()">&times;</button>
+        </div>
+        <div id="sm-violation-modal-body">
             <?php include SM_PLUGIN_DIR . 'templates/system-form.php'; ?>
         </div>
     </div>

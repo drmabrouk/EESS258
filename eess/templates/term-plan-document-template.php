@@ -221,26 +221,33 @@ $school_phone = get_user_meta($first_plan->teacher_id, 'eess_school_phone', true
     </div>
 
     <!-- Official School Document Header (Dynamic Institutional Branding) -->
-    <div class="doc-header">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <?php if (!empty($school_logo)): ?>
-                <img src="<?php echo esc_url($school_logo); ?>" style="max-height: 55px; width: auto; object-fit: contain;">
-            <?php endif; ?>
-            <div>
-                <h1 class="doc-title"><?php echo esc_html($assigned_school); ?></h1>
-                <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12px; font-weight: 700;">
-                    <?php echo $is_annual ? 'وثيقة الخطة السنوية الشاملة للمنهج' : 'وثيقة التوزيع الأسبوعي للخطة الفصلية المعتمدة'; ?> | تاريخ التصدير: <?php echo current_time('Y-m-d H:i'); ?>
-                </p>
+    <div class="doc-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; margin-bottom: 8px;">
+        <!-- Right Side: Government Authority -->
+        <div style="text-align: right;">
+            <div style="font-size: 13.5px; font-weight: 900; color: #0f172a;">وزارة التربية والتعليم</div>
+            <div style="font-size: 11.5px; font-weight: 700; color: #475569;">دولة الإمارات العربية المتحدة</div>
+        </div>
+
+        <?php if (!empty($school_logo)): ?>
+            <div style="text-align: center;">
+                <img src="<?php echo esc_url($school_logo); ?>" style="max-height: 50px; width: auto; object-fit: contain;">
             </div>
-        </div>
+        <?php endif; ?>
+
+        <!-- Left Side: Educational Institution (Foundation ABOVE School Name) -->
         <div style="text-align: left;">
-            <div style="font-weight: 900; font-size: 16px; color: #881337;"><?php echo esc_html($assigned_school); ?></div>
-            <?php if (!empty($school_phone)): ?>
-                <div style="font-size: 11px; color: #64748b; font-family: monospace;">هاتف: <?php echo esc_html($school_phone); ?></div>
-            <?php else: ?>
-                <div style="font-size: 11px; color: #64748b;">منظومة الخطط المعتمدة</div>
-            <?php endif; ?>
+            <div style="font-size: 14px; font-weight: 900; color: #881337;">مؤسسة الشعلة للتعليم والتطوير</div>
+            <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-top: 2px;"><?php echo esc_html($assigned_school); ?></div>
         </div>
+    </div>
+
+    <!-- Divider Line & Centered Document Title -->
+    <div style="border-bottom: 1.5px solid #0f172a; margin-bottom: 12px;"></div>
+    <div style="text-align: center; margin-bottom: 16px;">
+        <h2 style="font-size: 17px; font-weight: 900; color: #0f172a; margin: 0; padding: 0;">
+            <?php echo $is_annual ? 'وثيقة الخطة السنوية الشاملة للمنهج' : 'وثيقة التوزيع الأسبوعي للخطة الفصلية المعتمدة'; ?>
+        </h2>
+        <p style="margin: 3px 0 0 0; color: #64748b; font-size: 11px; font-weight: 700;">تاريخ التصدير: <?php echo current_time('Y-m-d H:i'); ?></p>
     </div>
 
     <!-- Teacher & Metadata Summary Table -->
