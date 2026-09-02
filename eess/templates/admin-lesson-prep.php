@@ -358,9 +358,10 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
             </button>
             <?php endif; ?>
 
-            <!-- Settings Gear Icon Button (Icon Only) -->
-            <button type="button" onclick="document.getElementById('prep-settings-modal').style.display='flex'" class="sm-btn sm-btn-outline" title="إعدادات وجدولة تسليم التحضيرات" style="height: 38px; width: 38px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50% !important; cursor: pointer; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 0;">
-                <span class="dashicons dashicons-admin-generic" style="font-size: 18px; width: 18px; height: 18px; margin: 0; color: #475569;"></span>
+            <!-- Settings Gear Icon Button -->
+            <button type="button" onclick="document.getElementById('prep-settings-modal').style.display='flex'" class="sm-btn sm-btn-outline" style="height: 38px; display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px !important; cursor: pointer; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; font-weight: 800; font-size: 12.5px; padding: 0 16px;">
+                <span class="dashicons dashicons-admin-generic" style="font-size: 16px; width: 16px; height: 16px; margin: 0; color: #475569;"></span>
+                <span>إعدادات التحضير</span>
             </button>
             <?php endif; ?>
         </div>
@@ -822,20 +823,14 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
         <!-- List Panel (Compacted & Cleaned Up) -->
         <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
 
-            <!-- Table Header Bar: Right Title & Left Compact Search Control & Sorting Toggle -->
+            <!-- Table Header Bar: Right Title & Left Compact Search Control -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #ffffff; padding: 14px 18px; border-radius: 14px; border: 1px solid #cbd5e1;">
                 <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0f172a;">سجلات تحضير الدروس المقدمة</h3>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <button type="button" id="eess_prep_sort_btn" onclick="eessTogglePrepTableSort()" class="sm-btn sm-btn-outline" style="height: 36px; padding: 0 14px; font-size: 11.5px; font-weight: 800; border-radius: 9999px !important; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                        <span class="dashicons dashicons-sort"></span>
-                        <span id="eess_prep_sort_label">الأحدث أولاً</span>
-                    </button>
-                    <form method="get" style="display: flex; align-items: center; gap: 8px; margin: 0;">
-                        <input type="hidden" name="page" value="<?php echo isset($_GET['page']) ? esc_attr($_GET['page']) : ''; ?>">
-                        <input type="text" id="eess_prep_live_search" name="s_query" value="<?php echo isset($_GET['s_query']) ? esc_attr($_GET['s_query']) : ''; ?>" onkeyup="eessFilterPrepTableLive()" placeholder="بحث باسم المعلم، المادة، أو الدرس..." class="sm-input" style="height: 36px; font-size: 12px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 14px; width: 240px;">
-                        <button type="submit" class="sm-btn" style="height: 36px; font-size: 12px; padding: 0 16px; background: #881337; border-radius: 9999px !important; color: white !important; font-weight: 800; border: none; cursor: pointer;">بحث</button>
-                    </form>
-                </div>
+                <form method="get" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                    <input type="hidden" name="page" value="<?php echo isset($_GET['page']) ? esc_attr($_GET['page']) : ''; ?>">
+                    <input type="text" name="s_query" value="<?php echo isset($_GET['s_query']) ? esc_attr($_GET['s_query']) : ''; ?>" placeholder="بحث باسم المعلم، المادة، أو الدرس..." class="sm-input" style="height: 36px; font-size: 12px; border-radius: 9999px !important; border: 1px solid #cbd5e1; padding: 0 14px; width: 240px;">
+                    <button type="submit" class="sm-btn" style="height: 36px; font-size: 12px; padding: 0 16px; background: #881337; border-radius: 9999px !important; color: white !important; font-weight: 800; border: none; cursor: pointer;">بحث</button>
+                </form>
             </div>
 
             <!-- Table of Submissions -->
@@ -855,7 +850,7 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody id="prep-submissions-tbody">
+                    <tbody>
                         <?php
                         $query = "SELECT p.*, u.display_name as teacher_name
                                   FROM {$wpdb->prefix}sm_lesson_preps p
@@ -939,7 +934,7 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                 $parsed_sub_data = !empty($sub->lesson_data) ? json_decode($sub->lesson_data, true) : array();
                                 $sub_file_url = $parsed_sub_data['file_url'] ?? '';
                         ?>
-                        <tr style="font-size: 12px;" id="prep-row-<?php echo $sub->id; ?>" data-timestamp="<?php echo strtotime($sub->submission_time ?: $sub->created_at); ?>">
+                        <tr style="font-size: 12px;" id="prep-row-<?php echo $sub->id; ?>">
                             <td style="text-align: center;"><input type="checkbox" class="eess-prep-cb" value="<?php echo $sub->id; ?>"></td>
                             <?php if ($can_review): ?>
                                 <td>
@@ -969,17 +964,6 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <td>
                                 <div style="font-weight:700; color:var(--sm-dark-color);"><?php echo esc_html($sub->title); ?></div>
                                 <div style="font-size:10px; color:#64748b;"><?php echo esc_html($sub->subject); ?></div>
-                                <?php
-                                $l_date = !empty($sub->lesson_date) ? $sub->lesson_date : ($sub->created_at ?: current_time('Y-m-d'));
-                                $l_ts = strtotime($l_date);
-                                $dow = date('N', $l_ts);
-                                $w_start = strtotime('-' . ($dow - 1) . ' days', $l_ts);
-                                $w_end = strtotime('+' . (7 - $dow) . ' days', $l_ts);
-                                $w_num = date('W', $l_ts);
-                                ?>
-                                <span style="display:inline-block; font-size:9.5px; color:#881337; font-weight:800; background:#fef2f2; padding:1px 6px; border-radius:4px; border:1px solid #fecdd3; margin-top:3px;">
-                                    الأسبوع <?php echo $w_num; ?> (<?php echo date_i18n('j M', $w_start) . ' - ' . date_i18n('j M', $w_end); ?>)
-                                </span>
                             </td>
                             <td>
                                 <?php
@@ -1248,42 +1232,6 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                 </form>
             </div>
         </div>
-        <script>
-            var eessPrepSortAsc = false;
-            function eessTogglePrepTableSort() {
-                eessPrepSortAsc = !eessPrepSortAsc;
-                var lbl = document.getElementById('eess_prep_sort_label');
-                if (lbl) lbl.innerText = eessPrepSortAsc ? 'الأقدم أولاً' : 'الأحدث أولاً';
-
-                var tbody = document.querySelector('#prep-submissions-tbody');
-                if (!tbody) return;
-
-                var rows = Array.from(tbody.querySelectorAll('tr[data-timestamp]'));
-                rows.sort(function(a, b) {
-                    var tA = parseInt(a.getAttribute('data-timestamp')) || 0;
-                    var tB = parseInt(b.getAttribute('data-timestamp')) || 0;
-                    return eessPrepSortAsc ? (tA - tB) : (tB - tA);
-                });
-
-                rows.forEach(function(r) { tbody.appendChild(r); });
-            }
-
-            function eessFilterPrepTableLive() {
-                var q = document.getElementById('eess_prep_live_search').value.toLowerCase().trim();
-                var tbody = document.querySelector('#prep-submissions-tbody');
-                if (!tbody) return;
-
-                var rows = tbody.querySelectorAll('tr[data-timestamp]');
-                rows.forEach(function(r) {
-                    var txt = r.textContent.toLowerCase();
-                    if (!q || txt.includes(q)) {
-                        r.style.display = '';
-                    } else {
-                        r.style.display = 'none';
-                    }
-                });
-            }
-        </script>
     </div>
     <?php endif; ?>
 

@@ -305,10 +305,5 @@ $fields = SM_Settings::get_subject_lesson_fields($prep->subject);
         </div>
     </div>
 
-    <!-- Mandatory Global EESS System Footer -->
-    <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 9px; color: #64748b; font-weight: 700; font-family: 'Cairo', sans-serif;" dir="ltr">
-        Powered by Educational Electronic Systems Solutions (EESS) — eess.online
-    </div>
-
 </body>
 </html>
