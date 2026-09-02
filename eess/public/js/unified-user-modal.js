@@ -20,12 +20,12 @@ window.eessOpenUnifiedUserModal = function(mode, userId) {
     if (form) form.reset();
 
     // Reset all input values explicitly
-    ['u_first_name', 'u_last_name', 'u_employee_id', 'u_username', 'u_user_email', 'u_phone_number', 'u_civil_id', 'u_dob', 'u_nationality', 'u_assigned_sections', 'u_user_pass', 'u_user_pass_confirm', 'u_sec_username_display'].forEach(function(id) {
+    ['u_first_name', 'u_last_name', 'u_employee_id', 'u_username', 'u_user_email', 'u_phone_number', 'u_civil_id', 'u_dob', 'u_nationality', 'u_address', 'u_building_info', 'u_admin_section', 'u_assigned_sections', 'u_user_pass', 'u_user_pass_confirm', 'u_sec_username_display'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
     });
 
-    ['u_user_role', 'u_institution_id', 'u_department', 'u_specialization', 'u_emirate'].forEach(function(id) {
+    ['u_user_role', 'u_institution_id', 'u_school_id', 'u_department', 'u_specialization', 'u_gender', 'u_emirate', 'u_user_status'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.selectedIndex = 0;
     });
@@ -165,10 +165,15 @@ window.eessRenderStepSummary = function() {
     var ln = document.getElementById('u_last_name').value;
     var nat = document.getElementById('u_nationality').value || 'غير محدد';
     var dob = document.getElementById('u_dob').value || 'غير محدد';
+    var genderSel = document.getElementById('u_gender');
+    var genderTxt = genderSel.options[genderSel.selectedIndex] ? genderSel.options[genderSel.selectedIndex].text : 'غير محدد';
+
     var email = document.getElementById('u_user_email').value;
     var phone = document.getElementById('u_country_code').value + ' ' + document.getElementById('u_phone_number').value;
     var country = document.getElementById('u_country_residence').value;
     var emirate = document.getElementById('u_emirate').value || 'غير محدد';
+    var address = document.getElementById('u_address').value || 'غير محدد';
+    var bldg = document.getElementById('u_building_info').value || 'غير محدد';
 
     var roleSel = document.getElementById('u_user_role');
     var roleTxt = roleSel.options[roleSel.selectedIndex] ? roleSel.options[roleSel.selectedIndex].text : '-';
@@ -178,8 +183,13 @@ window.eessRenderStepSummary = function() {
     var instSel = document.getElementById('u_institution_id');
     var instTxt = instSel.options[instSel.selectedIndex] ? instSel.options[instSel.selectedIndex].text : '-';
 
+    var schSel = document.getElementById('u_school_id');
+    var schTxt = schSel.options[schSel.selectedIndex] ? schSel.options[schSel.selectedIndex].text : '-';
+
     var specSel = document.getElementById('u_specialization');
     var specTxt = specSel.options[specSel.selectedIndex] ? specSel.options[specSel.selectedIndex].text : '-';
+
+    var sectionsTxt = document.getElementById('u_assigned_sections').value || 'جميع الشعب';
 
     var checkedGrades = [];
     document.querySelectorAll('input[name="assigned_grades[]"]:checked').forEach(function(g) {
@@ -188,9 +198,11 @@ window.eessRenderStepSummary = function() {
 
     if (document.getElementById('rev_u_fullname')) document.getElementById('rev_u_fullname').innerText = (fn + ' ' + ln).trim() || '-';
     if (document.getElementById('rev_u_nat_dob')) document.getElementById('rev_u_nat_dob').innerText = nat + ' (' + dob + ')';
+    if (document.getElementById('rev_u_gender')) document.getElementById('rev_u_gender').innerText = genderTxt;
     if (document.getElementById('rev_u_email')) document.getElementById('rev_u_email').innerText = email || '-';
     if (document.getElementById('rev_u_phone')) document.getElementById('rev_u_phone').innerText = phone || '-';
     if (document.getElementById('rev_u_location')) document.getElementById('rev_u_location').innerText = country + ' - ' + emirate;
+    if (document.getElementById('rev_u_address_info')) document.getElementById('rev_u_address_info').innerText = address + ' (' + bldg + ')';
     if (document.getElementById('rev_u_role_id')) document.getElementById('rev_u_role_id').innerText = roleTxt + ' (ID: ' + empId + ')';
 
     if (roleVal === 'administrator') {
@@ -199,8 +211,8 @@ window.eessRenderStepSummary = function() {
     } else {
         if (document.getElementById('rev_u_inst_container')) document.getElementById('rev_u_inst_container').style.display = 'block';
         if (document.getElementById('rev_u_grades_container')) document.getElementById('rev_u_grades_container').style.display = 'block';
-        if (document.getElementById('rev_u_inst_subj')) document.getElementById('rev_u_inst_subj').innerText = instTxt + ' (' + specTxt + ')';
-        if (document.getElementById('rev_u_grades')) document.getElementById('rev_u_grades').innerText = checkedGrades.length > 0 ? checkedGrades.join('، ') : 'لا يوجد صفوف محددة';
+        if (document.getElementById('rev_u_inst_subj')) document.getElementById('rev_u_inst_subj').innerText = instTxt + (schTxt !== '-' ? ' — ' + schTxt : '') + ' (' + specTxt + ')';
+        if (document.getElementById('rev_u_grades')) document.getElementById('rev_u_grades').innerText = (checkedGrades.length > 0 ? checkedGrades.join('، ') : 'جميع الصفوف') + ' — شعب: ' + sectionsTxt;
     }
 };
 
@@ -352,14 +364,18 @@ window.eessOnRoleChanged = function() {
     var isSysAdmin = (role === 'administrator');
 
     var instWrapper = document.getElementById('u_inst_wrapper');
+    var schoolWrapper = document.getElementById('u_school_wrapper');
     var deptWrapper = document.getElementById('u_department_wrapper');
+    var adminSecWrapper = document.getElementById('u_admin_sec_wrapper');
     var subjWrapper = document.getElementById('u_subject_wrapper');
     var gradesWrapper = document.getElementById('u_grades_wrapper');
     var sectionsWrapper = document.getElementById('u_sections_wrapper');
 
     if (isSysAdmin) {
         if (instWrapper) instWrapper.style.display = 'none';
+        if (schoolWrapper) schoolWrapper.style.display = 'none';
         if (deptWrapper) deptWrapper.style.display = 'none';
+        if (adminSecWrapper) adminSecWrapper.style.display = 'none';
         if (subjWrapper) subjWrapper.style.display = 'none';
         if (gradesWrapper) gradesWrapper.style.display = 'none';
         if (sectionsWrapper) sectionsWrapper.style.display = 'none';
@@ -368,7 +384,9 @@ window.eessOnRoleChanged = function() {
         if (instSel) instSel.required = false;
     } else {
         if (instWrapper) instWrapper.style.display = 'block';
+        if (schoolWrapper) schoolWrapper.style.display = 'block';
         if (deptWrapper) deptWrapper.style.display = 'block';
+        if (adminSecWrapper) adminSecWrapper.style.display = 'block';
         if (subjWrapper) subjWrapper.style.display = 'block';
         if (gradesWrapper) gradesWrapper.style.display = 'block';
         if (sectionsWrapper) sectionsWrapper.style.display = 'block';
@@ -379,7 +397,22 @@ window.eessOnRoleChanged = function() {
 };
 
 window.eessOnInstitutionChanged = function() {
-    // Institution selection handler
+    var instId = document.getElementById('u_institution_id').value;
+    var schoolSelect = document.getElementById('u_school_id');
+
+    if (!schoolSelect) return;
+
+    for (var i = 0; i < schoolSelect.options.length; i++) {
+        var opt = schoolSelect.options[i];
+        if (!opt.value) continue;
+
+        var optInst = opt.getAttribute('data-institution');
+        if (!instId || optInst === instId) {
+            opt.style.display = 'block';
+        } else {
+            opt.style.display = 'none';
+        }
+    }
 };
 
 window.eessLoadUserData = function(userId) {
@@ -410,6 +443,9 @@ window.eessLoadUserData = function(userId) {
             document.getElementById('u_civil_id').value = u.civil_id || '';
             if (document.getElementById('u_dob')) document.getElementById('u_dob').value = u.dob || '';
             if (document.getElementById('u_nationality')) document.getElementById('u_nationality').value = u.nationality || '';
+            if (document.getElementById('u_gender') && u.gender) document.getElementById('u_gender').value = u.gender;
+            if (document.getElementById('u_address') && u.address) document.getElementById('u_address').value = u.address;
+            if (document.getElementById('u_building_info') && u.building_info) document.getElementById('u_building_info').value = u.building_info;
             if (document.getElementById('u_emirate') && u.emirate) document.getElementById('u_emirate').value = u.emirate;
 
             var normalizedRole = u.role || 'sm_teacher';
@@ -433,11 +469,14 @@ window.eessLoadUserData = function(userId) {
                 }
             }
             document.getElementById('u_institution_id').value = u.institution_id || '';
+            if (document.getElementById('u_school_id') && u.school_id) document.getElementById('u_school_id').value = u.school_id;
             document.getElementById('u_department').value = u.department || '';
+            if (document.getElementById('u_admin_section') && u.admin_section) document.getElementById('u_admin_section').value = u.admin_section;
             document.getElementById('u_specialization').value = u.specialization || '';
             if (document.getElementById('u_assigned_sections') && u.assigned_sections) {
                 document.getElementById('u_assigned_sections').value = u.assigned_sections;
             }
+            if (document.getElementById('u_user_status') && u.user_status) document.getElementById('u_user_status').value = u.user_status;
 
             // Bind Grade Capsules
             var assignedGrades = Array.isArray(u.assigned_grades) ? u.assigned_grades : [];
@@ -450,6 +489,7 @@ window.eessLoadUserData = function(userId) {
                 document.getElementById('u_photo_preview').src = u.photo_url;
             }
 
+            eessOnInstitutionChanged();
             eessOnRoleChanged();
         }
     })
