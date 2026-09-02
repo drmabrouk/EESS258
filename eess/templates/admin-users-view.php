@@ -283,22 +283,32 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <td style="text-align: center;">
                                 <input type="checkbox" class="user-checkbox" value="<?php echo $u->ID; ?>" <?php if($u->ID == get_current_user_id()) echo 'disabled'; ?>>
                             </td>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <?php echo get_avatar($u->ID, 32, '', '', array('style' => 'border-radius:50%; width: 32px; height: 32px; object-fit: cover;')); ?>
-                                    <div>
-                                        <div style="font-weight: 700; font-size: 13px; color: #1e293b;"><?php echo esc_html($u->display_name); ?></div>
-                                        <div style="font-size:10px; color:#64748b;">@<?php echo esc_html($u->user_login); ?></div>
+                            <td style="padding: 12px 16px; vertical-align: middle;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="flex-shrink: 0; width: 36px; height: 36px;">
+                                        <?php echo get_avatar($u->ID, 36, '', '', array('style' => 'border-radius:50%; width: 36px; height: 36px; object-fit: cover; border: 1px solid #cbd5e1;')); ?>
+                                    </div>
+                                    <div style="min-width: 0; flex: 1;">
+                                        <div style="font-weight: 800; font-size: 13.5px; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" title="<?php echo esc_attr($u->display_name); ?>">
+                                            <?php echo esc_html($u->display_name); ?>
+                                        </div>
                                         <?php
+                                        $u_nat = get_user_meta($u->ID, 'nationality', true) ?: (get_user_meta($u->ID, 'sm_nationality', true) ?: 'عام');
                                         $emp_code = get_user_meta($u->ID, 'eess_employee_number', true) ?: (get_user_meta($u->ID, 'sm_employee_id', true) ?: $u->user_login);
                                         $app_year = intval(get_user_meta($u->ID, 'eess_appointment_year', true) ?: get_user_meta($u->ID, 'sm_appointment_year', true));
                                         $exp_years = $app_year > 0 ? (intval(date('Y')) - $app_year) : 0;
                                         ?>
-                                        <div style="margin-top: 3px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
-                                            <span style="display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10px; font-weight: 800; font-family: monospace;">
+                                        <div style="margin-top: 4px; display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
+                                            <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 10.5px; font-weight: 700; font-family: monospace;">
+                                                @<?php echo esc_html($u->user_login); ?>
+                                            </span>
+                                            <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #fdf4ff; color: #86198f; border: 1px solid #f5d0fe; font-size: 10.5px; font-weight: 800;">
+                                                <?php echo esc_html($u_nat); ?>
+                                            </span>
+                                            <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10.5px; font-weight: 800; font-family: monospace;">
                                                 <?php echo esc_html($emp_code); ?>
                                             </span>
-                                            <span style="display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10px; font-weight: 800;">
+                                            <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10.5px; font-weight: 800;">
                                                 خبرة: <?php echo $exp_years > 0 ? ($exp_years . ' سنوات') : 'جديد'; ?>
                                             </span>
                                         </div>
