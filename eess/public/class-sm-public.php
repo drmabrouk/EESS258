@@ -7298,8 +7298,9 @@ class SM_Public {
                             <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo">
                         <?php endif; ?>
                         <div>
-                            <div style="font-size: 14px; font-weight: 900; color: #0f172a;"><?php echo esc_html($school_name); ?></div>
-                            <div style="font-size: 11px; color: #64748b; font-weight: 700;">إدارة الشؤون التعليمية والتدريب</div>
+                            <div style="font-size: 13px; font-weight: 900; color: #0f172a;">وزارة التربية والتعليم — دولة الإمارات العربية المتحدة</div>
+                            <div style="font-size: 12px; font-weight: 800; color: #881337;">مؤسسة الشعلة للتعليم والتطوير</div>
+                            <div style="font-size: 11px; color: #64748b; font-weight: 700;">إدارة الخدمات والأنظمة الإلكترونية التعليمية</div>
                         </div>
                     </div>
                     <div style="text-align: left;">
@@ -7664,9 +7665,9 @@ class SM_Public {
                             <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo">
                         <?php endif; ?>
                         <div>
-                            <div style="font-size: 14px; font-weight: 900; color: #0f172a;">مؤسسة الشعلة للتعليم والتطوير</div>
-                            <div style="font-size: 11.5px; color: #0284c7; font-weight: 800;"><?php echo esc_html($target_school); ?></div>
-                            <div style="font-size: 10px; color: #64748b; font-weight: 700;">وزارة التربية والتعليم — دولة الإمارات العربية المتحدة</div>
+                            <div style="font-size: 13px; font-weight: 900; color: #0f172a;">وزارة التربية والتعليم — دولة الإمارات العربية المتحدة</div>
+                            <div style="font-size: 12px; font-weight: 800; color: #881337;">مؤسسة الشعلة للتعليم والتطوير</div>
+                            <div style="font-size: 11px; color: #0284c7; font-weight: 800;">إدارة الخدمات والأنظمة الإلكترونية التعليمية — <?php echo esc_html($target_school); ?></div>
                         </div>
                     </div>
                     <div style="text-align: left;">

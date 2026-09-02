@@ -860,6 +860,27 @@ function eessTogglePlansTableSort() {
     </div>
 </div>
 
+<!-- INSPECTION / REJECTION NOTES MODAL -->
+<div id="tp_inspect_modal" class="sm-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 99999; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); position: fixed; inset: 0; padding: 20px; box-sizing: border-box;">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 580px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; font-family: 'Cairo', sans-serif;" dir="rtl">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; background: #0f172a; color: white;">
+            <h3 id="tp_inspect_title" style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff;">مراجعة وملاحظات الخطة</h3>
+            <button type="button" onclick="document.getElementById('tp_inspect_modal').style.display='none'" style="background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 24px;">
+            <div id="tp_inspect_body" style="margin-bottom: 16px;"></div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 12.5px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">ملاحظات التوجيه / سبب الرفض <span style="color:#ef4444;">*</span></label>
+                <textarea id="tp_rejection_notes_input" placeholder="أدخل الملاحظات والسبب هنا..." style="width: 100%; height: 100px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 10px; font-size: 13px; font-family: 'Cairo', sans-serif; box-sizing: border-box; line-height: 1.5;"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="document.getElementById('tp_inspect_modal').style.display='none'" class="sm-btn sm-btn-outline" style="height: 38px; padding: 0 20px; font-size: 12.5px; border-radius: 9999px !important;">إلغاء</button>
+                <button type="button" onclick="eessSubmitTermPlanRejectionWithNotes()" class="sm-btn" style="height: 38px; padding: 0 24px; font-size: 12.5px; font-weight: 800; background: #dc2626; color: white !important; border: none; border-radius: 9999px !important; cursor: pointer;">تأكيد الإجراء وحفظ الملاحظات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- School-Specific Term Plan Report Modal -->
 <div id="eess-school-plan-report-modal" class="sm-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; font-family: 'Cairo', sans-serif;" dir="rtl">
     <div style="background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; border: 1px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden;">
@@ -1176,12 +1197,49 @@ function eessCheckAnnualPlanPrintComplete(completedCount) {
 }
 
 var eessActiveRejectionTargetStatus = 'rejected';
+var currentInspectedPlanId = 0;
 function eessOpenModificationNotesModal(planId, teacherName, status) {
     currentInspectedPlanId = planId;
     eessActiveRejectionTargetStatus = status || 'rejected';
-    document.getElementById('tp_inspect_title').innerText = 'رفض الخطة وتدوين الملاحظات: ' + teacherName;
-    document.getElementById('tp_inspect_body').innerHTML = '<p style="color:#64748b; font-size:12.5px; margin-bottom:10px;">يرجى كتابة سبب وسبب الرفض والملاحظات المطلوبة ليتم توثيقها بالمنصة.</p>';
-    document.getElementById('tp_inspect_modal').style.display = 'flex';
+    var titleEl = document.getElementById('tp_inspect_title');
+    var bodyEl = document.getElementById('tp_inspect_body');
+    var modalEl = document.getElementById('tp_inspect_modal');
+
+    if (titleEl) titleEl.innerText = 'رفض الخطة وتدوين الملاحظات: ' + teacherName;
+    if (bodyEl) bodyEl.innerHTML = '<p style="color:#64748b; font-size:12.5px; margin-bottom:10px;">يرجى كتابة سبب الرفض والملاحظات المطلوبة ليتم توثيقها بالمنصة وتنبيه المعلم.</p>';
+    if (modalEl) modalEl.style.display = 'flex';
+}
+
+function eessSubmitTermPlanRejectionWithNotes() {
+    if (!currentInspectedPlanId) return;
+    var notesEl = document.getElementById('tp_rejection_notes_input');
+    var notes = notesEl ? notesEl.value.trim() : '';
+    if (!notes) {
+        alert('يرجى كتابة سبب الملاحظات أو الرفض أولاً.');
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append('action', 'sm_review_term_plan');
+    formData.append('plan_id', currentInspectedPlanId);
+    formData.append('review_status', eessActiveRejectionTargetStatus || 'rejected');
+    formData.append('review_notes', notes);
+    formData.append('sm_nonce', '<?php echo wp_create_nonce("sm_term_plan_action"); ?>');
+
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+        if (res.success) {
+            if (typeof smShowNotification === 'function') {
+                smShowNotification('تم حفظ الملاحظات وتحديث حالة الخطة بنجاح');
+            }
+            var modalEl = document.getElementById('tp_inspect_modal');
+            if (modalEl) modalEl.style.display = 'none';
+            setTimeout(function() { location.reload(); }, 600);
+        } else {
+            alert('خطأ: ' + (res.data || 'تعذر معالجة الطلب'));
+        }
+    });
 }
 
 function switchTermPlanTab(tabKey) {
