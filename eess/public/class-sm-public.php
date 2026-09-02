@@ -7949,6 +7949,8 @@ class SM_Public {
             'specialization'    => $specialization,
             'assigned_grades'   => $assigned_grades,
             'assigned_sections' => $assigned_sections,
+            'appointment_year'  => get_user_meta($user_id, 'eess_appointment_year', true) ?: (get_user_meta($user_id, 'sm_appointment_year', true) ?: date('Y')),
+            'job_rank'          => get_user_meta($user_id, 'eess_job_rank', true) ?: 'teacher',
             'photo_url'         => $photo_url,
         ));
     }
@@ -8018,6 +8020,11 @@ class SM_Public {
         $admin_section  = sanitize_text_field($_POST['admin_section'] ?? '');
         $sections       = sanitize_text_field($_POST['assigned_sections'] ?? '');
         $grades         = isset($_POST['assigned_grades']) ? array_map('sanitize_text_field', (array)$_POST['assigned_grades']) : array();
+        $appointment_year = intval($_POST['appointment_year'] ?? date('Y'));
+        if ($appointment_year < 1970 || $appointment_year > intval(date('Y'))) {
+            $appointment_year = intval(date('Y'));
+        }
+        $job_rank = sanitize_text_field($_POST['job_rank'] ?? 'teacher');
 
         if (empty($first_name) || empty($last_name) || empty($email) || empty($raw_phone)) {
             wp_send_json_error('يرجى استكمال جميع الحقول الأساسية المطلوبة.');
@@ -8135,6 +8142,9 @@ class SM_Public {
         update_user_meta($user_id, 'sm_specialization', $specialization);
         update_user_meta($user_id, 'eess_assigned_grades', json_encode($grades, JSON_UNESCAPED_UNICODE));
         update_user_meta($user_id, 'eess_assigned_sections', $sections);
+        update_user_meta($user_id, 'eess_appointment_year', $appointment_year);
+        update_user_meta($user_id, 'sm_appointment_year', $appointment_year);
+        update_user_meta($user_id, 'eess_job_rank', $job_rank);
 
         // Handle Profile Photo Upload if present
         if (!empty($_FILES['profile_photo']['name'])) {
