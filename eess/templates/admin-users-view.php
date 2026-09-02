@@ -283,6 +283,17 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                             <td style="text-align: center;">
                                 <input type="checkbox" class="user-checkbox" value="<?php echo $u->ID; ?>" <?php if($u->ID == get_current_user_id()) echo 'disabled'; ?>>
                             </td>
+
+                            <!-- User Column (Full Name + 3 Small Pastel Capsules) -->
+                            <td>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <?php echo get_avatar($u->ID, 36, '', '', array('style' => 'border-radius:50%; width: 36px; height: 36px; object-fit: cover; flex-shrink:0; border: 1px solid #cbd5e1;')); ?>
+                                    <div>
+                                        <div style="font-weight: 800; font-size: 13.5px; color: #0f172a; margin-bottom: 3px;"><?php echo esc_html($u->display_name); ?></div>
+                                        <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10px; font-weight: 800; font-family: monospace;">@<?php echo esc_html($u->user_login); ?></span>
+                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; font-weight: 800;"><?php echo esc_html($u_nat); ?></span>
+                                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; background: <?php echo $st_bg; ?>; color: <?php echo $st_col; ?>; border: 1px solid <?php echo $st_border; ?>; font-size: 10px; font-weight: 800;"><?php echo $st_lbl; ?></span>
                             <td style="padding: 12px 16px; vertical-align: middle;">
                                 <div style="display:flex; align-items:center; gap:12px;">
                                     <div style="flex-shrink: 0; width: 36px; height: 36px;">
@@ -311,6 +322,7 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                             <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10.5px; font-weight: 800;">
                                                 خبرة: <?php echo $exp_years > 0 ? ($exp_years . ' سنوات') : 'جديد'; ?>
                                             </span>
+
                                         </div>
                                     </div>
                                 </div>

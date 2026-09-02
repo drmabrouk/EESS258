@@ -191,24 +191,6 @@ $departments  = class_exists('SM_Settings') ? SM_Settings::get_departments() : a
                             <span class="eess-field-error" id="err_u_user_role" style="display:none; color:#dc2626; font-size:11px; font-weight:bold; margin-top:2px;">يرجى تحديد الرتبة الوظيفية.</span>
                         </div>
 
-                        <div class="eess-float-group">
-                            <input type="number" name="appointment_year" id="u_appointment_year" class="sm-input eess-float-input" placeholder=" " min="1970" max="<?php echo date('Y'); ?>" value="<?php echo date('Y'); ?>" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; font-weight: bold;">
-                            <label for="u_appointment_year" class="eess-float-label">سنة التعيين (Year of Appointment)</label>
-                        </div>
-
-                        <div class="eess-float-group">
-                            <select name="job_rank" id="u_job_rank" class="sm-select eess-float-input" style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px; font-weight: bold;">
-                                <option value="teacher">معلم / أخصائي</option>
-                                <option value="senior_teacher">معلم أول / خبير</option>
-                                <option value="coordinator">منسق مادة</option>
-                                <option value="supervisor">مشرف / موجه</option>
-                                <option value="vice_principal">نائب مدير مدرسة</option>
-                                <option value="principal">مدير مدرسة</option>
-                                <option value="sys_admin">مدير نظام</option>
-                            </select>
-                            <label for="u_job_rank" class="eess-float-label">المرتبة الوظيفية (Job Rank)</label>
-                        </div>
-
                         <div id="u_inst_wrapper" class="eess-float-group">
                             <select name="institution_id" id="u_institution_id" class="sm-select eess-float-input" onchange="eessOnInstitutionChanged()" required style="height: 44px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 0 14px; font-size: 13px;">
                                 <option value="">-- اختر المؤسسة التابعة --</option>

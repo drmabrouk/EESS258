@@ -942,18 +942,10 @@ $unique_subjects = array_unique(array_map(function($s){ return $s->name; }, $all
                                         <?php echo esc_html($sub->teacher_name); ?>
                                     </a>
                                     <?php
-                                    $teacher_emp_id = get_user_meta($sub->teacher_id, 'eess_employee_number', true) ?: ('EMP-' . $sub->teacher_id);
-                                    $app_year = intval(get_user_meta($sub->teacher_id, 'eess_appointment_year', true) ?: get_user_meta($sub->teacher_id, 'sm_appointment_year', true));
-                                    $exp_years = $app_year > 0 ? (intval(date('Y')) - $app_year) : 0;
-                                    ?>
-                                    <div style="margin-top: 4px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
-                                        <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #fef2f2; color: #881337; border: 1px solid #fecdd3; font-size: 10.5px; font-weight: 800; font-family: monospace;">
-                                            <?php echo esc_html($teacher_emp_id); ?>
-                                        </span>
-                                        <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 10.5px; font-weight: 800;">
-                                            خبرة: <?php echo $exp_years > 0 ? ($exp_years . ' سنوات') : 'جديد'; ?>
-                                        </span>
-                                    </div>
+                                    $teacher_emp_id = get_user_meta($sub->teacher_id, 'eess_employee_number', true);
+                                    if (!empty($teacher_emp_id)): ?>
+                                        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">رقم الموظف: <?php echo esc_html($teacher_emp_id); ?></div>
+                                    <?php endif; ?>
                                     <?php
                                     $is_contacted = get_user_meta($sub->teacher_id, 'eess_contacted_prep_' . $sub->id, true);
                                     if ($is_contacted): ?>

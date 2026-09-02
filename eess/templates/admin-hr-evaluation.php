@@ -127,12 +127,24 @@ if (isset($_GET['eess_print_eval'])) {
                     <button onclick="window.print()" style="padding:10px 20px; font-weight:bold; cursor:pointer; font-family:'Cairo';">🖨️ بدء طباعة تقرير التقييم</button>
                 </div>
 
-                <div class="header">
-                    <div>
-                        <h1 class="title">تقرير تقييم الأداء المهني والسنوي المعتمد</h1>
-                        <p style="margin:5px 0 0 0; color:#64748b;">خدمات الأنظمة الإلكترونية التعليمية (EESS)</p>
+                <?php $emp_sch = get_user_meta($pe_user->ID, 'eess_school_name', true) ?: 'المدرسة الرئيسية'; ?>
+                <!-- Official Dual Header -->
+                <div class="header" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; margin-bottom: 8px; border-bottom: none;">
+                    <div style="text-align: right;">
+                        <div style="font-size: 13.5px; font-weight: 900; color: #0f172a;">وزارة التربية والتعليم</div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #475569;">دولة الإمارات العربية المتحدة</div>
                     </div>
-                    <div style="font-weight: 900; font-size: 20px; color: #334155;">EESS ONLINE</div>
+
+                    <div style="text-align: left;">
+                        <div style="font-size: 14px; font-weight: 900; color: #881337;">مؤسسة الشعلة للتعليم والتطوير</div>
+                        <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-top: 2px;"><?php echo esc_html($emp_sch); ?></div>
+                    </div>
+                </div>
+
+                <div style="border-bottom: 1.5px solid #0f172a; margin-bottom: 12px;"></div>
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <h1 class="title" style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; padding: 0;">تقرير تقييم الأداء المهني والسنوي المعتمد</h1>
+                    <p style="margin: 3px 0 0 0; color: #64748b; font-size: 11px; font-weight: 700;">تاريخ التصدير: <?php echo current_time('Y-m-d H:i'); ?></p>
                 </div>
 
                 <div style="display:flex; gap:30px; align-items:center; margin-bottom:30px;">
@@ -204,6 +216,11 @@ if (isset($_GET['eess_print_eval'])) {
                         <p style="font-weight:bold; margin-bottom:5px;">التاريخ: <?php echo date('Y-m-d'); ?></p>
                         <p>الختم والتوقيع الرسمي: _______________________</p>
                     </div>
+                </div>
+
+                <!-- Official Footer -->
+                <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 12px; text-align: center; color: #64748b; font-size: 11px; font-weight: 700; font-family: 'Cairo', sans-serif;">
+                    Powered by Educational Electronic Systems Solutions (EESS) &mdash; <a href="https://eess.online" target="_blank" style="color: #0284c7; text-decoration: none;">eess.online</a>
                 </div>
             </body>
             </html>

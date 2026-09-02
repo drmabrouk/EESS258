@@ -57,7 +57,7 @@
         </div>
     </div>
 
-    <div class="sm-tabs-wrapper" style="display: flex; gap: 12px; margin-bottom: 20px; padding-bottom: 0;">
+    <div class="sm-tabs-wrapper" style="display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 0;">
         <button class="sm-tab-btn sm-active" onclick="smOpenInternalTab('received-assignments', this)" style="padding: 10px 20px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: #881337; border-bottom: 3px solid #881337; margin-bottom: -2px; cursor: pointer; transition: all 0.2s;">الواجبات المستلمة</button>
         <button class="sm-tab-btn" onclick="smOpenInternalTab('sent-assignments', this)" style="padding: 10px 20px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer; transition: all 0.2s;">الواجبات المرسلة</button>
     </div>

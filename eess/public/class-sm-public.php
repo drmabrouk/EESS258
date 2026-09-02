@@ -3179,23 +3179,10 @@ class SM_Public {
     }
 
     public function ajax_save_record() {
-        if (!is_user_logged_in() || (!current_user_can('تسجيل_مخالفة') && !current_user_can('manage_options'))) {
-            wp_send_json_error('عفواً، لا تملك الصلاحية لتسجيل المخالفات.');
-        }
-        if (!wp_verify_nonce($_POST['sm_nonce'] ?? '', 'sm_record_action')) {
-            wp_send_json_error('فشل التوثيق الأمني للجلسة.');
-        }
+        if (!is_user_logged_in() || !current_user_can('تسجيل_مخالفة')) wp_send_json_error('Unauthorized');
+        if (!wp_verify_nonce($_POST['sm_nonce'], 'sm_record_action')) wp_send_json_error('Security check failed');
 
-        $raw_student_ids = sanitize_text_field($_POST['student_ids'] ?? '');
-        $student_ids = array_filter(array_map('intval', explode(',', $raw_student_ids)));
-
-        if (empty($student_ids)) {
-            wp_send_json_error('يرجى تحديد طالب واحد على الأقل.');
-        }
-
-        global $wpdb;
-        $wpdb->query('START TRANSACTION');
-
+        $student_ids = array_filter(array_map('intval', explode(',', $_POST['student_ids'])));
         $last_record_id = 0;
         $count = 0;
         
@@ -3206,24 +3193,21 @@ class SM_Public {
             if ($rid) {
                 $last_record_id = $rid;
                 $count++;
-                if (class_exists('SM_Notifications')) {
-                    SM_Notifications::send_violation_alert($rid);
-                }
+                SM_Notifications::send_violation_alert($rid);
             }
         }
 
         if ($count > 0) {
-            $wpdb->query('COMMIT');
             SM_Logger::log('تسجيل مخالفة جماعية', "تم تسجيل مخالفة لعدد ($count) من الطلاب بنجاح.");
+        }
+
+        if ($last_record_id) {
             wp_send_json_success(array(
-                'count' => $count,
                 'record_id' => $last_record_id,
-                'message' => "تم تسجيل المخالفة بنجاح لـ ($count) من الطلاب المحددين.",
                 'print_url' => admin_url('admin-ajax.php?action=sm_print&print_type=single_violation&record_id=' . $last_record_id)
             ));
         } else {
-            $wpdb->query('ROLLBACK');
-            wp_send_json_error('تعذر تسجيل المخالفة بقاعدة البيانات.');
+            wp_send_json_error('Failed to save records');
         }
     }
 
@@ -7292,6 +7276,13 @@ class SM_Public {
                 <div class="no-print" style="margin-bottom: 15px; text-align: left;">
                     <button onclick="window.print()" style="background: #881337; color: #fff; border: none; padding: 7px 18px; font-family: 'Cairo'; font-weight: 800; border-radius: 9999px; cursor: pointer; font-size: 12px;">🖨️ طباعة التقرير الرسمية A4</button>
                 </div>
+ jules-2469291711566325231-6682a58b
+                <!-- Official Dual Header -->
+                <div class="report-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; margin-bottom: 8px; border-bottom: none;">
+                    <div style="text-align: right;">
+                        <div style="font-size: 13.5px; font-weight: 900; color: #0f172a;">وزارة التربية والتعليم</div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #475569;">دولة الإمارات العربية المتحدة</div>
+
                 <div class="report-header">
                     <div class="brand-box">
                         <?php if ($school_logo): ?>
@@ -7301,11 +7292,25 @@ class SM_Public {
                             <div style="font-size: 14px; font-weight: 900; color: #0f172a;"><?php echo esc_html($school_name); ?></div>
                             <div style="font-size: 11px; color: #64748b; font-weight: 700;">إدارة الشؤون التعليمية والتدريب</div>
                         </div>
+
                     </div>
+
+                    <?php if ($school_logo): ?>
+                        <div style="text-align: center;">
+                            <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo" style="max-height: 48px; width: auto; object-fit: contain;">
+                        </div>
+                    <?php endif; ?>
+
                     <div style="text-align: left;">
-                        <h1 class="report-title">كشف رصد ومتابعة تسليم تحضيرات الدروس أسبوعياً</h1>
-                        <p class="report-subtitle">موعد الاستحقاق المعتمد: يوم الإثنين 12:00 ظهراً (التاريخ: <?php echo esc_html($monday_deadline); ?>)</p>
+                        <div style="font-size: 14px; font-weight: 900; color: #881337;">مؤسسة الشعلة للتعليم والتطوير</div>
+                        <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-top: 2px;"><?php echo esc_html($school_name); ?></div>
                     </div>
+                </div>
+
+                <div style="border-bottom: 1.5px solid #0f172a; margin-bottom: 12px;"></div>
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <h1 class="report-title" style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; padding: 0;">كشف رصد ومتابعة تسليم تحضيرات الدروس أسبوعياً</h1>
+                    <p class="report-subtitle" style="margin: 3px 0 0 0; color: #64748b; font-size: 11px; font-weight: 700;">موعد الاستحقاق المعتمد: يوم الإثنين 12:00 ظهراً (التاريخ: <?php echo esc_html($monday_deadline); ?>)</p>
                 </div>
 
                 <?php
@@ -7483,20 +7488,29 @@ class SM_Public {
                 <div class="no-print" style="margin-bottom: 15px; text-align: left;">
                     <button onclick="window.print()" style="background: #881337; color: #fff; border: none; padding: 7px 18px; font-family: 'Cairo'; font-weight: 800; border-radius: 9999px; cursor: pointer; font-size: 12px;">🖨️ طباعة التقرير الرسمية A4</button>
                 </div>
-                <div class="report-header">
-                    <div class="brand-box">
-                        <?php if ($school_logo): ?>
-                            <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo">
-                        <?php endif; ?>
-                        <div>
-                            <div style="font-size: 14px; font-weight: 900; color: #0f172a;"><?php echo esc_html($school_name); ?></div>
-                            <div style="font-size: 11px; color: #64748b; font-weight: 700;">المكتب التنفيذي والاعتماد الأكاديمي</div>
+                <!-- Official Dual Header -->
+                <div class="report-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; margin-bottom: 8px; border-bottom: none;">
+                    <div style="text-align: right;">
+                        <div style="font-size: 13.5px; font-weight: 900; color: #0f172a;">وزارة التربية والتعليم</div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #475569;">دولة الإمارات العربية المتحدة</div>
+                    </div>
+
+                    <?php if ($school_logo): ?>
+                        <div style="text-align: center;">
+                            <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo" style="max-height: 48px; width: auto; object-fit: contain;">
                         </div>
-                    </div>
+                    <?php endif; ?>
+
                     <div style="text-align: left;">
-                        <h1 class="report-title">كشف متابعة تسليم الخطط الفصلية (الفصل <?php echo $term_num; ?>)</h1>
-                        <p class="report-subtitle">العام الأكاديمي: <?php echo esc_html($acad_year); ?> | الموعد النهائي: <?php echo date_i18n('Y-m-d H:i', strtotime($configured_deadline)); ?></p>
+                        <div style="font-size: 14px; font-weight: 900; color: #881337;">مؤسسة الشعلة للتعليم والتطوير</div>
+                        <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-top: 2px;"><?php echo esc_html($school_name); ?></div>
                     </div>
+                </div>
+
+                <div style="border-bottom: 1.5px solid #0f172a; margin-bottom: 12px;"></div>
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <h1 class="report-title" style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; padding: 0;">كشف متابعة تسليم الخطط الفصلية (الفصل <?php echo $term_num; ?>)</h1>
+                    <p class="report-subtitle" style="margin: 3px 0 0 0; color: #64748b; font-size: 11px; font-weight: 700;">العام الأكاديمي: <?php echo esc_html($acad_year); ?> | الموعد النهائي: <?php echo date_i18n('Y-m-d H:i', strtotime($configured_deadline)); ?></p>
                 </div>
 
                 <?php
@@ -7658,6 +7672,10 @@ class SM_Public {
                 </div>
 
                 <!-- Official Dual Header -->
+                <div class="report-header" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; margin-bottom: 8px; border-bottom: none;">
+                    <div style="text-align: right;">
+                        <div style="font-size: 13.5px; font-weight: 900; color: #0f172a;">وزارة التربية والتعليم</div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #475569;">دولة الإمارات العربية المتحدة</div>
                 <div class="report-header">
                     <div class="brand-box">
                         <?php if ($school_logo): ?>
@@ -7669,10 +7687,23 @@ class SM_Public {
                             <div style="font-size: 10px; color: #64748b; font-weight: 700;">وزارة التربية والتعليم — دولة الإمارات العربية المتحدة</div>
                         </div>
                     </div>
+
+                    <?php if ($school_logo): ?>
+                        <div style="text-align: center;">
+                            <img src="<?php echo esc_url($school_logo); ?>" class="brand-logo" alt="Logo" style="max-height: 48px; width: auto; object-fit: contain;">
+                        </div>
+                    <?php endif; ?>
+
                     <div style="text-align: left;">
-                        <h1 class="report-title"><?php echo esc_html($report_title); ?></h1>
-                        <p class="report-subtitle">العام الأكاديمي: <?php echo esc_html($acad_year); ?> | تاريخ التقرير: <?php echo current_time('Y-m-d H:i'); ?></p>
+                        <div style="font-size: 14px; font-weight: 900; color: #881337;">مؤسسة الشعلة للتعليم والتطوير</div>
+                        <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-top: 2px;"><?php echo esc_html($target_school); ?></div>
                     </div>
+                </div>
+
+                <div style="border-bottom: 1.5px solid #0f172a; margin-bottom: 12px;"></div>
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <h1 class="report-title" style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; padding: 0;"><?php echo esc_html($report_title); ?></h1>
+                    <p class="report-subtitle" style="margin: 3px 0 0 0; color: #64748b; font-size: 11px; font-weight: 700;">العام الأكاديمي: <?php echo esc_html($acad_year); ?> | تاريخ التقرير: <?php echo current_time('Y-m-d H:i'); ?></p>
                 </div>
 
                 <?php
@@ -7949,8 +7980,6 @@ class SM_Public {
             'specialization'    => $specialization,
             'assigned_grades'   => $assigned_grades,
             'assigned_sections' => $assigned_sections,
-            'appointment_year'  => get_user_meta($user_id, 'eess_appointment_year', true) ?: (get_user_meta($user_id, 'sm_appointment_year', true) ?: date('Y')),
-            'job_rank'          => get_user_meta($user_id, 'eess_job_rank', true) ?: 'teacher',
             'photo_url'         => $photo_url,
         ));
     }
@@ -8020,11 +8049,6 @@ class SM_Public {
         $admin_section  = sanitize_text_field($_POST['admin_section'] ?? '');
         $sections       = sanitize_text_field($_POST['assigned_sections'] ?? '');
         $grades         = isset($_POST['assigned_grades']) ? array_map('sanitize_text_field', (array)$_POST['assigned_grades']) : array();
-        $appointment_year = intval($_POST['appointment_year'] ?? date('Y'));
-        if ($appointment_year < 1970 || $appointment_year > intval(date('Y'))) {
-            $appointment_year = intval(date('Y'));
-        }
-        $job_rank = sanitize_text_field($_POST['job_rank'] ?? 'teacher');
 
         if (empty($first_name) || empty($last_name) || empty($email) || empty($raw_phone)) {
             wp_send_json_error('يرجى استكمال جميع الحقول الأساسية المطلوبة.');
@@ -8142,9 +8166,6 @@ class SM_Public {
         update_user_meta($user_id, 'sm_specialization', $specialization);
         update_user_meta($user_id, 'eess_assigned_grades', json_encode($grades, JSON_UNESCAPED_UNICODE));
         update_user_meta($user_id, 'eess_assigned_sections', $sections);
-        update_user_meta($user_id, 'eess_appointment_year', $appointment_year);
-        update_user_meta($user_id, 'sm_appointment_year', $appointment_year);
-        update_user_meta($user_id, 'eess_job_rank', $job_rank);
 
         // Handle Profile Photo Upload if present
         if (!empty($_FILES['profile_photo']['name'])) {
