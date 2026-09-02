@@ -242,10 +242,17 @@ class SM_DB {
             $status = 'pending';
         }
 
-        $student_id = intval($data['student_id']);
-        $violation_code = sanitize_text_field($data['violation_code'] ?? '');
-        $degree = intval($data['degree'] ?? 1);
-        $points = intval($data['points'] ?? 0);
+        $student_id = intval($data['student_id'] ?? 0);
+        if (!$student_id) return false;
+
+        $type = !empty($data['type']) ? sanitize_text_field($data['type']) : 'مخالفة سلوكية';
+        $classification = !empty($data['classification']) ? sanitize_text_field($data['classification']) : 'general';
+        $severity = !empty($data['severity']) ? sanitize_text_field($data['severity']) : 'low';
+        $degree = !empty($data['degree']) ? intval($data['degree']) : 1;
+        $violation_code = !empty($data['violation_code']) ? sanitize_text_field($data['violation_code']) : '';
+        $points = !empty($data['points']) ? intval($data['points']) : 0;
+        $details = !empty($data['details']) ? sanitize_textarea_field($data['details']) : '';
+        $action_taken = !empty($data['action_taken']) ? sanitize_text_field($data['action_taken']) : 'تسجيل ملاحظة';
         $created_at = !empty($data['custom_date']) ? sanitize_text_field($data['custom_date']) . ' ' . current_time('H:i:s') : current_time('mysql');
 
         // Recurrence Tracking
@@ -261,11 +268,11 @@ class SM_DB {
         // Automatic Escalation (e.g. double points on 3rd recurrence)
         if ($recurrence >= 3) {
             $points = floor($points * 1.5);
-            $data['action_taken'] .= ' (تكرار للمرة الثالثة - تصعيد تلقائي)';
+            $action_taken .= ' (تكرار للمرة الثالثة - تصعيد تلقائي)';
         }
 
         if (!$skip_log) {
-            SM_Logger::log('تسجيل مخالفة', "معرف الطالب: $student_id، النوع: {$data['type']}، الدرجة: $degree");
+            SM_Logger::log('تسجيل مخالفة', "معرف الطالب: $student_id، النوع: $type، الدرجة: $degree");
         }
 
         $inserted = $wpdb->insert(
@@ -273,15 +280,15 @@ class SM_DB {
             array(
                 'student_id' => $student_id,
                 'teacher_id' => get_current_user_id(),
-                'type' => sanitize_text_field($data['type']),
-                'classification' => sanitize_text_field($data['classification'] ?? 'general'),
-                'severity' => sanitize_text_field($data['severity']),
+                'type' => $type,
+                'classification' => $classification,
+                'severity' => $severity,
                 'degree' => $degree,
                 'violation_code' => $violation_code,
                 'points' => $points,
                 'recurrence_count' => $recurrence,
-                'details' => sanitize_textarea_field($data['details']),
-                'action_taken' => sanitize_text_field($data['action_taken']),
+                'details' => $details,
+                'action_taken' => $action_taken,
                 'status' => $status,
                 'created_at' => $created_at
             )

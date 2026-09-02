@@ -3179,10 +3179,23 @@ class SM_Public {
     }
 
     public function ajax_save_record() {
-        if (!is_user_logged_in() || !current_user_can('تسجيل_مخالفة')) wp_send_json_error('Unauthorized');
-        if (!wp_verify_nonce($_POST['sm_nonce'], 'sm_record_action')) wp_send_json_error('Security check failed');
+        if (!is_user_logged_in() || (!current_user_can('تسجيل_مخالفة') && !current_user_can('manage_options'))) {
+            wp_send_json_error('عفواً، لا تملك الصلاحية لتسجيل المخالفات.');
+        }
+        if (!wp_verify_nonce($_POST['sm_nonce'] ?? '', 'sm_record_action')) {
+            wp_send_json_error('فشل التوثيق الأمني للجلسة.');
+        }
 
-        $student_ids = array_filter(array_map('intval', explode(',', $_POST['student_ids'])));
+        $raw_student_ids = sanitize_text_field($_POST['student_ids'] ?? '');
+        $student_ids = array_filter(array_map('intval', explode(',', $raw_student_ids)));
+
+        if (empty($student_ids)) {
+            wp_send_json_error('يرجى تحديد طالب واحد على الأقل.');
+        }
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+
         $last_record_id = 0;
         $count = 0;
         
@@ -3193,21 +3206,24 @@ class SM_Public {
             if ($rid) {
                 $last_record_id = $rid;
                 $count++;
-                SM_Notifications::send_violation_alert($rid);
+                if (class_exists('SM_Notifications')) {
+                    SM_Notifications::send_violation_alert($rid);
+                }
             }
         }
 
         if ($count > 0) {
+            $wpdb->query('COMMIT');
             SM_Logger::log('تسجيل مخالفة جماعية', "تم تسجيل مخالفة لعدد ($count) من الطلاب بنجاح.");
-        }
-
-        if ($last_record_id) {
             wp_send_json_success(array(
+                'count' => $count,
                 'record_id' => $last_record_id,
+                'message' => "تم تسجيل المخالفة بنجاح لـ ($count) من الطلاب المحددين.",
                 'print_url' => admin_url('admin-ajax.php?action=sm_print&print_type=single_violation&record_id=' . $last_record_id)
             ));
         } else {
-            wp_send_json_error('Failed to save records');
+            $wpdb->query('ROLLBACK');
+            wp_send_json_error('تعذر تسجيل المخالفة بقاعدة البيانات.');
         }
     }
 
