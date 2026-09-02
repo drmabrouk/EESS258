@@ -110,34 +110,15 @@ window.eessGoToStep = function(step) {
 
         if (container) container.style.display = (i === eessCurrentStep) ? 'block' : 'none';
         if (indicator) {
-            var badge = indicator.querySelector('span');
             if (i === eessCurrentStep) {
                 indicator.style.background = '#881337';
-                indicator.style.color = '#ffffff';
-                indicator.style.border = '1px solid #881337';
-                if (badge) {
-                    badge.style.background = 'rgba(255,255,255,0.25)';
-                    badge.style.color = '#ffffff';
-                    badge.innerText = i;
-                }
+                indicator.style.color = 'white';
             } else if (i < eessCurrentStep) {
                 indicator.style.background = '#16a34a';
-                indicator.style.color = '#ffffff';
-                indicator.style.border = '1px solid #16a34a';
-                if (badge) {
-                    badge.style.background = 'rgba(255,255,255,0.25)';
-                    badge.style.color = '#ffffff';
-                    badge.innerText = '✓';
-                }
+                indicator.style.color = 'white';
             } else {
                 indicator.style.background = '#f1f5f9';
-                indicator.style.color = '#334155';
-                indicator.style.border = '1px solid #cbd5e1';
-                if (badge) {
-                    badge.style.background = '#cbd5e1';
-                    badge.style.color = '#334155';
-                    badge.innerText = i;
-                }
+                indicator.style.color = '#64748b';
             }
         }
     }

@@ -3,6 +3,18 @@
     <form method="post" id="violation-form">
         <?php wp_nonce_field('sm_record_action', 'sm_nonce'); ?>
         <input type="hidden" name="record_id" id="edit_record_id" value="0">
+        <input type="hidden" name="student_ids" id="selected_student_ids" value="">
+
+        <!-- ==================== STEP 1: SELECT PERSONS ==================== -->
+        <div id="sm-vstep-1" style="display: block;">
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                <span class="dashicons dashicons-info" style="color: #2563eb; font-size: 18px; width: 18px; height: 18px;"></span>
+                <span style="font-size: 12px; font-weight: 700; color: #1e40af; line-height: 1.5;">ابحث عن الطالب بالاسم أو الكود، أو استخدم الماسح الضوئي لإضافة الطلاب. يمكنك اختيار حتى 30 طالباً للمخالفات الجماعية.</span>
+            </div>
+
+            <!-- Search Field & Scanner Button Row -->
+            <div style="margin-bottom: 14px; position: relative;">
+                <label style="display: block; font-size: 12.5px; font-weight: 800; color: #1e293b; margin-bottom: 6px;">البحث عن الطالب / الشخص: <span style="color:#ef4444;">*</span></label>
 
         <!-- Top Header & Date -->
         <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
@@ -18,6 +30,21 @@
                 <button id="start-scanner" type="button" class="sm-btn" style="height: 28px; padding: 0 10px; font-size: 11px; background: #334155; color: white !important; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                     <span class="dashicons dashicons-barcode" style="font-size: 14px; width: 14px; height: 14px; margin: 0;"></span>
                     <span>الماسح الضوئي</span>
+
+                <div id="selected_students_container" style="display:flex; flex-wrap:wrap; gap:8px; min-height: 42px; align-items: center;">
+                    <span id="empty_selection_notice" style="font-size: 12px; color: #94a3b8; font-weight: 600;">لم يتم اختيار أي طالب حتى الآن. يرجى البحث أعلاه واختيار الطلاب.</span>
+                </div>
+
+                <span class="eess-field-error" id="err_student_ids" style="display:none; color:#dc2626; font-size:11.5px; font-weight:800; margin-top:8px;">⚠️ يرجى اختيار طالب واحد على الأقل للمتابعة.</span>
+            </div>
+
+            <!-- Step 1 Actions -->
+            <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+                <button type="button" onclick="smCloseViolationModal()" class="sm-btn" style="height: 40px; padding: 0 18px; font-size: 12.5px; font-weight: 800; background: #f1f5f9; color: #1e293b !important; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">إلغاء</button>
+
+                <button type="button" id="btn-to-step-2" onclick="smSetViolationStep(2)" class="sm-btn" style="height: 40px; padding: 0 22px; font-weight: 800; font-size: 13px; background: #dc2626; color: white !important; border: none; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.25);" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                    <span>التالي: إدخال بيانات المخالفة</span>
+                    <span>➔</span>
                 </button>
             </div>
         </div>
@@ -255,6 +282,16 @@ if (searchInput) {
         }, 300);
     });
 }
+    // Prevent duplicate selection
+    if (window.selectedStudents.some(x => parseInt(x.id) === parseInt(s.id))) {
+        return;
+    }
+
+    // Limit up to 30 students
+    if (window.selectedStudents.length >= 30) {
+        alert('يمكن اختيار حتى 30 طالباً فقط في العملية الواحدة.');
+        return;
+    }
 
 let selectedStudents = [];
 
