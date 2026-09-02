@@ -3179,10 +3179,23 @@ class SM_Public {
     }
 
     public function ajax_save_record() {
-        if (!is_user_logged_in() || !current_user_can('تسجيل_مخالفة')) wp_send_json_error('Unauthorized');
-        if (!wp_verify_nonce($_POST['sm_nonce'], 'sm_record_action')) wp_send_json_error('Security check failed');
+        if (!is_user_logged_in() || (!current_user_can('تسجيل_مخالفة') && !current_user_can('manage_options'))) {
+            wp_send_json_error('عفواً، لا تملك الصلاحية لتسجيل المخالفات.');
+        }
+        if (!wp_verify_nonce($_POST['sm_nonce'] ?? '', 'sm_record_action')) {
+            wp_send_json_error('فشل التوثيق الأمني للجلسة.');
+        }
 
-        $student_ids = array_filter(array_map('intval', explode(',', $_POST['student_ids'])));
+        $raw_student_ids = sanitize_text_field($_POST['student_ids'] ?? '');
+        $student_ids = array_filter(array_map('intval', explode(',', $raw_student_ids)));
+
+        if (empty($student_ids)) {
+            wp_send_json_error('يرجى تحديد طالب واحد على الأقل.');
+        }
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+
         $last_record_id = 0;
         $count = 0;
         
@@ -3193,21 +3206,24 @@ class SM_Public {
             if ($rid) {
                 $last_record_id = $rid;
                 $count++;
-                SM_Notifications::send_violation_alert($rid);
+                if (class_exists('SM_Notifications')) {
+                    SM_Notifications::send_violation_alert($rid);
+                }
             }
         }
 
         if ($count > 0) {
+            $wpdb->query('COMMIT');
             SM_Logger::log('تسجيل مخالفة جماعية', "تم تسجيل مخالفة لعدد ($count) من الطلاب بنجاح.");
-        }
-
-        if ($last_record_id) {
             wp_send_json_success(array(
+                'count' => $count,
                 'record_id' => $last_record_id,
+                'message' => "تم تسجيل المخالفة بنجاح لـ ($count) من الطلاب المحددين.",
                 'print_url' => admin_url('admin-ajax.php?action=sm_print&print_type=single_violation&record_id=' . $last_record_id)
             ));
         } else {
-            wp_send_json_error('Failed to save records');
+            $wpdb->query('ROLLBACK');
+            wp_send_json_error('تعذر تسجيل المخالفة بقاعدة البيانات.');
         }
     }
 
@@ -8099,6 +8115,8 @@ class SM_Public {
             'specialization'    => $specialization,
             'assigned_grades'   => $assigned_grades,
             'assigned_sections' => $assigned_sections,
+            'appointment_year'  => get_user_meta($user_id, 'eess_appointment_year', true) ?: (get_user_meta($user_id, 'sm_appointment_year', true) ?: date('Y')),
+            'job_rank'          => get_user_meta($user_id, 'eess_job_rank', true) ?: 'teacher',
             'photo_url'         => $photo_url,
         ));
     }
@@ -8168,6 +8186,11 @@ class SM_Public {
         $admin_section  = sanitize_text_field($_POST['admin_section'] ?? '');
         $sections       = sanitize_text_field($_POST['assigned_sections'] ?? '');
         $grades         = isset($_POST['assigned_grades']) ? array_map('sanitize_text_field', (array)$_POST['assigned_grades']) : array();
+        $appointment_year = intval($_POST['appointment_year'] ?? date('Y'));
+        if ($appointment_year < 1970 || $appointment_year > intval(date('Y'))) {
+            $appointment_year = intval(date('Y'));
+        }
+        $job_rank = sanitize_text_field($_POST['job_rank'] ?? 'teacher');
 
         if (empty($first_name) || empty($last_name) || empty($email) || empty($raw_phone)) {
             wp_send_json_error('يرجى استكمال جميع الحقول الأساسية المطلوبة.');
@@ -8285,6 +8308,9 @@ class SM_Public {
         update_user_meta($user_id, 'sm_specialization', $specialization);
         update_user_meta($user_id, 'eess_assigned_grades', json_encode($grades, JSON_UNESCAPED_UNICODE));
         update_user_meta($user_id, 'eess_assigned_sections', $sections);
+        update_user_meta($user_id, 'eess_appointment_year', $appointment_year);
+        update_user_meta($user_id, 'sm_appointment_year', $appointment_year);
+        update_user_meta($user_id, 'eess_job_rank', $job_rank);
 
         // Handle Profile Photo Upload if present
         if (!empty($_FILES['profile_photo']['name'])) {
